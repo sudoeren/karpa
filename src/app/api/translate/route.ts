@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { text, targetLanguage } = await req.json();
+    const { text, targetLanguage, tone } = await req.json();
 
     if (!text || !targetLanguage) {
       return NextResponse.json(
@@ -11,15 +11,33 @@ export async function POST(req: Request) {
       );
     }
 
-    // LM Studio default local server
     const LM_STUDIO_URL = 'http://localhost:1234/v1/chat/completions';
 
-    // Construct the prompt
-    // Using a system message to enforce the persona and a user message for the content.
+    // Tone instructions
+    let toneInstruction = "";
+    if (tone) {
+        switch (tone) {
+            case "formal":
+                toneInstruction = "Use a formal, professional, and business-appropriate tone.";
+                break;
+            case "casual":
+                toneInstruction = "Use a casual, friendly, and conversational tone.";
+                break;
+            case "technical":
+                toneInstruction = "Use precise technical terminology and a direct style.";
+                break;
+            case "concise":
+                toneInstruction = "Be concise and to the point. Simplify the text where possible.";
+                break;
+            default:
+                toneInstruction = "";
+        }
+    }
+
     const messages = [
       {
         role: "system",
-        content: `You are a professional translator. Translate the given text into ${targetLanguage}. Do not provide any explanations, notes, or extra text. Only provide the direct translation.`
+        content: `You are a professional translator. Translate the given text into ${targetLanguage}. ${toneInstruction} Do not provide any explanations, notes, or extra text. Only provide the direct translation.`
       },
       {
         role: "user",
@@ -35,22 +53,21 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: "hy-mt1.5-7b/HY-MT1.5-7B-Q4_K_M.gguf",
         messages: messages,
-        temperature: 0.1, 
+        temperature: 0.2, 
         stream: false
       }),
     });
 
     if (!response.ok) {
-        // Try to read error details
         const errorText = await response.text();
-        console.error("LM Studio Error Response:", errorText);
-        return NextResponse.json({ error: `LM Studio Error: ${response.status} - ${response.statusText}` }, { status: response.status });
+        console.error("LM Studio Error:", errorText);
+        return NextResponse.json({ error: `LM Studio Error: ${response.status}` }, { status: response.status });
     }
 
     const data = await response.json();
     
     if (!data.choices || data.choices.length === 0) {
-        return NextResponse.json({ error: "No translation returned from model." }, { status: 500 });
+        return NextResponse.json({ error: "No translation returned." }, { status: 500 });
     }
 
     const translation = data.choices[0]?.message?.content?.trim();
