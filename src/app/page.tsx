@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { 
   ArrowRightLeft, 
@@ -18,8 +19,10 @@ import {
   Trash2, 
   X,
   Sparkles,
-  Maximize2,
-  Keyboard
+  Keyboard,
+  Search,
+  ArrowRight,
+  CornerDownLeft
 } from "lucide-react"
 
 type TranslationHistory = {
@@ -31,6 +34,12 @@ type TranslationHistory = {
   timestamp: number
 }
 
+// Helper to get short code (English -> EN)
+const getLangCode = (lang: string) => {
+    if (lang === "Auto Detect") return "AUTO"
+    return lang.substring(0, 2).toUpperCase()
+}
+
 export default function Home() {
   const [sourceText, setSourceText] = useState("")
   const [translatedText, setTranslatedText] = useState("")
@@ -38,9 +47,10 @@ export default function Home() {
   const [targetLanguage, setTargetLanguage] = useState("English")
   const [loading, setLoading] = useState(false)
   const [history, setHistory] = useState<TranslationHistory[]>([])
+  const [historySearch, setHistorySearch] = useState("")
   const [isCopied, setIsCopied] = useState(false)
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
   
-  // Ref for keyboard shortcut
   const sourceInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -58,7 +68,7 @@ export default function Home() {
     localStorage.setItem("translation-history", JSON.stringify(history))
   }, [history])
 
-  // Keyboard shortcut: Ctrl + Enter to translate
+  // Keyboard shortcut: Ctrl + Enter
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -81,7 +91,6 @@ export default function Home() {
     if (!sourceText.trim()) return
     
     setLoading(true)
-    // Don't clear translated text immediately for better UX if re-translating
     if (!translatedText) setTranslatedText("") 
 
     try {
@@ -104,13 +113,18 @@ export default function Home() {
 
       const newEntry: TranslationHistory = {
         id: Date.now().toString(),
-        sourceText: sourceText.substring(0, 100) + (sourceText.length > 100 ? "..." : ""),
-        translatedText: data.translation.substring(0, 100) + (data.translation.length > 100 ? "..." : ""),
+        sourceText: sourceText, // Store full text
+        translatedText: data.translation,
         sourceLang: sourceLanguage,
         targetLang: targetLanguage,
         timestamp: Date.now(),
       }
-      setHistory(prev => [newEntry, ...prev].slice(0, 50)) 
+      
+      // Prevent duplicates at the top
+      setHistory(prev => {
+          const filtered = prev.filter(item => item.sourceText !== sourceText || item.targetLang !== targetLanguage)
+          return [newEntry, ...filtered].slice(0, 100)
+      })
 
     } catch (err: any) {
       toast.error(err.message || "Something went wrong")
@@ -160,6 +174,21 @@ export default function Home() {
       toast.success("History cleared")
   }
 
+  const restoreHistoryItem = (item: TranslationHistory) => {
+      setSourceText(item.sourceText)
+      setTranslatedText(item.translatedText)
+      setSourceLanguage(item.sourceLang)
+      setTargetLanguage(item.targetLang)
+      setIsSheetOpen(false)
+      toast.info("Translation restored")
+  }
+
+  // Filter history
+  const filteredHistory = history.filter(item => 
+      item.sourceText.toLowerCase().includes(historySearch.toLowerCase()) || 
+      item.translatedText.toLowerCase().includes(historySearch.toLowerCase())
+  )
+
   return (
     <div className="h-screen bg-background text-foreground font-sans flex flex-col overflow-hidden">
       
@@ -173,42 +202,87 @@ export default function Home() {
         </div>
         
         <div className="flex items-center gap-2">
-             <Sheet>
+             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                         <History className="w-4 h-4 mr-2" /> History
                     </Button>
                 </SheetTrigger>
-                <SheetContent className="w-[400px]">
-                    <SheetHeader className="mb-4">
-                        <SheetTitle className="flex items-center justify-between">
-                            <span>History</span>
-                            {history.length > 0 && (
-                                <Button variant="ghost" size="sm" onClick={clearHistory} className="text-destructive h-8">
-                                    <Trash2 className="w-4 h-4 mr-2" /> Clear
-                                </Button>
-                            )}
-                        </SheetTitle>
-                    </SheetHeader>
-                    <ScrollArea className="h-[calc(100vh-100px)]">
-                        <div className="space-y-3 pr-4">
-                            {history.length === 0 ? (
-                                <div className="text-center text-muted-foreground py-10 text-sm">No recent translations.</div>
+                <SheetContent className="w-[400px] sm:w-[500px] flex flex-col p-0 gap-0 border-l border-border bg-background">
+                    
+                    {/* History Header */}
+                    <div className="p-6 border-b border-border">
+                        <SheetHeader className="mb-4">
+                            <SheetTitle className="flex items-center justify-between">
+                                <span className="text-xl">History</span>
+                                {history.length > 0 && (
+                                    <Button variant="ghost" size="icon" onClick={clearHistory} className="text-muted-foreground hover:text-destructive h-8 w-8">
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                )}
+                            </SheetTitle>
+                            <SheetDescription>
+                                Your recent translations. Click to restore.
+                            </SheetDescription>
+                        </SheetHeader>
+                        
+                        <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                                placeholder="Search history..." 
+                                className="pl-9 bg-muted/30 border-border/50 focus-visible:ring-1 focus-visible:ring-primary/20"
+                                value={historySearch}
+                                onChange={(e) => setHistorySearch(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    {/* History List */}
+                    <ScrollArea className="flex-1">
+                        <div className="p-4 space-y-3">
+                            {filteredHistory.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-20 text-center space-y-3 opacity-50">
+                                    <History className="w-12 h-12 text-muted-foreground/30" />
+                                    <p className="text-sm text-muted-foreground">
+                                        {history.length === 0 ? "No translations yet." : "No results found."}
+                                    </p>
+                                </div>
                             ) : (
-                                history.map((item) => (
-                                    <div key={item.id} className="p-3 rounded-lg border border-border bg-card/50 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => {
-                                        setSourceText(item.sourceText)
-                                        setTranslatedText(item.translatedText)
-                                        setSourceLanguage(item.sourceLang)
-                                        setTargetLanguage(item.targetLang)
-                                    }}>
-                                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-1">
-                                            <span>{item.sourceLang}</span>
-                                            <ArrowRightLeft className="w-3 h-3" />
-                                            <span>{item.targetLang}</span>
+                                filteredHistory.map((item) => (
+                                    <div 
+                                        key={item.id} 
+                                        className="group relative p-4 rounded-xl border border-border/40 bg-card hover:bg-muted/40 hover:border-primary/20 transition-all cursor-pointer shadow-sm hover:shadow-md"
+                                        onClick={() => restoreHistoryItem(item)}
+                                    >
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-1.5">
+                                                <Badge variant="outline" className="text-[10px] font-mono font-normal h-5 px-1.5 bg-background/50 text-muted-foreground">
+                                                    {getLangCode(item.sourceLang)}
+                                                </Badge>
+                                                <ArrowRight className="w-3 h-3 text-muted-foreground/50" />
+                                                <Badge variant="outline" className="text-[10px] font-mono font-normal h-5 px-1.5 bg-primary/5 text-primary border-primary/20">
+                                                    {getLangCode(item.targetLang)}
+                                                </Badge>
+                                            </div>
+                                            <span className="text-[10px] text-muted-foreground/60 font-medium">
+                                                {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
                                         </div>
-                                        <p className="text-sm line-clamp-2 text-foreground mb-1">{item.sourceText}</p>
-                                        <p className="text-sm line-clamp-2 text-muted-foreground">{item.translatedText}</p>
+                                        
+                                        <div className="space-y-2">
+                                            <p className="text-sm text-foreground/90 leading-snug line-clamp-2 font-medium">
+                                                {item.sourceText}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground leading-snug line-clamp-2">
+                                                {item.translatedText}
+                                            </p>
+                                        </div>
+
+                                        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="bg-primary text-primary-foreground p-1.5 rounded-md shadow-sm">
+                                                <CornerDownLeft className="w-3 h-3" />
+                                            </div>
+                                        </div>
                                     </div>
                                 ))
                             )}
