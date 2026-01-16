@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { toast } from "sonner"
+import { ModeToggle } from "@/components/mode-toggle"
 import { 
   ArrowRightLeft, 
   Loader2, 
@@ -113,14 +114,13 @@ export default function Home() {
 
       const newEntry: TranslationHistory = {
         id: Date.now().toString(),
-        sourceText: sourceText, // Store full text
+        sourceText: sourceText, 
         translatedText: data.translation,
         sourceLang: sourceLanguage,
         targetLang: targetLanguage,
         timestamp: Date.now(),
       }
       
-      // Prevent duplicates at the top
       setHistory(prev => {
           const filtered = prev.filter(item => item.sourceText !== sourceText || item.targetLang !== targetLanguage)
           return [newEntry, ...filtered].slice(0, 100)
@@ -202,6 +202,8 @@ export default function Home() {
         </div>
         
         <div className="flex items-center gap-2">
+             <ModeToggle />
+             <div className="h-4 w-px bg-border mx-1 hidden sm:block"></div>
              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
