@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Settings, Sun, Moon, Monitor, Globe, 
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Github, Heart, Shield, Code2, ExternalLink
+  Github, Heart, Code2, ExternalLink
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -29,10 +29,12 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
+import { useOnboarding } from "@/contexts/onboarding-context"
 
 export default function SettingsPage() {
   const { t, language, setLanguage } = useLanguage()
   const { theme, setTheme } = useTheme()
+  const { resetOnboarding } = useOnboarding()
   const [lmStudioUrl, setLmStudioUrl] = useState("http://localhost:1234")
   const [temperature, setTemperature] = useState(0.2)
   const [isTestingConnection, setIsTestingConnection] = useState(false)
@@ -126,6 +128,8 @@ export default function SettingsPage() {
     localStorage.removeItem("translation-history")
     localStorage.removeItem("translation-favorites")
     toast.success(t.settings.clearData)
+    // Reset onboarding to show it again
+    resetOnboarding()
   }
 
   const themes = [
@@ -144,17 +148,6 @@ export default function SettingsPage() {
     { id: 'connection' as const, label: t.settings.connection, icon: Zap },
     { id: 'data' as const, label: t.settings.data, icon: Download },
     { id: 'about' as const, label: t.nav.about, icon: Code2 },
-  ]
-
-  const features = [
-    { icon: Shield, title: "100% Private", desc: language === 'tr' ? "Tum veriler cihazinizda kalir" : "All data stays on your device" },
-    { icon: Zap, title: "AI Powered", desc: language === 'tr' ? "LM Studio ile yerel LLM" : "Using local LLM via LM Studio" },
-    { icon: Code2, title: "Open Source", desc: language === 'tr' ? "Sonsuza kadar ucretsiz" : "Free and open source forever" },
-  ]
-
-  const technologies = [
-    "Next.js 16", "React 19", "TypeScript", "Tailwind CSS", 
-    "shadcn/ui", "Framer Motion", "LM Studio"
   ]
 
   return (
@@ -376,123 +369,63 @@ export default function SettingsPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-8"
               >
-                {/* Hero Section */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/5 via-primary/10 to-violet-500/10 p-6 sm:p-8">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                {/* Developer Section - Main Focus */}
+                <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-br from-card via-card to-violet-500/5">
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
                   
-                  <div className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary to-violet-500 rounded-2xl blur-xl opacity-30 scale-110" />
-                      <div className="relative p-4 bg-gradient-to-br from-background to-background/80 rounded-2xl border shadow-xl">
-                        <Logo size={56} />
-                      </div>
-                    </div>
-                    <div className="text-center sm:text-left">
-                      <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Localce</h2>
-                      <p className="text-sm text-muted-foreground mt-1 max-w-xs">{t.about.description}</p>
-                      <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
-                        <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">v1.0.0</Badge>
-                        <Badge variant="outline" className="text-xs">Stable</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Features Grid */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{language === 'tr' ? 'Ozellikler' : 'Features'}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {features.map((feature, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="group relative p-5 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 border border-transparent hover:border-primary/20 transition-all hover:shadow-lg hover:shadow-primary/5"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-                        <div className="relative">
-                          <div className="inline-flex items-center justify-center size-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 mb-3 group-hover:scale-110 transition-transform">
-                            <feature.icon className="size-6 text-primary" />
-                          </div>
-                          <p className="font-semibold mb-1">{feature.title}</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{feature.desc}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Developer Section */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{t.about.developer}</h3>
-                  <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-card to-card/50">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                    
-                    <div className="relative p-6">
-                      <div className="flex flex-col sm:flex-row items-center gap-5">
-                        <div className="relative group">
-                          <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity" />
-                          <div className="relative size-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-2xl ring-4 ring-background">
-                            EC
-                          </div>
-                        </div>
-                        
-                        <div className="flex-1 text-center sm:text-left">
-                          <h4 className="text-lg font-bold">Eren Cakar</h4>
-                          <p className="text-sm text-muted-foreground">Full Stack Developer</p>
-                          
-                          <div className="flex items-center gap-2 mt-4 justify-center sm:justify-start">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-9 px-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all" 
-                              asChild
-                            >
-                              <Link href="https://erencakar.com" target="_blank">
-                                <Globe className="size-4" />
-                                Website
-                                <ExternalLink className="size-3 opacity-50" />
-                              </Link>
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-9 px-4 rounded-xl gap-2 hover:bg-foreground hover:text-background transition-all" 
-                              asChild
-                            >
-                              <Link href="https://github.com/sudoeren" target="_blank">
-                                <Github className="size-4" />
-                                GitHub
-                              </Link>
-                            </Button>
-                          </div>
+                  <div className="relative p-8">
+                    <div className="flex flex-col items-center text-center">
+                      {/* Avatar */}
+                      <div className="relative mb-6">
+                        <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-600 rounded-3xl blur-2xl opacity-50 scale-110" />
+                        <div className="relative size-28 rounded-3xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-4xl shadow-2xl ring-4 ring-background">
+                          EC
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tech Stack */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{t.about.technologies}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {technologies.map((tech, index) => (
-                      <motion.div
-                        key={tech}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <Badge 
-                          variant="secondary" 
-                          className="px-3 py-1.5 text-xs font-medium bg-muted/50 hover:bg-muted transition-colors cursor-default"
+                      
+                      {/* Info */}
+                      <h2 className="text-2xl font-bold mb-1">Eren Cakar</h2>
+                      <p className="text-muted-foreground mb-6">Full Stack Developer</p>
+                      
+                      {/* Buttons */}
+                      <div className="flex items-center gap-3">
+                        <Button 
+                          variant="outline" 
+                          className="h-11 px-5 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all" 
+                          asChild
                         >
-                          {tech}
-                        </Badge>
-                      </motion.div>
-                    ))}
+                          <Link href="https://erencakar.com" target="_blank">
+                            <Globe className="size-4" />
+                            Website
+                            <ExternalLink className="size-3 opacity-50" />
+                          </Link>
+                        </Button>
+                        <Button 
+                          className="h-11 px-5 rounded-xl gap-2" 
+                          asChild
+                        >
+                          <Link href="https://github.com/sudoeren" target="_blank">
+                            <Github className="size-4" />
+                            GitHub
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* App Info Card */}
+                <div className="relative overflow-hidden rounded-2xl border bg-muted/30 p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-background rounded-xl border shadow-sm">
+                      <Logo size={40} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg">Localce</h3>
+                      <p className="text-sm text-muted-foreground">{t.about.description}</p>
+                    </div>
+                    <Badge className="bg-primary/10 text-primary border-primary/20">v1.0.0</Badge>
                   </div>
                 </div>
 
@@ -507,10 +440,10 @@ export default function SettingsPage() {
                           : 'View the code, contribute, or fork it'}
                       </p>
                     </div>
-                    <Button className="gap-2 rounded-xl h-11 px-6" asChild>
+                    <Button variant="outline" className="gap-2 rounded-xl h-11 px-6" asChild>
                       <Link href="https://github.com/sudoeren/localce" target="_blank">
                         <Github className="size-4" />
-                        GitHub
+                        {language === 'tr' ? 'Kaynak Kodu' : 'Source Code'}
                         <ExternalLink className="size-3" />
                       </Link>
                     </Button>

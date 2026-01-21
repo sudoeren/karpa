@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "@/components/logo"
 import { useTTS } from "@/hooks/use-tts"
 import { MarkdownViewer } from "@/components/markdown-viewer"
+import { useOnboarding } from "@/contexts/onboarding-context"
 
 type TranslationItem = {
   id: string
@@ -53,6 +54,7 @@ const tones = [
 function TranslatorWorkspace() {
   const searchParams = useSearchParams()
   const { t } = useLanguage()
+  const { nativeLanguage, targetLanguage: defaultTargetLang } = useOnboarding()
 
   const [mode, setMode] = useState<"text" | "file">("text")
   const [sourceText, setSourceText] = useState("")
@@ -60,8 +62,8 @@ function TranslatorWorkspace() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileContent, setFileContent] = useState("")
   const [translatedFileContent, setTranslatedFileContent] = useState("")
-  const [sourceLanguage, setSourceLanguage] = useState("Auto Detect")
-  const [targetLanguage, setTargetLanguage] = useState("English")
+  const [sourceLanguage, setSourceLanguage] = useState(nativeLanguage || "Auto Detect")
+  const [targetLanguage, setTargetLanguage] = useState(defaultTargetLang || "English")
   const [tone, setTone] = useState("standard")
   const [loading, setLoading] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
