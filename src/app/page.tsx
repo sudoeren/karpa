@@ -15,6 +15,7 @@ import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "@/components/logo"
 import { useTTS } from "@/hooks/use-tts"
+import { MarkdownViewer } from "@/components/markdown-viewer"
 
 type TranslationItem = {
   id: string
@@ -405,12 +406,13 @@ const copyToClipboard = async (text: string) => {
                       </div>
                     </div>
                   )}
-                  <Textarea
-                    value={translatedText}
-                    readOnly
-                    placeholder={t.translator.translationWillAppear}
-                    className="min-h-[180px] sm:min-h-[280px] resize-none border-none focus-visible:ring-0 rounded-none p-4 text-base bg-transparent"
-                  />
+                  <div className="min-h-[180px] sm:min-h-[280px] p-4 overflow-y-auto">
+                    {translatedText ? (
+                      <MarkdownViewer content={translatedText} className="text-base" />
+                    ) : (
+                      <p className="text-muted-foreground">{t.translator.translationWillAppear}</p>
+                    )}
+                  </div>
                   <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3 bg-gradient-to-t from-muted/40 to-transparent">
                     <span className="text-xs text-muted-foreground">
                       {translatedText.length} {t.translator.characters}
