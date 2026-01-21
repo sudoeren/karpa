@@ -3,226 +3,263 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { useOnboarding } from "@/contexts/onboarding-context"
 import { useLanguage } from "@/contexts/language-context"
+import { useOnboarding } from "@/contexts/onboarding-context"
 import { 
-  Shield, 
-  Server, 
-  Globe, 
-  Sparkles, 
-  ArrowRight, 
-  Check,
-  Languages
+  Languages, Shield, Zap, ArrowRight, Check, Globe
 } from "lucide-react"
-import Image from "next/image"
 import { cn } from "@/lib/utils"
 
-const steps = [
-  {
-    icon: Shield,
-    titleKey: "step1Title" as const,
-    descKey: "step1Desc" as const,
-    color: "from-green-500 to-emerald-600",
-    bgColor: "bg-green-500/10",
-  },
-  {
-    icon: Server,
-    titleKey: "step2Title" as const,
-    descKey: "step2Desc" as const,
-    color: "from-blue-500 to-cyan-600",
-    bgColor: "bg-blue-500/10",
-  },
-  {
-    icon: Globe,
-    titleKey: "step3Title" as const,
-    descKey: "step3Desc" as const,
-    color: "from-purple-500 to-violet-600",
-    bgColor: "bg-purple-500/10",
-    showLanguageSelect: true,
-  },
-  {
-    icon: Sparkles,
-    titleKey: "step4Title" as const,
-    descKey: "step4Desc" as const,
-    color: "from-orange-500 to-amber-600",
-    bgColor: "bg-orange-500/10",
-    isFinal: true,
-  },
-]
-
 export function Onboarding() {
-  const [currentStep, setCurrentStep] = useState(0)
-  const { completeOnboarding } = useOnboarding()
+  const [step, setStep] = useState(0)
   const { t, language, setLanguage } = useLanguage()
+  const { completeOnboarding } = useOnboarding()
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      completeOnboarding()
-    }
-  }
-
-  const handleSkip = () => {
+  const handleComplete = () => {
     completeOnboarding()
   }
 
-  const step = steps[currentStep]
-  const Icon = step.icon
+  const nextStep = () => {
+    if (step < 2) {
+      setStep(step + 1)
+    } else {
+      handleComplete()
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-      {/* Background pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-      
-      {/* Gradient orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl" />
+      </div>
 
-      <div className="relative z-10 w-full max-w-lg px-4">
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center gap-3 mb-8"
-        >
-          <div className="relative size-12 rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-            <Image
-              src="/logo.png"
-              alt="Localce"
-              width={40}
-              height={40}
-              className="object-contain"
-            />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Localce</h1>
-            <p className="text-sm text-muted-foreground">AI Translator</p>
-          </div>
-        </motion.div>
-
-        {/* Step indicator */}
+      <div className="relative w-full max-w-lg mx-4">
+        {/* Progress */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          {steps.map((_, index) => (
-            <div
-              key={index}
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
               className={cn(
-                "h-2 rounded-full transition-all duration-300",
-                index === currentStep
-                  ? "w-8 bg-primary"
-                  : index < currentStep
-                  ? "w-2 bg-primary/50"
-                  : "w-2 bg-muted"
+                "h-1 rounded-full transition-all duration-300",
+                i === step ? "w-8 bg-primary" : "w-2 bg-muted"
               )}
             />
           ))}
         </div>
 
-        {/* Content */}
         <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className="border-2 shadow-2xl">
-              <CardContent className="p-8">
-                {/* Icon */}
-                <div className={cn("mx-auto w-20 h-20 rounded-2xl flex items-center justify-center mb-6", step.bgColor)}>
-                  <div className={cn("p-4 rounded-xl bg-gradient-to-br", step.color)}>
-                    <Icon className="size-8 text-white" />
+          {step === 0 && (
+            <motion.div
+              key="step0"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center"
+            >
+              {/* Logo */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="inline-flex items-center justify-center size-24 rounded-3xl bg-gradient-to-br from-primary to-primary/60 text-primary-foreground mb-6 shadow-2xl shadow-primary/25"
+              >
+                <Languages className="size-12" />
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl font-bold mb-2"
+              >
+                Localce
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-muted-foreground mb-8"
+              >
+                {t.onboarding.welcomeDesc}
+              </motion.p>
+
+              {/* Features */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="grid grid-cols-2 gap-3 mb-8"
+              >
+                {[
+                  { icon: Shield, text: t.onboarding.step1Title },
+                  { icon: Zap, text: "AI Powered" },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 p-4 rounded-2xl bg-card/50 border"
+                  >
+                    <div className="p-2 rounded-xl bg-primary/10">
+                      <item.icon className="size-5 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium">{item.text}</span>
+                  </div>
+                ))}
+              </motion.div>
+
+              <Button
+                onClick={nextStep}
+                size="lg"
+                className="w-full h-14 rounded-2xl text-base font-medium gap-2"
+              >
+                {t.onboarding.getStarted}
+                <ArrowRight className="size-5" />
+              </Button>
+            </motion.div>
+          )}
+
+          {step === 1 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+                className="inline-flex items-center justify-center size-20 rounded-2xl bg-green-500/10 mb-6"
+              >
+                <Zap className="size-10 text-green-500" />
+              </motion.div>
+
+              <h2 className="text-2xl font-bold mb-2">{t.onboarding.step2Title}</h2>
+              <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+                {t.onboarding.step2Desc}
+              </p>
+
+              {/* Connection Info */}
+              <div className="bg-card/50 border rounded-2xl p-6 mb-8 text-left">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="size-10 rounded-xl bg-muted flex items-center justify-center">
+                    <span className="text-lg font-bold">1</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Download LM Studio</p>
+                    <p className="text-xs text-muted-foreground">lmstudio.ai</p>
                   </div>
                 </div>
-
-                {/* Title & Description */}
-                <h2 className="text-2xl font-bold text-center mb-3">
-                  {t.onboarding[step.titleKey]}
-                </h2>
-                <p className="text-muted-foreground text-center mb-6">
-                  {t.onboarding[step.descKey]}
-                </p>
-
-                {/* Language selector (Step 3) */}
-                {step.showLanguageSelect && (
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <button
-                      onClick={() => setLanguage('en')}
-                      className={cn(
-                        "p-4 rounded-xl border-2 transition-all flex items-center gap-3",
-                        language === 'en'
-                          ? "border-primary bg-primary/5"
-                          : "border-transparent bg-muted/50 hover:bg-muted"
-                      )}
-                    >
-                      <div className="text-2xl">🇬🇧</div>
-                      <div className="text-left">
-                        <p className="font-medium">English</p>
-                        <p className="text-xs text-muted-foreground">Interface language</p>
-                      </div>
-                      {language === 'en' && <Check className="ml-auto size-5 text-primary" />}
-                    </button>
-                    <button
-                      onClick={() => setLanguage('tr')}
-                      className={cn(
-                        "p-4 rounded-xl border-2 transition-all flex items-center gap-3",
-                        language === 'tr'
-                          ? "border-primary bg-primary/5"
-                          : "border-transparent bg-muted/50 hover:bg-muted"
-                      )}
-                    >
-                      <div className="text-2xl">🇹🇷</div>
-                      <div className="text-left">
-                        <p className="font-medium">Turkce</p>
-                        <p className="text-xs text-muted-foreground">Arayuz dili</p>
-                      </div>
-                      {language === 'tr' && <Check className="ml-auto size-5 text-primary" />}
-                    </button>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="size-10 rounded-xl bg-muted flex items-center justify-center">
+                    <span className="text-lg font-bold">2</span>
                   </div>
-                )}
+                  <div>
+                    <p className="font-medium text-sm">Load a translation model</p>
+                    <p className="text-xs text-muted-foreground">HY-MT1.5-7B recommended</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-xl bg-muted flex items-center justify-center">
+                    <span className="text-lg font-bold">3</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Start the server</p>
+                    <p className="text-xs text-muted-foreground">Default port: 1234</p>
+                  </div>
+                </div>
+              </div>
 
-                {/* Action buttons */}
-                <div className="flex gap-3">
-                  {currentStep < steps.length - 1 && (
-                    <Button
-                      variant="ghost"
-                      onClick={handleSkip}
-                      className="flex-1"
-                    >
-                      {t.common.skip}
-                    </Button>
-                  )}
-                  <Button
-                    onClick={handleNext}
+              <Button
+                onClick={nextStep}
+                size="lg"
+                className="w-full h-14 rounded-2xl text-base font-medium gap-2"
+              >
+                {t.common.next}
+                <ArrowRight className="size-5" />
+              </Button>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+                className="inline-flex items-center justify-center size-20 rounded-2xl bg-violet-500/10 mb-6"
+              >
+                <Globe className="size-10 text-violet-500" />
+              </motion.div>
+
+              <h2 className="text-2xl font-bold mb-2">{t.onboarding.step3Title}</h2>
+              <p className="text-muted-foreground mb-8">
+                {t.onboarding.step3Desc}
+              </p>
+
+              {/* Language Selection */}
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                {[
+                  { code: "en" as const, name: "English", flag: "GB" },
+                  { code: "tr" as const, name: "Turkce", flag: "TR" },
+                ].map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => setLanguage(lang.code)}
                     className={cn(
-                      "gap-2",
-                      currentStep < steps.length - 1 ? "flex-1" : "w-full"
+                      "flex items-center justify-center gap-3 p-5 rounded-2xl border-2 transition-all",
+                      language === lang.code
+                        ? "border-primary bg-primary/5"
+                        : "border-transparent bg-card/50 hover:bg-muted/50"
                     )}
                   >
-                    {step.isFinal ? (
-                      <>
-                        {t.onboarding.letsGo}
-                        <Sparkles className="size-4" />
-                      </>
-                    ) : (
-                      <>
-                        {t.common.next}
-                        <ArrowRight className="size-4" />
-                      </>
+                    <span className="text-2xl">{lang.flag === "GB" ? "🇬🇧" : "🇹🇷"}</span>
+                    <span className="font-medium">{lang.name}</span>
+                    {language === lang.code && (
+                      <Check className="size-5 text-primary" />
                     )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                  </button>
+                ))}
+              </div>
+
+              <Button
+                onClick={handleComplete}
+                size="lg"
+                className="w-full h-14 rounded-2xl text-base font-medium gap-2 bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90"
+              >
+                {t.onboarding.letsGo}
+                <ArrowRight className="size-5" />
+              </Button>
+            </motion.div>
+          )}
         </AnimatePresence>
 
-        {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          {t.onboarding.welcomeDesc}
-        </p>
+        {/* Skip */}
+        {step < 2 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-center mt-4"
+          >
+            <Button
+              variant="ghost"
+              onClick={handleComplete}
+              className="text-muted-foreground"
+            >
+              {t.common.skip}
+            </Button>
+          </motion.div>
+        )}
       </div>
     </div>
   )

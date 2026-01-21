@@ -5,24 +5,14 @@ import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import {
   ArrowRightLeft, Loader2, Copy, Check, Volume2, X, Star,
-  UploadCloud, Download, FileText, Trash, Languages, Sparkles,
-  Wand2, FileUp, RefreshCw
+  Languages, Sparkles, Wand2, FileUp, Upload
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Card, CardContent } from "@/components/ui/card"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb"
 import { useLanguage } from "@/contexts/language-context"
+import { motion, AnimatePresence } from "framer-motion"
 
 type TranslationItem = {
   id: string
@@ -36,53 +26,45 @@ type TranslationItem = {
 }
 
 const languages = [
-  { code: "en", name: "English", flag: "GB" },
-  { code: "tr", name: "Turkish", flag: "TR" },
-  { code: "es", name: "Spanish", flag: "ES" },
-  { code: "fr", name: "French", flag: "FR" },
-  { code: "de", name: "German", flag: "DE" },
-  { code: "it", name: "Italian", flag: "IT" },
-  { code: "pt", name: "Portuguese", flag: "PT" },
-  { code: "ru", name: "Russian", flag: "RU" },
-  { code: "ja", name: "Japanese", flag: "JP" },
-  { code: "zh", name: "Chinese", flag: "CN" },
-  { code: "ko", name: "Korean", flag: "KR" },
-  { code: "ar", name: "Arabic", flag: "SA" },
+  { code: "en", name: "English" },
+  { code: "tr", name: "Turkish" },
+  { code: "es", name: "Spanish" },
+  { code: "fr", name: "French" },
+  { code: "de", name: "German" },
+  { code: "it", name: "Italian" },
+  { code: "pt", name: "Portuguese" },
+  { code: "ru", name: "Russian" },
+  { code: "ja", name: "Japanese" },
+  { code: "zh", name: "Chinese" },
+  { code: "ko", name: "Korean" },
+  { code: "ar", name: "Arabic" },
 ]
 
 const tones = [
-  { value: "standard", labelKey: "standard" as const, icon: Languages },
-  { value: "formal", labelKey: "formal" as const, icon: FileText },
-  { value: "casual", labelKey: "casual" as const, icon: Sparkles },
-  { value: "technical", labelKey: "technical" as const, icon: Wand2 },
+  { value: "standard", labelKey: "standard" as const },
+  { value: "formal", labelKey: "formal" as const },
+  { value: "casual", labelKey: "casual" as const },
+  { value: "technical", labelKey: "technical" as const },
 ]
 
 function TranslatorWorkspace() {
   const searchParams = useSearchParams()
   const { t } = useLanguage()
-  
-  const [view, setView] = useState<"text" | "file">("text")
-  
-  // Text Mode State
+
+  const [mode, setMode] = useState<"text" | "file">("text")
   const [sourceText, setSourceText] = useState("")
   const [translatedText, setTranslatedText] = useState("")
-  
-  // File Mode State
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileContent, setFileContent] = useState("")
   const [translatedFileContent, setTranslatedFileContent] = useState("")
-  
-  // Shared State
   const [sourceLanguage, setSourceLanguage] = useState("Auto Detect")
   const [targetLanguage, setTargetLanguage] = useState("English")
   const [tone, setTone] = useState("standard")
   const [loading, setLoading] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
-  
-  const sourceInputRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Restore from URL params if available
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     const text = searchParams.get("text")
     const translation = searchParams.get("translation")
@@ -95,20 +77,31 @@ function TranslatorWorkspace() {
     if (tgt) setTargetLanguage(tgt)
   }, [searchParams])
 
-  // Save to History Logic
   const addToHistory = (item: TranslationItem) => {
     const savedH = localStorage.getItem("translation-history")
     let history: TranslationItem[] = savedH ? JSON.parse(savedH) : []
     history = [item, ...history].slice(0, 100)
     localStorage.setItem("translation-history", JSON.stringify(history))
   }
-  
-  const addToFavorites = (item: TranslationItem) => {
+
+  const addToFavorites = () => {
+    if (!translatedText) return
     const savedF = localStorage.getItem("translation-favorites")
     let favorites: TranslationItem[] = savedF ? JSON.parse(savedF) : []
-    
+
+    const item: TranslationItem = {
+      id: Date.now().toString(),
+      sourceText,
+      translatedText,
+      sourceLang: sourceLanguage,
+      targetLang: targetLanguage,
+      timestamp: Date.now(),
+      tone,
+      isFavorite: true
+    }
+
     if (!favorites.some(f => f.translatedText === item.translatedText)) {
-      favorites = [{...item, isFavorite: true}, ...favorites]
+      favorites = [item, ...favorites]
       localStorage.setItem("translation-favorites", JSON.stringify(favorites))
       toast.success(t.favorites.added)
     } else {
@@ -116,33 +109,31 @@ function TranslatorWorkspace() {
     }
   }
 
-  // Ctrl+Enter Shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        if (!loading) {
-          if (view === "text" && sourceText.trim()) handleTranslate();
-          if (view === "file" && selectedFile) handleTranslate();
+        if (!loading && (sourceText.trim() || selectedFile)) {
+          handleTranslate()
         }
       }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [sourceText, selectedFile, loading, tone, view]);
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [sourceText, selectedFile, loading])
 
   const handleTranslate = async () => {
-    const textToTranslate = view === "text" ? sourceText : fileContent;
-    
+    const textToTranslate = mode === "text" ? sourceText : fileContent
     if (!textToTranslate.trim()) return
+
     setLoading(true)
-    
     try {
       const response = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: textToTranslate,
-          targetLanguage: targetLanguage,
+          targetLanguage,
+          sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
           tone: tone !== "standard" ? tone : undefined
         }),
       })
@@ -150,28 +141,23 @@ function TranslatorWorkspace() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || "Failed")
 
-      if (view === "text") {
+      if (mode === "text") {
         setTranslatedText(data.translation)
       } else {
         setTranslatedFileContent(data.translation)
-      }
-
-      const previewText = textToTranslate.substring(0, 150) + (textToTranslate.length > 150 ? "..." : "")
-      const newEntry: TranslationItem = {
-        id: Date.now().toString(),
-        sourceText: previewText, 
-        translatedText: data.translation.substring(0, 150) + "...", 
-        sourceLang: sourceLanguage, 
-        targetLang: targetLanguage, 
-        timestamp: Date.now(), 
-        tone
-      }
-      addToHistory(newEntry)
-      
-      if (view === "file") {
         toast.success(t.translator.fileTranslated)
       }
 
+      const newEntry: TranslationItem = {
+        id: Date.now().toString(),
+        sourceText: textToTranslate.substring(0, 150) + (textToTranslate.length > 150 ? "..." : ""),
+        translatedText: data.translation.substring(0, 150) + "...",
+        sourceLang: sourceLanguage,
+        targetLang: targetLanguage,
+        timestamp: Date.now(),
+        tone
+      }
+      addToHistory(newEntry)
     } catch (err: any) {
       toast.error(err.message)
     } finally {
@@ -196,23 +182,20 @@ function TranslatorWorkspace() {
       const content = event.target?.result as string
       setFileContent(content)
       setSelectedFile(file)
-      setTranslatedFileContent("") 
+      setTranslatedFileContent("")
     }
     reader.readAsText(file)
   }
 
   const handleDownload = () => {
     if (!translatedFileContent || !selectedFile) return
-    
     const blob = new Blob([translatedFileContent], { type: 'text/plain' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
-    
     const nameParts = selectedFile.name.split('.')
     const ext = nameParts.pop()
     const name = nameParts.join('.')
-    const targetCode = targetLanguage === "English" ? "en" : targetLanguage.substring(0, 2).toLowerCase()
-    
+    const targetCode = targetLanguage.substring(0, 2).toLowerCase()
     a.href = url
     a.download = `${name}_${targetCode}.${ext}`
     a.click()
@@ -246,374 +229,301 @@ function TranslatorWorkspace() {
   }
 
   return (
-    <div className="flex flex-col h-full min-h-svh bg-background">
+    <div className="h-svh flex flex-col items-center justify-center p-4 pb-24">
       {/* Header */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="flex items-center gap-2">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-6"
+      >
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          Localce
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">{t.translator.title}</p>
+      </motion.div>
+
+      {/* Main Card */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-4xl"
+      >
+        <div className="bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden">
+          {/* Mode Toggle & Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b bg-muted/30">
+            {/* Mode Toggle */}
+            <div className="flex bg-muted rounded-xl p-1 self-start">
+              <button
+                onClick={() => setMode("text")}
+                className={cn(
+                  "flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                  mode === "text"
+                    ? "bg-background shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
                 <Languages className="size-4" />
-                {t.translator.title}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        
-        <div className="ml-auto flex items-center gap-2">
-          {/* Mode Toggle */}
-          <div className="flex bg-muted p-1 rounded-lg">
-            <button 
-              onClick={() => setView("text")}
-              className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
-                view === "text" 
-                  ? "bg-background shadow-sm text-foreground" 
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Languages className="size-4" />
-              <span className="hidden sm:inline">{t.translator.textMode}</span>
-            </button>
-            <button 
-              onClick={() => setView("file")}
-              className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
-                view === "file" 
-                  ? "bg-background shadow-sm text-foreground" 
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <FileUp className="size-4" />
-              <span className="hidden sm:inline">{t.translator.fileMode}</span>
-            </button>
-          </div>
-        </div>
-      </header>
+                <span className="hidden xs:inline">{t.translator.textMode}</span>
+                <span className="xs:hidden">Text</span>
+              </button>
+              <button
+                onClick={() => setMode("file")}
+                className={cn(
+                  "flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                  mode === "file"
+                    ? "bg-background shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <FileUp className="size-4" />
+                <span className="hidden xs:inline">{t.translator.fileMode}</span>
+                <span className="xs:hidden">File</span>
+              </button>
+            </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col gap-4 p-4 pt-0">
-        
-        {/* Controls Bar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4 border-b">
-          {/* Language Selection */}
-          <div className="flex items-center gap-2 flex-1 w-full sm:w-auto">
-            <Select value={sourceLanguage} onValueChange={setSourceLanguage}>
-              <SelectTrigger className="w-full sm:w-[160px] h-10">
-                <SelectValue placeholder={t.translator.source} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Auto Detect">
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="size-4" />
-                    {t.translator.autoDetect}
-                  </span>
-                </SelectItem>
-                {languages.map(l => (
-                  <SelectItem key={l.code} value={l.name}>
-                    {l.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="shrink-0 rounded-full"
-              onClick={swapLanguages}
-              disabled={sourceLanguage === "Auto Detect"}
-            >
-              <ArrowRightLeft className="size-4" />
-            </Button>
-
-            <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-              <SelectTrigger className="w-full sm:w-[160px] h-10">
-                <SelectValue placeholder="Target" />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map(l => (
-                  <SelectItem key={l.code} value={l.name}>
-                    {l.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Tone & Translate */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Select value={tone} onValueChange={setTone}>
-              <SelectTrigger className="w-full sm:w-[140px] h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {tones.map(toneItem => (
-                  <SelectItem key={toneItem.value} value={toneItem.value}>
+            {/* Language Controls */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={sourceLanguage} onValueChange={setSourceLanguage}>
+                <SelectTrigger className="w-[110px] sm:w-[130px] h-9 rounded-xl bg-background/50 text-xs sm:text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Auto Detect">
                     <span className="flex items-center gap-2">
-                      <toneItem.icon className="size-4" />
-                      {t.translator[toneItem.labelKey]}
+                      <Sparkles className="size-3" />
+                      {t.translator.autoDetect}
                     </span>
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Button 
-              onClick={handleTranslate} 
-              disabled={loading || (!sourceText.trim() && !selectedFile)}
-              className="h-10 px-6 gap-2"
-            >
-              {loading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Wand2 className="size-4" />
-              )}
-              <span className="hidden sm:inline">{t.translator.translate}</span>
-            </Button>
-          </div>
-        </div>
+                  {languages.map(l => (
+                    <SelectItem key={l.code} value={l.name}>{l.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-        {/* Content Area */}
-        <div className="flex-1 min-h-0">
-          
-          {/* TEXT MODE */}
-          {view === "text" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
-              {/* Source Panel */}
-              <Card className="flex flex-col overflow-hidden border-2 border-transparent focus-within:border-primary/20 transition-colors">
-                <div className="flex items-center justify-between p-3 border-b bg-muted/30">
-                  <span className="text-sm font-medium text-muted-foreground">{t.translator.source}</span>
-                  <div className="flex items-center gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="size-8" 
-                      onClick={() => handleSpeak(sourceText, sourceLanguage)}
-                      disabled={!sourceText}
-                    >
-                      <Volume2 className="size-4" />
-                    </Button>
-                    {sourceText && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="size-8 hover:text-destructive" 
-                        onClick={() => setSourceText("")}
-                      >
-                        <X className="size-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                <CardContent className="flex-1 p-0 relative">
-                  <Textarea 
-                    ref={sourceInputRef}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9 rounded-xl shrink-0"
+                onClick={swapLanguages}
+                disabled={sourceLanguage === "Auto Detect"}
+              >
+                <ArrowRightLeft className="size-4" />
+              </Button>
+
+              <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                <SelectTrigger className="w-[110px] sm:w-[130px] h-9 rounded-xl bg-background/50 text-xs sm:text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map(l => (
+                    <SelectItem key={l.code} value={l.name}>{l.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={tone} onValueChange={setTone}>
+                <SelectTrigger className="w-[100px] sm:w-[120px] h-9 rounded-xl bg-background/50 text-xs sm:text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {tones.map(t2 => (
+                    <SelectItem key={t2.value} value={t2.value}>
+                      {t.translator[t2.labelKey]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Content Area */}
+          <AnimatePresence mode="wait">
+            {mode === "text" ? (
+              <motion.div
+                key="text"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x"
+              >
+                {/* Source */}
+                <div className="relative">
+                  <Textarea
                     value={sourceText}
                     onChange={(e) => setSourceText(e.target.value)}
                     placeholder={t.translator.enterText}
-                    className="absolute inset-0 resize-none border-none focus-visible:ring-0 rounded-none p-4 text-base"
+                    className="min-h-[180px] sm:min-h-[280px] resize-none border-none focus-visible:ring-0 rounded-none p-4 text-base bg-transparent"
                     spellCheck={false}
                   />
-                </CardContent>
-                <div className="flex items-center justify-between p-2 border-t bg-muted/20">
-                  <span className="text-xs text-muted-foreground px-2">
-                    {sourceText.length} {t.translator.characters}
-                  </span>
-                  <Badge variant="outline" className="text-xs">
-                    {t.translator.ctrlEnter}
-                  </Badge>
-                </div>
-              </Card>
-
-              {/* Target Panel */}
-              <Card className="flex flex-col overflow-hidden bg-muted/20 relative">
-                {loading && (
-                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="flex items-center gap-3 bg-background px-4 py-3 rounded-full shadow-lg border">
-                      <Loader2 className="size-5 animate-spin text-primary" />
-                      <span className="text-sm font-medium">{t.translator.translating}</span>
+                  <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3 bg-gradient-to-t from-card/80 to-transparent">
+                    <span className="text-xs text-muted-foreground">
+                      {sourceText.length} {t.translator.characters}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 rounded-lg"
+                        onClick={() => handleSpeak(sourceText, sourceLanguage)}
+                        disabled={!sourceText}
+                      >
+                        <Volume2 className="size-4" />
+                      </Button>
+                      {sourceText && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 rounded-lg hover:text-destructive"
+                          onClick={() => setSourceText("")}
+                        >
+                          <X className="size-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
-                )}
-                <div className="flex items-center justify-between p-3 border-b bg-muted/30">
-                  <span className="text-sm font-medium text-muted-foreground">{t.translator.translation}</span>
-                  <div className="flex items-center gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="size-8" 
-                      onClick={() => handleSpeak(translatedText, targetLanguage)}
-                      disabled={!translatedText}
-                    >
-                      <Volume2 className="size-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="size-8" 
-                      onClick={() => copyToClipboard(translatedText)}
-                      disabled={!translatedText}
-                    >
-                      {isCopied ? (
-                        <Check className="size-4 text-green-500" />
-                      ) : (
-                        <Copy className="size-4" />
-                      )}
-                    </Button>
-                    {translatedText && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="size-8 hover:text-yellow-500" 
-                        onClick={() => addToFavorites({
-                          id: Date.now().toString(),
-                          sourceText,
-                          translatedText,
-                          sourceLang: sourceLanguage,
-                          targetLang: targetLanguage,
-                          timestamp: Date.now(),
-                          tone
-                        })}
-                      >
-                        <Star className="size-4" />
-                      </Button>
-                    )}
-                  </div>
                 </div>
-                <CardContent className="flex-1 p-0 relative">
-                  <Textarea 
+
+                {/* Target */}
+                <div className="relative bg-muted/20">
+                  {loading && (
+                    <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center">
+                      <div className="flex items-center gap-3 bg-background px-4 py-2 rounded-full shadow-lg border">
+                        <Loader2 className="size-4 animate-spin text-primary" />
+                        <span className="text-sm">{t.translator.translating}</span>
+                      </div>
+                    </div>
+                  )}
+                  <Textarea
                     value={translatedText}
                     readOnly
                     placeholder={t.translator.translationWillAppear}
-                    className="absolute inset-0 resize-none border-none focus-visible:ring-0 rounded-none p-4 text-base bg-transparent"
+                    className="min-h-[180px] sm:min-h-[280px] resize-none border-none focus-visible:ring-0 rounded-none p-4 text-base bg-transparent"
                   />
-                </CardContent>
-                <div className="flex items-center justify-between p-2 border-t bg-muted/20">
-                  <span className="text-xs text-muted-foreground px-2">
-                    {translatedText.length} {t.translator.characters}
-                  </span>
-                  {translatedText && (
-                    <Badge variant="secondary" className="text-xs capitalize">
-                      {tone}
-                    </Badge>
-                  )}
+                  <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3 bg-gradient-to-t from-muted/40 to-transparent">
+                    <span className="text-xs text-muted-foreground">
+                      {translatedText.length} {t.translator.characters}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 rounded-lg"
+                        onClick={() => handleSpeak(translatedText, targetLanguage)}
+                        disabled={!translatedText}
+                      >
+                        <Volume2 className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 rounded-lg"
+                        onClick={() => copyToClipboard(translatedText)}
+                        disabled={!translatedText}
+                      >
+                        {isCopied ? <Check className="size-4 text-green-500" /> : <Copy className="size-4" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 rounded-lg hover:text-yellow-500"
+                        onClick={addToFavorites}
+                        disabled={!translatedText}
+                      >
+                        <Star className="size-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </Card>
-            </div>
-          )}
-
-          {/* FILE MODE */}
-          {view === "file" && (
-            <div className="h-full flex items-center justify-center">
-              {!selectedFile ? (
-                <Card 
-                  className="w-full max-w-lg border-2 border-dashed hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <CardContent className="flex flex-col items-center justify-center gap-4 py-16">
-                    <div className="p-4 rounded-full bg-muted">
-                      <UploadCloud className="size-8 text-muted-foreground" />
-                    </div>
-                    <div className="text-center">
-                      <h3 className="text-lg font-semibold">{t.translator.uploadFile}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {t.translator.dragDrop}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {t.translator.supportedFormats}
-                      </p>
-                    </div>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      accept=".txt,.md,.json,.csv,.srt,.js,.ts,.py,.html,.css,.xml" 
-                      onChange={handleFileUpload} 
+              </motion.div>
+            ) : (
+              <motion.div
+                key="file"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="p-6"
+              >
+                {!selectedFile ? (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-all"
+                  >
+                    <Upload className="size-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="font-semibold mb-1">{t.translator.uploadFile}</h3>
+                    <p className="text-sm text-muted-foreground">{t.translator.dragDrop}</p>
+                    <p className="text-xs text-muted-foreground mt-2">{t.translator.supportedFormats}</p>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept=".txt,.md,.json,.csv,.srt,.js,.ts,.py,.html,.css,.xml"
+                      onChange={handleFileUpload}
                     />
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
-                  {/* Source File */}
-                  <Card className="flex flex-col overflow-hidden">
-                    <div className="p-4 border-b bg-muted/30 flex items-center justify-between">
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <FileText className="size-5 text-primary" />
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <FileUp className="size-5 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">{selectedFile.name}</p>
+                          <p className="font-medium text-sm">{selectedFile.name}</p>
                           <p className="text-xs text-muted-foreground">{fileContent.length} {t.translator.characters}</p>
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => {
                           setSelectedFile(null)
                           setFileContent("")
                           setTranslatedFileContent("")
                         }}
                       >
-                        <Trash className="size-4" />
+                        <X className="size-4" />
                       </Button>
                     </div>
-                    <CardContent className="flex-1 p-4 overflow-auto">
-                      <pre className="text-xs font-mono whitespace-pre-wrap text-muted-foreground">
-                        {fileContent.substring(0, 5000)}
-                        {fileContent.length > 5000 && "..."}
-                      </pre>
-                    </CardContent>
-                  </Card>
 
-                  {/* Translated File */}
-                  <Card className="flex flex-col overflow-hidden bg-muted/20 relative">
-                    {loading && (
-                      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                        <Loader2 className="size-8 animate-spin text-primary" />
+                    {translatedFileContent && (
+                      <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                            {t.translator.translatedFile}
+                          </p>
+                          <Button size="sm" onClick={handleDownload} className="bg-green-600 hover:bg-green-500">
+                            {t.common.download}
+                          </Button>
+                        </div>
                       </div>
                     )}
-                    <div className="p-4 border-b bg-green-500/5 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-green-500/10">
-                          <FileText className="size-5 text-green-600" />
-                        </div>
-                        <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                          {t.translator.translatedFile}
-                        </p>
-                      </div>
-                      {translatedFileContent && (
-                        <Button 
-                          size="sm" 
-                          onClick={handleDownload}
-                          className="gap-2 bg-green-600 hover:bg-green-500"
-                        >
-                          <Download className="size-4" />
-                          {t.common.download}
-                        </Button>
-                      )}
-                    </div>
-                    <CardContent className="flex-1 p-4 overflow-auto">
-                      {translatedFileContent ? (
-                        <pre className="text-xs font-mono whitespace-pre-wrap">
-                          {translatedFileContent}
-                        </pre>
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-muted-foreground">
-                          <p className="text-sm italic">{t.translator.clickTranslate}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Translate Button */}
+          <div className="p-4 border-t bg-muted/20">
+            <Button
+              onClick={handleTranslate}
+              disabled={loading || (mode === "text" ? !sourceText.trim() : !selectedFile)}
+              className="w-full h-12 rounded-xl text-base font-medium gap-2"
+              size="lg"
+            >
+              {loading ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : (
+                <Wand2 className="size-5" />
               )}
-            </div>
-          )}
+              {loading ? t.translator.translating : t.translator.translate}
+            </Button>
+            <p className="text-xs text-center text-muted-foreground mt-2">
+              {t.translator.ctrlEnter}
+            </p>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

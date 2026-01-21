@@ -4,31 +4,11 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { 
-  Search, Trash2, ArrowRight, Star, Heart, Copy,
-  MoreVertical, ExternalLink
+import {
+  Search, Trash2, ArrowRight, Star, Copy, ExternalLink, Heart
 } from "lucide-react"
 import { toast } from "sonner"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +21,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useLanguage } from "@/contexts/language-context"
+import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -64,16 +46,14 @@ export default function FavoritesPage() {
     if (saved) setFavorites(JSON.parse(saved))
   }, [])
 
-  const removeFavorite = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation()
+  const removeFavorite = (id: string) => {
     const newFavorites = favorites.filter(item => item.id !== id)
     setFavorites(newFavorites)
     localStorage.setItem("translation-favorites", JSON.stringify(newFavorites))
     toast.info(t.favorites.removed)
   }
 
-  const copyToClipboard = async (e: React.MouseEvent, text: string) => {
-    e.stopPropagation()
+  const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text)
     toast.success(t.common.copied)
   }
@@ -94,202 +74,170 @@ export default function FavoritesPage() {
     router.push(`/?${params.toString()}`)
   }
 
-  const filtered = favorites.filter(item => 
-    item.sourceText.toLowerCase().includes(search.toLowerCase()) || 
+  const filtered = favorites.filter(item =>
+    item.sourceText.toLowerCase().includes(search.toLowerCase()) ||
     item.translatedText.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
-    <div className="flex flex-col h-full min-h-svh bg-background">
+    <div className="h-svh flex flex-col p-4 pb-24">
       {/* Header */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="/">{t.nav.translator}</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden md:block" />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="flex items-center gap-2">
-                <Star className="size-4 fill-yellow-400 text-yellow-400" />
-                {t.favorites.title}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        
-        <div className="ml-auto flex items-center gap-3">
-          <Badge variant="secondary" className="gap-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
-            <Heart className="size-3 fill-current" />
-            {favorites.length} {t.favorites.saved}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-6"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 backdrop-blur-xl border border-yellow-500/20 rounded-full mb-2">
+          <Star className="size-4 text-yellow-500 fill-yellow-500" />
+          <span className="text-sm font-medium">{t.favorites.title}</span>
+          <Badge variant="secondary" className="ml-1 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400">
+            {favorites.length}
           </Badge>
-          
-          {favorites.length > 0 && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2 text-muted-foreground hover:text-destructive hover:border-destructive">
-                  <Trash2 className="size-4" />
-                  <span className="hidden sm:inline">{t.history.clearAll}</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t.history.clearAllTitle}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t.history.clearAllDesc}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={clearAllFavorites} 
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {t.common.delete}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
         </div>
-      </header>
+      </motion.div>
 
-      {/* Search Bar */}
-      <div className="border-b px-4 py-3">
-        <div className="max-w-xl mx-auto relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input 
-            placeholder={t.common.search + "..."} 
-            className="pl-10 bg-muted/50 border-transparent focus:bg-background focus:border-input transition-all"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
+      {/* Main Content */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex-1 max-w-4xl mx-auto w-full"
+      >
+        <div className="h-full bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col">
+          {/* Search & Actions */}
+          <div className="flex items-center gap-3 p-4 border-b">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
+                placeholder={t.common.search + "..."}
+                className="pl-10 h-10 rounded-xl bg-muted/50 border-transparent"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            {favorites.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="rounded-xl gap-2 text-muted-foreground hover:text-destructive">
+                    <Trash2 className="size-4" />
+                    <span className="hidden sm:inline">{t.history.clearAll}</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t.history.clearAllTitle}</AlertDialogTitle>
+                    <AlertDialogDescription>{t.history.clearAllDesc}</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+                    <AlertDialogAction onClick={clearAllFavorites} className="bg-destructive text-destructive-foreground">
+                      {t.common.delete}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
 
-      {/* Content */}
-      <ScrollArea className="flex-1">
-        <div className="p-4">
-          <div className="max-w-3xl mx-auto">
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20">
+              <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="p-4 rounded-full bg-yellow-500/10 mb-4">
-                  <Star className="size-8 text-yellow-500" />
+                  <Heart className="size-8 text-yellow-500" />
                 </div>
-                <h3 className="text-lg font-medium mb-1">{t.favorites.noFavorites}</h3>
-                <p className="text-sm text-muted-foreground text-center max-w-sm">
-                  {search 
-                    ? t.history.tryDifferent 
-                    : t.favorites.noFavoritesDesc
-                  }
+                <h3 className="font-medium mb-1">{t.favorites.noFavorites}</h3>
+                <p className="text-sm text-muted-foreground max-w-xs">
+                  {search ? t.history.tryDifferent : t.favorites.noFavoritesDesc}
                 </p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
+                <Button
+                  variant="outline"
+                  className="mt-4 rounded-xl"
                   onClick={() => router.push("/")}
                 >
                   {t.favorites.goToTranslator}
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filtered.map((item) => (
-                  <Card 
-                    key={item.id} 
-                    className="group hover:shadow-md hover:border-yellow-500/30 transition-all cursor-pointer relative overflow-hidden"
-                    onClick={() => restoreItem(item)}
-                  >
-                    {/* Favorite indicator */}
-                    <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden">
-                      <div className="absolute top-0 right-0 w-4 h-4 bg-yellow-400 transform rotate-45 translate-x-4 -translate-y-2" />
-                    </div>
-                    
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        {/* Language badges */}
-                        <div className="flex items-center gap-2 text-xs">
-                          <Badge variant="outline" className="font-mono">
-                            {item.sourceLang}
-                          </Badge>
-                          <ArrowRight className="size-3 text-muted-foreground" />
-                          <Badge variant="outline" className="font-mono bg-primary/5">
-                            {item.targetLang}
-                          </Badge>
-                        </div>
-                        
-                        {/* Source text */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <AnimatePresence>
+                  {filtered.map((item, index) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="group relative bg-gradient-to-br from-card to-muted/30 border rounded-2xl p-4 hover:shadow-lg hover:border-yellow-500/30 transition-all"
+                    >
+                      {/* Star indicator */}
+                      <div className="absolute top-3 right-3">
+                        <Star className="size-4 text-yellow-500 fill-yellow-500" />
+                      </div>
+
+                      {/* Language badges */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
+                          {item.sourceLang.slice(0, 2).toUpperCase()}
+                        </Badge>
+                        <ArrowRight className="size-3 text-muted-foreground" />
+                        <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 bg-primary/5">
+                          {item.targetLang.slice(0, 2).toUpperCase()}
+                        </Badge>
+                      </div>
+
+                      {/* Content */}
+                      <div className="space-y-2 mb-4">
                         <div>
-                          <p className="text-xs text-muted-foreground mb-1">{t.favorites.original}</p>
-                          <p className="text-sm font-medium line-clamp-2">{item.sourceText}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                            {t.favorites.original}
+                          </p>
+                          <p className="text-sm line-clamp-2">{item.sourceText}</p>
                         </div>
-                        
-                        {/* Translation */}
                         <div>
-                          <p className="text-xs text-muted-foreground mb-1">{t.translator.translation}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                            {t.translator.translation}
+                          </p>
                           <p className="text-sm text-muted-foreground line-clamp-2">{item.translatedText}</p>
                         </div>
-                        
-                        {/* Footer */}
-                        <div className="flex items-center justify-between pt-2 border-t">
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(item.timestamp).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}
-                          </p>
-                          
-                          {/* Actions */}
-                          <div className="flex items-center gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="size-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={(e) => copyToClipboard(e, item.translatedText)}
-                            >
-                              <Copy className="size-3.5" />
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="size-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <MoreVertical className="size-3.5" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation()
-                                  restoreItem(item)
-                                }}>
-                                  <ExternalLink className="size-4 mr-2" />
-                                  {t.history.openInTranslator}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={(e) => copyToClipboard(e, item.translatedText)}>
-                                  <Copy className="size-4 mr-2" />
-                                  {t.history.copyTranslation}
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  onClick={(e) => removeFavorite(e, item.id)}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <Star className="size-4 mr-2" />
-                                  {t.favorites.removeFromFavorites}
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 pt-3 border-t">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1 h-8 rounded-lg text-xs gap-1.5"
+                          onClick={() => copyToClipboard(item.translatedText)}
+                        >
+                          <Copy className="size-3" />
+                          {t.common.copy}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1 h-8 rounded-lg text-xs gap-1.5"
+                          onClick={() => restoreItem(item)}
+                        >
+                          <ExternalLink className="size-3" />
+                          Open
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 rounded-lg text-muted-foreground hover:text-destructive"
+                          onClick={() => removeFavorite(item.id)}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             )}
           </div>
         </div>
-      </ScrollArea>
+      </motion.div>
     </div>
   )
 }

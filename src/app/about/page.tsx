@@ -1,199 +1,174 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { 
-  User, Globe, Github, Heart, Code, ExternalLink, 
-  Mail, Sparkles, Coffee, Star
-} from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import Image from "next/image"
+import { motion } from "framer-motion"
+import { 
+  Github, Globe, Heart, Code2, Shield, Zap,
+  ExternalLink
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-
-const technologies = [
-  { name: "Next.js 16", color: "bg-black dark:bg-white dark:text-black" },
-  { name: "React 19", color: "bg-blue-500" },
-  { name: "TypeScript", color: "bg-blue-600" },
-  { name: "Tailwind CSS", color: "bg-cyan-500" },
-  { name: "shadcn/ui", color: "bg-zinc-800 dark:bg-zinc-200 dark:text-black" },
-  { name: "Framer Motion", color: "bg-purple-500" },
-  { name: "LM Studio", color: "bg-green-500" },
-]
-
-const features = [
-  { icon: Sparkles, text: "AI-Powered Translation" },
-  { icon: Globe, text: "100% Local & Private" },
-  { icon: Code, text: "Open Source" },
-  { icon: Heart, text: "Free Forever" },
-]
 
 export default function AboutPage() {
   const { t } = useLanguage()
 
-  return (
-    <div className="flex flex-col h-full min-h-svh bg-background">
-      {/* Header */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="/">{t.nav.translator}</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden md:block" />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="flex items-center gap-2">
-                <User className="size-4" />
-                {t.about.title}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+  const features = [
+    { icon: Shield, title: "100% Private", desc: "All data stays on your device" },
+    { icon: Zap, title: "AI Powered", desc: "Using local LLM via LM Studio" },
+    { icon: Code2, title: "Open Source", desc: "Free and open source forever" },
+  ]
 
-      {/* Content */}
-      <ScrollArea className="flex-1">
-        <div className="p-4 md:p-6">
-          <div className="max-w-2xl mx-auto space-y-6">
+  const technologies = [
+    "Next.js 16", "React 19", "TypeScript", "Tailwind CSS", 
+    "shadcn/ui", "Framer Motion", "LM Studio"
+  ]
+
+  return (
+    <div className="h-svh flex flex-col items-center justify-center p-4 pb-24">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-md"
+      >
+        <div className="bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden">
+          {/* Header */}
+          <div className="relative p-8 text-center bg-gradient-to-b from-primary/10 to-transparent">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring" }}
+              className="inline-flex items-center justify-center size-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 text-primary-foreground mb-4 shadow-lg shadow-primary/25"
+            >
+              <span className="text-3xl font-bold">L</span>
+            </motion.div>
             
-            {/* App Info */}
-            <Card className="overflow-hidden">
-              <div className="bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 p-8">
-                <div className="flex flex-col items-center text-center">
-                  <div className="relative size-24 rounded-2xl overflow-hidden bg-background shadow-xl mb-4">
-                    <Image
-                      src="/logo.png"
-                      alt="Localce"
-                      fill
-                      className="object-contain p-2"
-                    />
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text"
+            >
+              Localce
+            </motion.h1>
+            
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-sm text-muted-foreground mt-1"
+            >
+              {t.about.description}
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Badge variant="secondary" className="mt-3">
+                v1.0.0
+              </Badge>
+            </motion.div>
+          </div>
+
+          {/* Features */}
+          <div className="px-6 py-4 border-t border-b bg-muted/20">
+            <div className="grid grid-cols-3 gap-3">
+              {features.map((feature, index) => (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + index * 0.1 }}
+                  className="text-center"
+                >
+                  <div className="inline-flex items-center justify-center size-10 rounded-xl bg-primary/10 mb-2">
+                    <feature.icon className="size-5 text-primary" />
                   </div>
-                  <h1 className="text-3xl font-bold mb-1">Localce</h1>
-                  <Badge variant="secondary" className="mb-4">
-                    {t.about.version} 2.2.0
-                  </Badge>
-                  <p className="text-muted-foreground max-w-md">
-                    {t.about.description}
-                  </p>
+                  <p className="text-xs font-medium">{feature.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{feature.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Developer */}
+          <div className="p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex items-center gap-4 p-4 rounded-2xl bg-muted/50"
+            >
+              <div className="size-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                EC
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold">Eren Cakar</p>
+                <p className="text-xs text-muted-foreground">{t.about.developer}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Button variant="ghost" size="sm" className="h-7 px-2 rounded-lg" asChild>
+                    <Link href="https://erencakar.com" target="_blank">
+                      <Globe className="size-3.5 mr-1" />
+                      <span className="text-xs">Website</span>
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-7 px-2 rounded-lg" asChild>
+                    <Link href="https://github.com/sudoeren" target="_blank">
+                      <Github className="size-3.5 mr-1" />
+                      <span className="text-xs">GitHub</span>
+                    </Link>
+                  </Button>
                 </div>
               </div>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {features.map((feature, i) => (
-                    <div key={i} className="flex flex-col items-center text-center p-3 rounded-lg bg-muted/50">
-                      <feature.icon className="size-5 mb-2 text-primary" />
-                      <span className="text-xs font-medium">{feature.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Developer */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="size-5" />
-                  {t.about.developer}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-primary/5 to-purple-500/5 border">
-                  <div className="relative size-16 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold">
-                    EC
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold">Eren Cakar</h3>
-                    <p className="text-sm text-muted-foreground">Full Stack Developer</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Button variant="outline" size="sm" asChild className="gap-2">
-                        <Link href="https://erencakar.com" target="_blank">
-                          <Globe className="size-3.5" />
-                          {t.about.website}
-                        </Link>
-                      </Button>
-                      <Button variant="outline" size="sm" asChild className="gap-2">
-                        <Link href="https://github.com/sudoeren" target="_blank">
-                          <Github className="size-3.5" />
-                          GitHub
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            </motion.div>
 
             {/* Technologies */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code className="size-5" />
-                  {t.about.technologies}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {technologies.map((tech) => (
-                    <Badge
-                      key={tech.name}
-                      className={`${tech.color} text-white`}
-                    >
-                      {tech.name}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              className="mt-4"
+            >
+              <p className="text-xs text-muted-foreground mb-2">{t.about.technologies}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {technologies.map((tech) => (
+                  <Badge key={tech} variant="outline" className="text-[10px] font-normal">
+                    {tech}
+                  </Badge>
+                ))}
+              </div>
+            </motion.div>
 
-            {/* Open Source */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="size-5" />
+            {/* Links */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="mt-6 pt-4 border-t"
+            >
+              <Button variant="outline" className="w-full rounded-xl gap-2" asChild>
+                <Link href="https://github.com/sudoeren/localce" target="_blank">
+                  <Github className="size-4" />
                   {t.about.openSource}
-                </CardTitle>
-                <CardDescription>{t.about.openSourceDesc}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full gap-2">
-                  <Link href="https://github.com/sudoeren/localce" target="_blank">
-                    <Github className="size-4" />
-                    View on GitHub
-                    <ExternalLink className="size-3.5 ml-auto" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+                  <ExternalLink className="size-3 ml-auto" />
+                </Link>
+              </Button>
+            </motion.div>
 
-            {/* Made with love */}
-            <div className="text-center py-8">
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-                {t.about.madeWith}
-                <Heart className="size-4 text-red-500 fill-red-500 animate-pulse" />
-                by Eren Cakar
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                2024 Localce. All rights reserved.
-              </p>
-            </div>
-
+            {/* Made with */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9 }}
+              className="text-center text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1"
+            >
+              {t.about.madeWith} <Heart className="size-3 text-red-500 fill-red-500" /> in Turkey
+            </motion.p>
           </div>
         </div>
-      </ScrollArea>
+      </motion.div>
     </div>
   )
 }

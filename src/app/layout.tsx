@@ -3,11 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { AppWrapper } from "@/components/app-wrapper";
+import { FloatingNavbar } from "@/components/floating-navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,18 +44,10 @@ export default function RootLayout({
           <LanguageProvider>
             <OnboardingProvider>
               <AppWrapper>
-                <SidebarProvider
-                  style={
-                    {
-                      "--sidebar-width": "19rem",
-                    } as React.CSSProperties
-                  }
-                >
-                  <AppSidebar />
-                  <SidebarInset>
-                    {children}
-                  </SidebarInset>
-                </SidebarProvider>
+                <main className="min-h-svh bg-gradient-to-br from-background via-background to-muted/20">
+                  {children}
+                </main>
+                <FloatingNavbar />
               </AppWrapper>
             </OnboardingProvider>
           </LanguageProvider>
