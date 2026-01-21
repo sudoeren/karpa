@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="32" fill="#18181b"/>
-  <text x="64" y="80" font-family="system-ui, sans-serif" font-size="56" font-weight="bold" fill="#fafafa" text-anchor="middle">L</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <rect width="80" height="80" rx="16" fill="#18181b"/>
+  <path d="M20 20h12v36h18v12H20V20z" fill="#fafafa"/>
+  <path d="M52 28l12 9-12 9v-6h-9v-6h9v-6z" fill="#fafafa"/>
+  <circle cx="60" cy="60" r="6" fill="#fafafa"/>
 </svg>

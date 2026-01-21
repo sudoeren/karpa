@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sudoeren/localce/master/public/logo.svg" alt="Localce" width="80" height="80" />
+  <img src="/logo.svg" alt="Localce" width="80" height="80" />
 </p>
 
 <h1 align="center">Localce</h1>
