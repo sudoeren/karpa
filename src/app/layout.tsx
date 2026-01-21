@@ -44,10 +44,10 @@ export default function RootLayout({
           <LanguageProvider>
             <OnboardingProvider>
               <AppWrapper>
-                <main className="min-h-svh bg-gradient-to-br from-background via-background to-muted/20">
+<FloatingNavbar />
+                <main className="min-h-svh pt-20 bg-gradient-to-br from-background via-background to-muted/20">
                   {children}
                 </main>
-                <FloatingNavbar />
               </AppWrapper>
             </OnboardingProvider>
           </LanguageProvider>

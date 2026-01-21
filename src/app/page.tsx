@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence } from "framer-motion"
+import { Logo } from "@/components/logo"
 
 type TranslationItem = {
   id: string
@@ -229,17 +230,18 @@ function TranslatorWorkspace() {
   }
 
   return (
-    <div className="h-svh flex flex-col items-center justify-center p-4 pb-24">
-      {/* Header */}
+    <div className="min-h-[calc(100svh-5rem)] flex flex-col items-center justify-center p-4">
+{/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-6"
       >
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          Localce
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">{t.translator.title}</p>
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <Logo size={36} />
+          <h1 className="text-2xl font-bold">Localce</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">{t.translator.title}</p>
       </motion.div>
 
       {/* Main Card */}

@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { Logo } from "@/components/logo"
 
 export default function AboutPage() {
   const { t } = useLanguage()
@@ -25,22 +26,22 @@ export default function AboutPage() {
   ]
 
   return (
-    <div className="h-svh flex flex-col items-center justify-center p-4 pb-24">
+    <div className="min-h-[calc(100svh-5rem)] flex flex-col items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md"
       >
         <div className="bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden">
-          {/* Header */}
+{/* Header */}
           <div className="relative p-8 text-center bg-gradient-to-b from-primary/10 to-transparent">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.1, type: "spring" }}
-              className="inline-flex items-center justify-center size-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 text-primary-foreground mb-4 shadow-lg shadow-primary/25"
+              className="inline-flex items-center justify-center mb-4"
             >
-              <span className="text-3xl font-bold">L</span>
+              <Logo size={64} />
             </motion.div>
             
             <motion.h1

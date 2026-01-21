@@ -97,7 +97,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="h-svh flex flex-col p-4 pb-24">
+    <div className="min-h-[calc(100svh-5rem)] flex flex-col p-4">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
