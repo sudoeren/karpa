@@ -37,7 +37,13 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <SidebarProvider>
+            <SidebarProvider
+              style={
+                {
+                  "--sidebar-width": "19rem",
+                } as React.CSSProperties
+              }
+            >
                 <AppSidebar />
                 <SidebarInset>
                     {children}
