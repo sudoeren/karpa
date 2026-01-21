@@ -2,14 +2,11 @@
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Languages, History, Star, Settings, Menu, X } from "lucide-react"
+import { Languages, History, Star, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
-import { useTheme } from "next-themes"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Logo } from "@/components/logo"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 
 const navItems = [
   { href: "/", icon: Languages, labelKey: "translator" as const },
@@ -21,101 +18,57 @@ const navItems = [
 export function FloatingNavbar() {
   const pathname = usePathname()
   const { t } = useLanguage()
-  const { theme } = useTheme()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <Logo size={32} />
-              <span className="font-bold text-lg tracking-tight">Localce</span>
-            </Link>
+    <motion.nav 
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50"
+    >
+      <div className="flex items-center gap-2 p-1.5 bg-background/70 backdrop-blur-2xl border border-border/50 rounded-full shadow-lg shadow-black/5 dark:shadow-black/20">
+        {/* Logo */}
+        <Link 
+          href="/" 
+          className="flex items-center justify-center size-10 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+        >
+          <Logo size={22} />
+        </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    )}
-                  >
-                    <item.icon className="size-4" />
-                    <span>{t.nav[item.labelKey]}</span>
-                  </Link>
-                )
-              })}
-            </div>
+        {/* Divider */}
+        <div className="w-px h-6 bg-border/50" />
 
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-            </Button>
-          </div>
+        {/* Navigation Items */}
+        <div className="flex items-center gap-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                  isActive
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="navbar-active"
+                    className="absolute inset-0 bg-primary rounded-full"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <item.icon className="size-4" />
+                  <span className="hidden sm:inline">{t.nav[item.labelKey]}</span>
+                </span>
+              </Link>
+            )
+          })}
         </div>
-      </nav>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            
-            {/* Menu Panel */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="fixed top-16 left-0 right-0 z-40 md:hidden bg-background border-b shadow-xl"
-            >
-              <div className="p-4 space-y-1">
-                {navItems.map((item) => {
-                  const isActive = pathname === item.href
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      )}
-                    >
-                      <item.icon className="size-5" />
-                      <span>{t.nav[item.labelKey]}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </>
+      </div>
+    </motion.nav>
   )
 }
