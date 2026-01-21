@@ -17,6 +17,7 @@ import {
   MessageSquare,
   HelpCircle,
   ExternalLink,
+  User,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -30,9 +31,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
@@ -53,58 +51,57 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-// Navigation data structure
-const navMain = [
-  {
-    title: "Workspace",
-    icon: Sparkles,
-    isOpen: true,
-    items: [
-      {
-        title: "Translator",
-        url: "/",
-        icon: Languages,
-        description: "Translate text and files",
-      },
-    ],
-  },
-  {
-    title: "Library",
-    icon: BookOpen,
-    isOpen: true,
-    items: [
-      {
-        title: "History",
-        url: "/history",
-        icon: History,
-        description: "View translation history",
-      },
-      {
-        title: "Favorites",
-        url: "/favorites",
-        icon: Star,
-        description: "Saved translations",
-      },
-    ],
-  },
-]
-
-const navSecondary = [
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-  },
-  {
-    title: "Help & Support",
-    url: "#",
-    icon: HelpCircle,
-  },
-]
+import { useLanguage } from "@/contexts/language-context"
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { t } = useLanguage()
+
+  // Navigation data with translations
+  const navMain = [
+    {
+      title: t.nav.workspace,
+      icon: Sparkles,
+      isOpen: true,
+      items: [
+        {
+          title: t.nav.translator,
+          url: "/",
+          icon: Languages,
+        },
+      ],
+    },
+    {
+      title: t.nav.library,
+      icon: BookOpen,
+      isOpen: true,
+      items: [
+        {
+          title: t.nav.history,
+          url: "/history",
+          icon: History,
+        },
+        {
+          title: t.nav.favorites,
+          url: "/favorites",
+          icon: Star,
+        },
+      ],
+    },
+  ]
+
+  const navSecondary = [
+    {
+      title: t.nav.settings,
+      url: "/settings",
+      icon: Settings,
+    },
+    {
+      title: t.nav.about,
+      url: "/about",
+      icon: User,
+    },
+  ]
 
   return (
     <Sidebar variant="floating" collapsible="icon">
@@ -147,16 +144,18 @@ export function AppSidebar() {
                   <div className="flex size-6 items-center justify-center rounded-sm border bg-background">
                     <Globe className="size-4" />
                   </div>
-                  <span className="font-medium">v2.2 Studio</span>
+                  <span className="font-medium">v2.2.0</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="gap-2 p-2">
-                  <Zap className="size-4" />
+                  <Zap className="size-4 text-green-500" />
                   <span>LM Studio Connected</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2 p-2">
-                  <ExternalLink className="size-4" />
-                  <span>Documentation</span>
+                <DropdownMenuItem className="gap-2 p-2" asChild>
+                  <Link href="https://github.com/sudoeren/localce" target="_blank">
+                    <ExternalLink className="size-4" />
+                    <span>GitHub</span>
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -279,13 +278,17 @@ export function AppSidebar() {
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="gap-2 p-2">
-                  <Settings className="size-4" />
-                  <span>Preferences</span>
+                <DropdownMenuItem className="gap-2 p-2" asChild>
+                  <Link href="/settings">
+                    <Settings className="size-4" />
+                    <span>{t.nav.settings}</span>
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2 p-2">
-                  <MessageSquare className="size-4" />
-                  <span>Feedback</span>
+                <DropdownMenuItem className="gap-2 p-2" asChild>
+                  <Link href="/about">
+                    <User className="size-4" />
+                    <span>{t.nav.about}</span>
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

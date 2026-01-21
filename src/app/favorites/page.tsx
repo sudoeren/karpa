@@ -40,6 +40,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useLanguage } from "@/contexts/language-context"
 
 type TranslationItem = {
   id: string
@@ -56,6 +57,7 @@ export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<TranslationItem[]>([])
   const [search, setSearch] = useState("")
   const router = useRouter()
+  const { t, language } = useLanguage()
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-favorites")
@@ -67,19 +69,19 @@ export default function FavoritesPage() {
     const newFavorites = favorites.filter(item => item.id !== id)
     setFavorites(newFavorites)
     localStorage.setItem("translation-favorites", JSON.stringify(newFavorites))
-    toast.info("Removed from favorites")
+    toast.info(t.favorites.removed)
   }
 
   const copyToClipboard = async (e: React.MouseEvent, text: string) => {
     e.stopPropagation()
     await navigator.clipboard.writeText(text)
-    toast.success("Copied to clipboard")
+    toast.success(t.common.copied)
   }
 
   const clearAllFavorites = () => {
     localStorage.removeItem("translation-favorites")
     setFavorites([])
-    toast.success("All favorites cleared")
+    toast.success(t.history.cleared)
   }
 
   const restoreItem = (item: TranslationItem) => {
@@ -106,13 +108,13 @@ export default function FavoritesPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="/">Translator</BreadcrumbLink>
+              <BreadcrumbLink href="/">{t.nav.translator}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
               <BreadcrumbPage className="flex items-center gap-2">
                 <Star className="size-4 fill-yellow-400 text-yellow-400" />
-                Favorites
+                {t.favorites.title}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -121,7 +123,7 @@ export default function FavoritesPage() {
         <div className="ml-auto flex items-center gap-3">
           <Badge variant="secondary" className="gap-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
             <Heart className="size-3 fill-current" />
-            {favorites.length} saved
+            {favorites.length} {t.favorites.saved}
           </Badge>
           
           {favorites.length > 0 && (
@@ -129,23 +131,23 @@ export default function FavoritesPage() {
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2 text-muted-foreground hover:text-destructive hover:border-destructive">
                   <Trash2 className="size-4" />
-                  <span className="hidden sm:inline">Clear All</span>
+                  <span className="hidden sm:inline">{t.history.clearAll}</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Clear all favorites?</AlertDialogTitle>
+                  <AlertDialogTitle>{t.history.clearAllTitle}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. All {favorites.length} saved translations will be permanently deleted.
+                    {t.history.clearAllDesc}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={clearAllFavorites} 
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Delete All
+                    {t.common.delete}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -159,7 +161,7 @@ export default function FavoritesPage() {
         <div className="max-w-xl mx-auto relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input 
-            placeholder="Search favorites..." 
+            placeholder={t.common.search + "..."} 
             className="pl-10 bg-muted/50 border-transparent focus:bg-background focus:border-input transition-all"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -176,11 +178,11 @@ export default function FavoritesPage() {
                 <div className="p-4 rounded-full bg-yellow-500/10 mb-4">
                   <Star className="size-8 text-yellow-500" />
                 </div>
-                <h3 className="text-lg font-medium mb-1">No favorites yet</h3>
+                <h3 className="text-lg font-medium mb-1">{t.favorites.noFavorites}</h3>
                 <p className="text-sm text-muted-foreground text-center max-w-sm">
                   {search 
-                    ? "Try a different search term" 
-                    : "Save your best translations by clicking the star icon in the translator"
+                    ? t.history.tryDifferent 
+                    : t.favorites.noFavoritesDesc
                   }
                 </p>
                 <Button 
@@ -188,7 +190,7 @@ export default function FavoritesPage() {
                   className="mt-4"
                   onClick={() => router.push("/")}
                 >
-                  Go to Translator
+                  {t.favorites.goToTranslator}
                 </Button>
               </div>
             ) : (
@@ -219,20 +221,20 @@ export default function FavoritesPage() {
                         
                         {/* Source text */}
                         <div>
-                          <p className="text-xs text-muted-foreground mb-1">Original</p>
+                          <p className="text-xs text-muted-foreground mb-1">{t.favorites.original}</p>
                           <p className="text-sm font-medium line-clamp-2">{item.sourceText}</p>
                         </div>
                         
                         {/* Translation */}
                         <div>
-                          <p className="text-xs text-muted-foreground mb-1">Translation</p>
+                          <p className="text-xs text-muted-foreground mb-1">{t.translator.translation}</p>
                           <p className="text-sm text-muted-foreground line-clamp-2">{item.translatedText}</p>
                         </div>
                         
                         {/* Footer */}
                         <div className="flex items-center justify-between pt-2 border-t">
                           <p className="text-xs text-muted-foreground">
-                            {new Date(item.timestamp).toLocaleDateString()}
+                            {new Date(item.timestamp).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}
                           </p>
                           
                           {/* Actions */}
@@ -261,11 +263,11 @@ export default function FavoritesPage() {
                                   restoreItem(item)
                                 }}>
                                   <ExternalLink className="size-4 mr-2" />
-                                  Open in Translator
+                                  {t.history.openInTranslator}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={(e) => copyToClipboard(e, item.translatedText)}>
                                   <Copy className="size-4 mr-2" />
-                                  Copy Translation
+                                  {t.history.copyTranslation}
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem 
@@ -273,7 +275,7 @@ export default function FavoritesPage() {
                                   className="text-destructive focus:text-destructive"
                                 >
                                   <Star className="size-4 mr-2" />
-                                  Remove from Favorites
+                                  {t.favorites.removeFromFavorites}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>

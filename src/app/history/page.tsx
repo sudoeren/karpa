@@ -40,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useLanguage } from "@/contexts/language-context"
 
 type TranslationItem = {
   id: string
@@ -55,6 +56,7 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<TranslationItem[]>([])
   const [search, setSearch] = useState("")
   const router = useRouter()
+  const { t, language } = useLanguage()
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-history")
@@ -64,7 +66,7 @@ export default function HistoryPage() {
   const clearHistory = () => {
     localStorage.removeItem("translation-history")
     setHistory([])
-    toast.success("History cleared")
+    toast.success(t.history.cleared)
   }
 
   const deleteItem = (e: React.MouseEvent, id: string) => {
@@ -72,13 +74,13 @@ export default function HistoryPage() {
     const newHistory = history.filter(item => item.id !== id)
     setHistory(newHistory)
     localStorage.setItem("translation-history", JSON.stringify(newHistory))
-    toast.info("Item removed")
+    toast.info(t.history.deleted)
   }
 
   const copyToClipboard = async (e: React.MouseEvent, text: string) => {
     e.stopPropagation()
     await navigator.clipboard.writeText(text)
-    toast.success("Copied to clipboard")
+    toast.success(t.common.copied)
   }
 
   const restoreItem = (item: TranslationItem) => {
@@ -98,7 +100,7 @@ export default function HistoryPage() {
 
   // Group by date
   const groupedHistory = filteredHistory.reduce((groups: Record<string, TranslationItem[]>, item) => {
-    const date = new Date(item.timestamp).toLocaleDateString('en-US', {
+    const date = new Date(item.timestamp).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -118,13 +120,13 @@ export default function HistoryPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="/">Translator</BreadcrumbLink>
+              <BreadcrumbLink href="/">{t.nav.translator}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
               <BreadcrumbPage className="flex items-center gap-2">
                 <History className="size-4" />
-                History
+                {t.history.title}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -133,7 +135,7 @@ export default function HistoryPage() {
         <div className="ml-auto flex items-center gap-3">
           <Badge variant="secondary" className="gap-1.5">
             <Clock className="size-3" />
-            {history.length} items
+            {history.length} {t.history.items}
           </Badge>
           
           {history.length > 0 && (
@@ -141,23 +143,23 @@ export default function HistoryPage() {
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2 text-muted-foreground hover:text-destructive hover:border-destructive">
                   <Trash2 className="size-4" />
-                  <span className="hidden sm:inline">Clear All</span>
+                  <span className="hidden sm:inline">{t.history.clearAll}</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Clear all history?</AlertDialogTitle>
+                  <AlertDialogTitle>{t.history.clearAllTitle}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. All {history.length} translation records will be permanently deleted.
+                    {t.history.clearAllDesc}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={clearHistory} 
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Delete All
+                    {t.common.delete}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -171,7 +173,7 @@ export default function HistoryPage() {
         <div className="max-w-xl mx-auto relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input 
-            placeholder="Search translations..." 
+            placeholder={t.common.search + "..."} 
             className="pl-10 bg-muted/50 border-transparent focus:bg-background focus:border-input transition-all"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -188,9 +190,9 @@ export default function HistoryPage() {
                 <div className="p-4 rounded-full bg-muted mb-4">
                   <History className="size-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-medium mb-1">No history found</h3>
+                <h3 className="text-lg font-medium mb-1">{t.history.noHistory}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {search ? "Try a different search term" : "Your translations will appear here"}
+                  {search ? t.history.tryDifferent : t.history.noHistoryDesc}
                 </p>
               </div>
             ) : (
@@ -236,7 +238,7 @@ export default function HistoryPage() {
                                 
                                 {/* Time */}
                                 <p className="text-xs text-muted-foreground">
-                                  {new Date(item.timestamp).toLocaleTimeString()}
+                                  {new Date(item.timestamp).toLocaleTimeString(language === 'tr' ? 'tr-TR' : 'en-US')}
                                 </p>
                               </div>
                               
@@ -257,11 +259,11 @@ export default function HistoryPage() {
                                     restoreItem(item)
                                   }}>
                                     <ExternalLink className="size-4 mr-2" />
-                                    Open in Translator
+                                    {t.history.openInTranslator}
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={(e) => copyToClipboard(e, item.translatedText)}>
                                     <Copy className="size-4 mr-2" />
-                                    Copy Translation
+                                    {t.history.copyTranslation}
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem 
@@ -269,7 +271,7 @@ export default function HistoryPage() {
                                     className="text-destructive focus:text-destructive"
                                   >
                                     <Trash2 className="size-4 mr-2" />
-                                    Delete
+                                    {t.common.delete}
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>

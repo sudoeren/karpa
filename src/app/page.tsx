@@ -22,6 +22,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
+import { useLanguage } from "@/contexts/language-context"
 
 type TranslationItem = {
   id: string
@@ -50,14 +51,15 @@ const languages = [
 ]
 
 const tones = [
-  { value: "standard", label: "Standard", icon: Languages },
-  { value: "formal", label: "Formal", icon: FileText },
-  { value: "casual", label: "Casual", icon: Sparkles },
-  { value: "technical", label: "Technical", icon: Wand2 },
+  { value: "standard", labelKey: "standard" as const, icon: Languages },
+  { value: "formal", labelKey: "formal" as const, icon: FileText },
+  { value: "casual", labelKey: "casual" as const, icon: Sparkles },
+  { value: "technical", labelKey: "technical" as const, icon: Wand2 },
 ]
 
 function TranslatorWorkspace() {
   const searchParams = useSearchParams()
+  const { t } = useLanguage()
   
   const [view, setView] = useState<"text" | "file">("text")
   
@@ -108,9 +110,9 @@ function TranslatorWorkspace() {
     if (!favorites.some(f => f.translatedText === item.translatedText)) {
       favorites = [{...item, isFavorite: true}, ...favorites]
       localStorage.setItem("translation-favorites", JSON.stringify(favorites))
-      toast.success("Added to favorites")
+      toast.success(t.favorites.added)
     } else {
-      toast.info("Already in favorites")
+      toast.info(t.favorites.alreadyExists)
     }
   }
 
@@ -167,7 +169,7 @@ function TranslatorWorkspace() {
       addToHistory(newEntry)
       
       if (view === "file") {
-        toast.success("File translated successfully")
+        toast.success(t.translator.fileTranslated)
       }
 
     } catch (err: any) {
@@ -185,7 +187,7 @@ function TranslatorWorkspace() {
     const isExtensionValid = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
 
     if (!isExtensionValid && !file.type.startsWith('text/')) {
-      toast.error("Please upload a text file")
+      toast.error(t.errors.invalidFile)
       return
     }
 
@@ -215,7 +217,7 @@ function TranslatorWorkspace() {
     a.download = `${name}_${targetCode}.${ext}`
     a.click()
     window.URL.revokeObjectURL(url)
-    toast.success("File downloaded")
+    toast.success(t.common.download)
   }
 
   const copyToClipboard = async (text: string) => {
@@ -223,7 +225,7 @@ function TranslatorWorkspace() {
     await navigator.clipboard.writeText(text)
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 2000)
-    toast.success("Copied to clipboard")
+    toast.success(t.common.copied)
   }
 
   const handleSpeak = (text: string, lang: string) => {
@@ -254,7 +256,7 @@ function TranslatorWorkspace() {
             <BreadcrumbItem>
               <BreadcrumbPage className="flex items-center gap-2">
                 <Languages className="size-4" />
-                AI Translator
+                {t.translator.title}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -273,7 +275,7 @@ function TranslatorWorkspace() {
               )}
             >
               <Languages className="size-4" />
-              <span className="hidden sm:inline">Text</span>
+              <span className="hidden sm:inline">{t.translator.textMode}</span>
             </button>
             <button 
               onClick={() => setView("file")}
@@ -285,7 +287,7 @@ function TranslatorWorkspace() {
               )}
             >
               <FileUp className="size-4" />
-              <span className="hidden sm:inline">File</span>
+              <span className="hidden sm:inline">{t.translator.fileMode}</span>
             </button>
           </div>
         </div>
@@ -300,13 +302,13 @@ function TranslatorWorkspace() {
           <div className="flex items-center gap-2 flex-1 w-full sm:w-auto">
             <Select value={sourceLanguage} onValueChange={setSourceLanguage}>
               <SelectTrigger className="w-full sm:w-[160px] h-10">
-                <SelectValue placeholder="Source" />
+                <SelectValue placeholder={t.translator.source} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Auto Detect">
                   <span className="flex items-center gap-2">
                     <Sparkles className="size-4" />
-                    Auto Detect
+                    {t.translator.autoDetect}
                   </span>
                 </SelectItem>
                 {languages.map(l => (
@@ -348,11 +350,11 @@ function TranslatorWorkspace() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {tones.map(t => (
-                  <SelectItem key={t.value} value={t.value}>
+                {tones.map(toneItem => (
+                  <SelectItem key={toneItem.value} value={toneItem.value}>
                     <span className="flex items-center gap-2">
-                      <t.icon className="size-4" />
-                      {t.label}
+                      <toneItem.icon className="size-4" />
+                      {t.translator[toneItem.labelKey]}
                     </span>
                   </SelectItem>
                 ))}
@@ -369,7 +371,7 @@ function TranslatorWorkspace() {
               ) : (
                 <Wand2 className="size-4" />
               )}
-              <span className="hidden sm:inline">Translate</span>
+              <span className="hidden sm:inline">{t.translator.translate}</span>
             </Button>
           </div>
         </div>
@@ -383,7 +385,7 @@ function TranslatorWorkspace() {
               {/* Source Panel */}
               <Card className="flex flex-col overflow-hidden border-2 border-transparent focus-within:border-primary/20 transition-colors">
                 <div className="flex items-center justify-between p-3 border-b bg-muted/30">
-                  <span className="text-sm font-medium text-muted-foreground">Source</span>
+                  <span className="text-sm font-medium text-muted-foreground">{t.translator.source}</span>
                   <div className="flex items-center gap-1">
                     <Button 
                       variant="ghost" 
@@ -411,17 +413,17 @@ function TranslatorWorkspace() {
                     ref={sourceInputRef}
                     value={sourceText}
                     onChange={(e) => setSourceText(e.target.value)}
-                    placeholder="Enter text to translate..."
+                    placeholder={t.translator.enterText}
                     className="absolute inset-0 resize-none border-none focus-visible:ring-0 rounded-none p-4 text-base"
                     spellCheck={false}
                   />
                 </CardContent>
                 <div className="flex items-center justify-between p-2 border-t bg-muted/20">
                   <span className="text-xs text-muted-foreground px-2">
-                    {sourceText.length} characters
+                    {sourceText.length} {t.translator.characters}
                   </span>
                   <Badge variant="outline" className="text-xs">
-                    Ctrl+Enter to translate
+                    {t.translator.ctrlEnter}
                   </Badge>
                 </div>
               </Card>
@@ -432,12 +434,12 @@ function TranslatorWorkspace() {
                   <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
                     <div className="flex items-center gap-3 bg-background px-4 py-3 rounded-full shadow-lg border">
                       <Loader2 className="size-5 animate-spin text-primary" />
-                      <span className="text-sm font-medium">Translating...</span>
+                      <span className="text-sm font-medium">{t.translator.translating}</span>
                     </div>
                   </div>
                 )}
                 <div className="flex items-center justify-between p-3 border-b bg-muted/30">
-                  <span className="text-sm font-medium text-muted-foreground">Translation</span>
+                  <span className="text-sm font-medium text-muted-foreground">{t.translator.translation}</span>
                   <div className="flex items-center gap-1">
                     <Button 
                       variant="ghost" 
@@ -485,13 +487,13 @@ function TranslatorWorkspace() {
                   <Textarea 
                     value={translatedText}
                     readOnly
-                    placeholder="Translation will appear here..."
+                    placeholder={t.translator.translationWillAppear}
                     className="absolute inset-0 resize-none border-none focus-visible:ring-0 rounded-none p-4 text-base bg-transparent"
                   />
                 </CardContent>
                 <div className="flex items-center justify-between p-2 border-t bg-muted/20">
                   <span className="text-xs text-muted-foreground px-2">
-                    {translatedText.length} characters
+                    {translatedText.length} {t.translator.characters}
                   </span>
                   {translatedText && (
                     <Badge variant="secondary" className="text-xs capitalize">
@@ -516,12 +518,12 @@ function TranslatorWorkspace() {
                       <UploadCloud className="size-8 text-muted-foreground" />
                     </div>
                     <div className="text-center">
-                      <h3 className="text-lg font-semibold">Upload a file</h3>
+                      <h3 className="text-lg font-semibold">{t.translator.uploadFile}</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Drag and drop or click to browse
+                        {t.translator.dragDrop}
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Supports .txt, .md, .json, .csv, .srt and more
+                        {t.translator.supportedFormats}
                       </p>
                     </div>
                     <input 
@@ -544,7 +546,7 @@ function TranslatorWorkspace() {
                         </div>
                         <div>
                           <p className="text-sm font-medium">{selectedFile.name}</p>
-                          <p className="text-xs text-muted-foreground">{fileContent.length} characters</p>
+                          <p className="text-xs text-muted-foreground">{fileContent.length} {t.translator.characters}</p>
                         </div>
                       </div>
                       <Button 
@@ -580,7 +582,7 @@ function TranslatorWorkspace() {
                           <FileText className="size-5 text-green-600" />
                         </div>
                         <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                          Translated File
+                          {t.translator.translatedFile}
                         </p>
                       </div>
                       {translatedFileContent && (
@@ -590,7 +592,7 @@ function TranslatorWorkspace() {
                           className="gap-2 bg-green-600 hover:bg-green-500"
                         >
                           <Download className="size-4" />
-                          Download
+                          {t.common.download}
                         </Button>
                       )}
                     </div>
@@ -601,7 +603,7 @@ function TranslatorWorkspace() {
                         </pre>
                       ) : (
                         <div className="flex items-center justify-center h-full text-muted-foreground">
-                          <p className="text-sm italic">Click "Translate" to process the file</p>
+                          <p className="text-sm italic">{t.translator.clickTranslate}</p>
                         </div>
                       )}
                     </CardContent>
