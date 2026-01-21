@@ -2,16 +2,14 @@
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Languages, History, Star, Settings } from "lucide-react"
+import { Languages, History, Star, Settings, Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { useTheme } from "next-themes"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
 import { Logo } from "@/components/logo"
+import { motion, AnimatePresence } from "framer-motion"
 
 const navItems = [
   { href: "/", icon: Languages, labelKey: "translator" as const },
@@ -23,47 +21,101 @@ const navItems = [
 export function FloatingNavbar() {
   const pathname = usePathname()
   const { t } = useLanguage()
+  const { theme } = useTheme()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <nav className="fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between px-4 py-2 bg-background/80 backdrop-blur-xl border rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20">
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <Logo size={28} />
-              <span className="font-semibold text-sm hidden sm:block">Localce</span>
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <Logo size={32} />
+              <span className="font-bold text-lg tracking-tight">Localce</span>
             </Link>
 
-            {/* Navigation */}
-            <div className="flex items-center gap-1">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href
                 return (
-                  <Tooltip key={item.href}>
-                    <TooltipTrigger asChild>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          "relative flex items-center justify-center size-10 rounded-xl transition-all duration-200",
-                          isActive
-                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                        )}
-                      >
-                        <item.icon className="size-[18px]" />
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="font-medium">
-                      {t.nav[item.labelKey]}
-                    </TooltipContent>
-                  </Tooltip>
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    )}
+                  >
+                    <item.icon className="size-4" />
+                    <span>{t.nav[item.labelKey]}</span>
+                  </Link>
                 )
               })}
             </div>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            </Button>
           </div>
         </div>
       </nav>
-    </TooltipProvider>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            
+            {/* Menu Panel */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="fixed top-16 left-0 right-0 z-40 md:hidden bg-background border-b shadow-xl"
+            >
+              <div className="p-4 space-y-1">
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      )}
+                    >
+                      <item.icon className="size-5" />
+                      <span>{t.nav[item.labelKey]}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   )
 }

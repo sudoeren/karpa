@@ -55,15 +55,27 @@ export default function SettingsPage() {
   const testConnection = async () => {
     setIsTestingConnection(true)
     setConnectionStatus('idle')
+    
     try {
-      const response = await fetch(`${lmStudioUrl}/v1/models`, { method: 'GET' })
-      if (response.ok) {
+      const response = await fetch('/api/test-connection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: lmStudioUrl }),
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
         setConnectionStatus('success')
-        toast.success(t.settings.connectionSuccess)
+        const modelInfo = data.models > 0 ? ` (${data.models} model${data.models > 1 ? 's' : ''})` : ''
+        toast.success(`${t.settings.connectionSuccess}${modelInfo}`)
       } else {
-        throw new Error()
+        setConnectionStatus('error')
+        toast.error(data.error || t.settings.connectionFailed)
       }
-    } catch {
+    } catch (error) {
       setConnectionStatus('error')
       toast.error(t.settings.connectionFailed)
     } finally {

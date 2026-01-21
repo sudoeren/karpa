@@ -7,13 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import {
-  ArrowRightLeft, Loader2, Copy, Check, Volume2, X, Star,
-  Languages, Sparkles, Wand2, FileUp, Upload
+  ArrowRightLeft, Loader2, Copy, Check, Volume2, VolumeX, X, Star,
+  Languages, Sparkles, Wand2, FileUp, Upload, Pause, Play
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "@/components/logo"
+import { useTTS } from "@/hooks/use-tts"
 
 type TranslationItem = {
   id: string
@@ -65,6 +66,7 @@ function TranslatorWorkspace() {
   const [isCopied, setIsCopied] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const tts = useTTS()
 
   useEffect(() => {
     const text = searchParams.get("text")
@@ -204,7 +206,7 @@ function TranslatorWorkspace() {
     toast.success(t.common.download)
   }
 
-  const copyToClipboard = async (text: string) => {
+const copyToClipboard = async (text: string) => {
     if (!text) return
     await navigator.clipboard.writeText(text)
     setIsCopied(true)
@@ -214,10 +216,11 @@ function TranslatorWorkspace() {
 
   const handleSpeak = (text: string, lang: string) => {
     if (!text) return
-    const u = new SpeechSynthesisUtterance(text)
-    const m: any = { "English": "en-US", "Turkish": "tr-TR", "Spanish": "es-ES", "French": "fr-FR", "German": "de-DE" }
-    u.lang = m[lang] || "en-US"
-    window.speechSynthesis.speak(u)
+    if (tts.isSpeaking) {
+      tts.stop()
+    } else {
+      tts.speak(text, lang)
+    }
   }
 
   const swapLanguages = () => {
@@ -361,15 +364,22 @@ function TranslatorWorkspace() {
                     <span className="text-xs text-muted-foreground">
                       {sourceText.length} {t.translator.characters}
                     </span>
-                    <div className="flex items-center gap-1">
+<div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-8 rounded-lg"
+                        className={cn(
+                          "size-8 rounded-lg transition-colors",
+                          tts.isSpeaking && "text-primary bg-primary/10"
+                        )}
                         onClick={() => handleSpeak(sourceText, sourceLanguage)}
-                        disabled={!sourceText}
+                        disabled={!sourceText || !tts.isSupported}
                       >
-                        <Volume2 className="size-4" />
+                        {tts.isSpeaking ? (
+                          <VolumeX className="size-4" />
+                        ) : (
+                          <Volume2 className="size-4" />
+                        )}
                       </Button>
                       {sourceText && (
                         <Button
@@ -405,15 +415,22 @@ function TranslatorWorkspace() {
                     <span className="text-xs text-muted-foreground">
                       {translatedText.length} {t.translator.characters}
                     </span>
-                    <div className="flex items-center gap-1">
+<div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-8 rounded-lg"
+                        className={cn(
+                          "size-8 rounded-lg transition-colors",
+                          tts.isSpeaking && "text-primary bg-primary/10"
+                        )}
                         onClick={() => handleSpeak(translatedText, targetLanguage)}
-                        disabled={!translatedText}
+                        disabled={!translatedText || !tts.isSupported}
                       >
-                        <Volume2 className="size-4" />
+                        {tts.isSpeaking ? (
+                          <VolumeX className="size-4" />
+                        ) : (
+                          <Volume2 className="size-4" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"
