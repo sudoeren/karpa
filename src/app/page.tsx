@@ -67,6 +67,7 @@ function TranslatorWorkspace() {
   const [isCopied, setIsCopied] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const tts = useTTS()
 
   useEffect(() => {
@@ -129,6 +130,14 @@ function TranslatorWorkspace() {
     const textToTranslate = mode === "text" ? sourceText : fileContent
     if (!textToTranslate.trim()) return
 
+    // Cancel any existing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+
+    // Create new AbortController
+    abortControllerRef.current = new AbortController()
+
     setLoading(true)
     try {
       const response = await fetch("/api/translate", {
@@ -140,6 +149,7 @@ function TranslatorWorkspace() {
           sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
           tone: tone !== "standard" ? tone : undefined
         }),
+        signal: abortControllerRef.current.signal,
       })
 
       const data = await response.json()
@@ -163,9 +173,20 @@ function TranslatorWorkspace() {
       }
       addToHistory(newEntry)
     } catch (err: any) {
-      toast.error(err.message)
+      if (err.name === 'AbortError') {
+        toast.info(t.translator.cancelled)
+      } else {
+        toast.error(err.message)
+      }
     } finally {
       setLoading(false)
+      abortControllerRef.current = null
+    }
+  }
+
+  const handleCancelTranslation = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
     }
   }
 
@@ -403,6 +424,14 @@ const copyToClipboard = async (text: string) => {
                       <div className="flex items-center gap-3 bg-background px-4 py-2 rounded-full shadow-lg border">
                         <Loader2 className="size-4 animate-spin text-primary" />
                         <span className="text-sm">{t.translator.translating}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-6 rounded-full hover:bg-destructive/10 hover:text-destructive"
+                          onClick={handleCancelTranslation}
+                        >
+                          <X className="size-3" />
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -526,19 +555,27 @@ const copyToClipboard = async (text: string) => {
 
           {/* Translate Button */}
           <div className="p-4 border-t bg-muted/20">
-            <Button
-              onClick={handleTranslate}
-              disabled={loading || (mode === "text" ? !sourceText.trim() : !selectedFile)}
-              className="w-full h-12 rounded-xl text-base font-medium gap-2"
-              size="lg"
-            >
-              {loading ? (
-                <Loader2 className="size-5 animate-spin" />
-              ) : (
+            {loading ? (
+              <Button
+                onClick={handleCancelTranslation}
+                variant="destructive"
+                className="w-full h-12 rounded-xl text-base font-medium gap-2"
+                size="lg"
+              >
+                <X className="size-5" />
+                {t.common.cancel}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleTranslate}
+                disabled={mode === "text" ? !sourceText.trim() : !selectedFile}
+                className="w-full h-12 rounded-xl text-base font-medium gap-2"
+                size="lg"
+              >
                 <Wand2 className="size-5" />
-              )}
-              {loading ? t.translator.translating : t.translator.translate}
-            </Button>
+                {t.translator.translate}
+              </Button>
+            )}
             <p className="text-xs text-center text-muted-foreground mt-2">
               {t.translator.ctrlEnter}
             </p>

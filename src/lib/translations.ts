@@ -88,6 +88,7 @@ export const translations = {
       translatedFile: "Translated File",
       clickTranslate: "Click \"Translate\" to process the file",
       fileTranslated: "File translated successfully",
+      cancelled: "Translation cancelled",
     },
     
     // History
@@ -270,6 +271,7 @@ export const translations = {
       translatedFile: "Cevrilmis Dosya",
       clickTranslate: "Dosyayi islemek icin \"Cevir\" tusuna basin",
       fileTranslated: "Dosya basariyla cevrildi",
+      cancelled: "Ceviri iptal edildi",
     },
     
     // History
