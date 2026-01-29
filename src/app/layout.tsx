@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppWrapper } from "@/components/app-wrapper";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,11 +49,11 @@ export default function RootLayout({
                 <AppWrapper>
                   <KeyboardShortcuts />
                   <AppSidebar />
-                  <main className="flex-1 min-h-svh w-full">
+                  <SidebarInset>
                     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full h-full">
                       {children}
                     </div>
-                  </main>
+                  </SidebarInset>
                 </AppWrapper>
               </SidebarProvider>
             </OnboardingProvider>

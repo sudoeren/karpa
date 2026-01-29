@@ -91,6 +91,23 @@ export default function SettingsPage() {
     if (savedModel) setSelectedModel(savedModel)
   }, [fetchModels])
 
+  // Apply AMOLED mode
+  useEffect(() => {
+    if (amoledMode && theme === 'dark') {
+      document.documentElement.classList.add('amoled')
+    } else {
+      document.documentElement.classList.remove('amoled')
+    }
+    localStorage.setItem("localce-amoled", String(amoledMode))
+  }, [amoledMode, theme])
+
+  const saveSettings = () => {
+    localStorage.setItem("lm-studio-url", lmStudioUrl)
+    localStorage.setItem("lm-studio-temperature", temperature.toString())
+    if (selectedModel) localStorage.setItem("lm-studio-model", selectedModel)
+    toast.success(t.settings.saved)
+  }
+
   const testConnection = async () => {
     setIsTestingConnection(true)
     setConnectionStatus('idle')
