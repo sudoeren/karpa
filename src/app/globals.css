@@ -122,6 +122,20 @@
   --sidebar-ring: oklch(0.7 0.15 270);
 }
 
+.amoled {
+  --background: oklch(0 0 0);
+  --foreground: oklch(0.985 0 0);
+  
+  --card: oklch(0.12 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  
+  --popover: oklch(0.12 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  
+  --sidebar-background: oklch(0 0 0);
+  --sidebar-border: oklch(0.2 0 0);
+}
+
 @layer base {
   * {
     border-color: var(--border);

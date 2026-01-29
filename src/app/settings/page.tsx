@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
 import {
   Settings, Sun, Moon, Monitor, Globe, 
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Github, Heart, Code2, ExternalLink
+  Github, Heart, Code2, ExternalLink, Droplets
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -40,13 +41,27 @@ export default function SettingsPage() {
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [activeTab, setActiveTab] = useState<'general' | 'connection' | 'data' | 'about'>('general')
+  const [amoledMode, setAmoledMode] = useState(false)
 
   useEffect(() => {
     const savedUrl = localStorage.getItem("lm-studio-url")
     const savedTemp = localStorage.getItem("lm-studio-temperature")
+    const savedAmoled = localStorage.getItem("localce-amoled")
+    
     if (savedUrl) setLmStudioUrl(savedUrl)
     if (savedTemp) setTemperature(parseFloat(savedTemp))
+    if (savedAmoled) setAmoledMode(savedAmoled === 'true')
   }, [])
+
+  useEffect(() => {
+    if (amoledMode) {
+      document.documentElement.classList.add('amoled')
+      localStorage.setItem("localce-amoled", 'true')
+    } else {
+      document.documentElement.classList.remove('amoled')
+      localStorage.setItem("localce-amoled", 'false')
+    }
+  }, [amoledMode])
 
   const saveSettings = () => {
     localStorage.setItem("lm-studio-url", lmStudioUrl)
@@ -218,6 +233,26 @@ export default function SettingsPage() {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* AMOLED Mode */}
+                <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Droplets className="size-4" />
+                      {language === 'tr' ? 'AMOLED Modu (Tam Siyah)' : 'AMOLED Mode (Pitch Black)'}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {language === 'tr' 
+                        ? 'Koyu tema icin tam siyah arka plan kullanir' 
+                        : 'Use pure black background for dark theme'}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={amoledMode}
+                    onCheckedChange={setAmoledMode}
+                    disabled={theme === 'light'}
+                  />
                 </div>
 
                 {/* Language */}
