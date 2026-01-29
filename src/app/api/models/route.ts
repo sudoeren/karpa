@@ -29,11 +29,11 @@ export async function POST(req: Request) {
       models: data.data || [] 
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Model fetch error:', error)
     return NextResponse.json({ 
       success: false, 
-      error: error.message || 'Failed to fetch models' 
+      error: (error as Error).message || 'Failed to fetch models' 
     }, { status: 500 })
   }
 }

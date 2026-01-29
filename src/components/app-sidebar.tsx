@@ -6,10 +6,7 @@ import {
   Languages, 
   History, 
   Star, 
-  Settings,
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd
+  Settings
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
@@ -26,8 +23,7 @@ import {
   SidebarRail,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
-  useSidebar
+  SidebarGroupLabel
 } from "@/components/ui/sidebar"
 
 const navItems = [

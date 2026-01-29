@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import {
   ArrowRightLeft, Loader2, Copy, Check, Volume2, VolumeX, X, Star,
-  Languages, Sparkles, Wand2, FileUp, Upload, Pause, Play
+  Languages, Sparkles, Wand2, FileUp, Upload
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
@@ -54,7 +54,7 @@ const tones = [
 function TranslatorWorkspace() {
   const searchParams = useSearchParams()
   const { t } = useLanguage()
-  const { nativeLanguage, targetLanguage: defaultTargetLang } = useOnboarding()
+  const { targetLanguage: defaultTargetLang } = useOnboarding()
 
   const [mode, setMode] = useState<"text" | "file">("text")
   const [sourceText, setSourceText] = useState("")
@@ -126,6 +126,7 @@ function TranslatorWorkspace() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sourceText, selectedFile, loading])
 
   const handleTranslate = async () => {
@@ -202,11 +203,11 @@ function TranslatorWorkspace() {
       } else {
         setTargetLanguage(defaultTargetLang || "English")
       }
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') {
         toast.info(t.translator.cancelled)
       } else {
-        toast.error(err.message)
+        toast.error((err as Error).message)
       }
     } finally {
       setLoading(false)

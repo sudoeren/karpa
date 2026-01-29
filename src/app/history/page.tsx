@@ -48,6 +48,7 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-history")
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved) setHistory(JSON.parse(saved))
   }, [])
 

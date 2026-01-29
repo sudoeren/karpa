@@ -286,11 +286,11 @@ export async function POST(req: Request) {
           });
         }
         
-      } catch (fetchError: any) {
-        lastError = fetchError;
+      } catch (fetchError) {
+        lastError = fetchError as Error;
         console.error(`Translation fetch error (attempt ${attempt + 1}):`, fetchError);
         
-        if (fetchError.name === 'AbortError') {
+        if ((fetchError as Error).name === 'AbortError') {
           return NextResponse.json(
             { error: 'Translation request timed out. Please try again with shorter text.' },
             { status: 504 }
@@ -311,10 +311,10 @@ export async function POST(req: Request) {
       { status: 503 }
     );
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Translation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { error: (error as Error).message || 'Internal Server Error' },
       { status: 500 }
     );
   }

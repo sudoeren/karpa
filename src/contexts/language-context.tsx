@@ -18,6 +18,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
     const saved = localStorage.getItem('localce-language') as Language
     if (saved && translations[saved]) {

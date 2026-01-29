@@ -42,6 +42,7 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-favorites")
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved) setFavorites(JSON.parse(saved))
   }, [])
 

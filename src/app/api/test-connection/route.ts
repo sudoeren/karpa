@@ -58,10 +58,10 @@ export async function POST(request: Request) {
         error: `Server returned ${response.status}` 
       }, { status: 502 })
 
-    } catch (fetchError: any) {
+    } catch (fetchError) {
       clearTimeout(timeoutId)
       
-      if (fetchError.name === 'AbortError') {
+      if ((fetchError as Error).name === 'AbortError') {
         return NextResponse.json({ 
           success: false, 
           error: 'Connection timed out' 
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       }, { status: 502 })
     }
 
-  } catch (error) {
+  } catch {
     return NextResponse.json({ 
       success: false, 
       error: 'Invalid request' 

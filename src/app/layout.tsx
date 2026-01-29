@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { LanguageProvider } from "@/contexts/language-context";
+import { OnboardingProvider } from "@/contexts/onboarding-context";
+import { Toaster } from "@/components/ui/sonner";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppWrapper } from "@/components/app-wrapper";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
