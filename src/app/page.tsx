@@ -465,7 +465,7 @@ const copyToClipboard = async (text: string) => {
                       </div>
                     </div>
                   )}
-                  <div className="min-h-[180px] sm:min-h-[280px] p-4 overflow-y-auto">
+                  <div className="min-h-[180px] sm:min-h-[280px] p-4 h-full">
                     {translatedText ? (
                       <MarkdownViewer content={translatedText} className="text-base" />
                     ) : (

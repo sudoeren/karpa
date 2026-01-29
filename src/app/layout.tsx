@@ -48,7 +48,7 @@ export default function RootLayout({
                 <KeyboardShortcuts />
                 <div className="flex min-h-svh bg-background">
                   <AppSidebar />
-                  <main className="flex-1 transition-all duration-300 ease-in-out pb-20 md:pb-0">
+                  <main className="flex-1 transition-all duration-300 ease-in-out pt-16 md:pt-0">
                     {/* The padding-left should match the default/collapsed state or be dynamic. 
                         Since Sidebar component manages its own width with internal state, 
                         getting the exact margin here via CSS alone is tricky without a shared context. 
