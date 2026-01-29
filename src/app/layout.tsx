@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { Toaster } from "@/components/ui/sonner";
-import { SimpleSidebar } from "@/components/simple-sidebar";
+import { FloatingNavbar } from "@/components/floating-navbar";
 import { AppWrapper } from "@/components/app-wrapper";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 
@@ -45,7 +45,6 @@ export default function RootLayout({
                   
                   if (amoled === 'true') {
                     element.classList.add('amoled');
-                    // Force dark mode if amoled is on, just to be safe for initial paint
                     element.classList.add('dark');
                     element.style.backgroundColor = '#000000';
                   } else {
@@ -71,16 +70,12 @@ export default function RootLayout({
             <OnboardingProvider>
               <AppWrapper>
                 <KeyboardShortcuts />
-                <div className="flex min-h-svh">
-                  <SimpleSidebar />
-                  <main className="flex-1 w-full min-w-0 bg-background transition-colors duration-300">
-                     {/* Mobile Header Spacer */}
-                     <div className="h-16 md:hidden" />
-                     <div className="h-full p-4 md:p-8 max-w-7xl mx-auto">
-                        {children}
-                     </div>
-                  </main>
-                </div>
+                <main className="min-h-svh w-full bg-background transition-colors duration-300 pb-28">
+                   <div className="h-full p-4 md:p-8 max-w-5xl mx-auto">
+                      {children}
+                   </div>
+                </main>
+                <FloatingNavbar />
               </AppWrapper>
             </OnboardingProvider>
           </LanguageProvider>
