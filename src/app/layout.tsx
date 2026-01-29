@@ -5,10 +5,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { Toaster } from "@/components/ui/sonner";
-import { AppSidebar } from "@/components/app-sidebar";
+import { SimpleSidebar } from "@/components/simple-sidebar";
 import { AppWrapper } from "@/components/app-wrapper";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,8 +33,33 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const amoled = localStorage.getItem('localce-amoled');
+                  const theme = localStorage.getItem('theme');
+                  const element = document.documentElement;
+                  
+                  if (amoled === 'true') {
+                    element.classList.add('amoled');
+                    // Force dark mode if amoled is on, just to be safe for initial paint
+                    element.classList.add('dark');
+                    element.style.backgroundColor = '#000000';
+                  } else {
+                    element.classList.remove('amoled');
+                    element.style.backgroundColor = '';
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground transition-colors duration-300`}
       >
         <ThemeProvider
           attribute="class"
@@ -45,17 +69,19 @@ export default function RootLayout({
         >
           <LanguageProvider>
             <OnboardingProvider>
-              <SidebarProvider>
-                <AppWrapper>
-                  <KeyboardShortcuts />
-                  <AppSidebar />
-                  <SidebarInset>
-                    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full h-full">
-                      {children}
-                    </div>
-                  </SidebarInset>
-                </AppWrapper>
-              </SidebarProvider>
+              <AppWrapper>
+                <KeyboardShortcuts />
+                <div className="flex min-h-svh">
+                  <SimpleSidebar />
+                  <main className="flex-1 w-full min-w-0 bg-background transition-colors duration-300">
+                     {/* Mobile Header Spacer */}
+                     <div className="h-16 md:hidden" />
+                     <div className="h-full p-4 md:p-8 max-w-7xl mx-auto">
+                        {children}
+                     </div>
+                  </main>
+                </div>
+              </AppWrapper>
             </OnboardingProvider>
           </LanguageProvider>
           <Toaster />
