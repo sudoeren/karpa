@@ -207,7 +207,7 @@ Translate the following text:`;
 
 export async function POST(req: Request) {
   try {
-    const { text, targetLanguage, tone, sourceLanguage } = await req.json();
+    const { text, targetLanguage, tone, sourceLanguage, model, apiUrl, temperature } = await req.json();
 
     if (!text || !targetLanguage) {
       return NextResponse.json(
@@ -216,9 +216,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const LM_STUDIO_URL = process.env.LM_STUDIO_URL || 'http://localhost:1234/v1/chat/completions';
-    const MODEL_NAME = process.env.LM_STUDIO_MODEL || 'hy-mt1.5-7b/HY-MT1.5-7B-Q4_K_M.gguf';
-    const TEMPERATURE = parseFloat(process.env.LM_STUDIO_TEMPERATURE || '0.2');
+    // Determine URL: remove trailing slash if present, add /v1/chat/completions if missing
+    let LM_STUDIO_URL = apiUrl || process.env.LM_STUDIO_URL || 'http://localhost:1234';
+    if (LM_STUDIO_URL.endsWith('/')) LM_STUDIO_URL = LM_STUDIO_URL.slice(0, -1);
+    if (!LM_STUDIO_URL.endsWith('/v1/chat/completions')) {
+        // If it ends with /v1, add /chat/completions
+        if (LM_STUDIO_URL.endsWith('/v1')) LM_STUDIO_URL += '/chat/completions';
+        // Otherwise assume base URL and add full path
+        else LM_STUDIO_URL += '/v1/chat/completions';
+    }
+
+    const MODEL_NAME = model || process.env.LM_STUDIO_MODEL || 'hy-mt1.5-7b/HY-MT1.5-7B-Q4_K_M.gguf';
+    const TEMPERATURE = temperature !== undefined ? parseFloat(temperature) : parseFloat(process.env.LM_STUDIO_TEMPERATURE || '0.2');
 
     // Split text into chunks for long translations
     const chunks = splitIntoChunks(text, 2000);

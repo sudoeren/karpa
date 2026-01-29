@@ -142,6 +142,11 @@ function TranslatorWorkspace() {
 
     setLoading(true)
     try {
+      // Get settings from localStorage
+      const savedModel = localStorage.getItem("lm-studio-model")
+      const savedUrl = localStorage.getItem("lm-studio-url")
+      const savedTemp = localStorage.getItem("lm-studio-temperature")
+
       const response = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -149,7 +154,10 @@ function TranslatorWorkspace() {
           text: textToTranslate,
           targetLanguage,
           sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
-          tone: tone !== "standard" ? tone : undefined
+          tone: tone !== "standard" ? tone : undefined,
+          model: savedModel,
+          apiUrl: savedUrl,
+          temperature: savedTemp ? parseFloat(savedTemp) : undefined
         }),
         signal: abortControllerRef.current.signal,
       })

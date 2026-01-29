@@ -1,16 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Settings, Sun, Moon, Monitor, Globe, 
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Github, Heart, Code2, ExternalLink, Droplets
+  Github, Heart, Code2, ExternalLink, Droplets, Cpu
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -32,6 +33,11 @@ import Link from "next/link"
 import { Logo } from "@/components/logo"
 import { useOnboarding } from "@/contexts/onboarding-context"
 
+type Model = {
+  id: string
+  object: string
+}
+
 export default function SettingsPage() {
   const { t, language, setLanguage } = useLanguage()
   const { theme, setTheme } = useTheme()
@@ -42,32 +48,48 @@ export default function SettingsPage() {
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [activeTab, setActiveTab] = useState<'general' | 'connection' | 'data' | 'about'>('general')
   const [amoledMode, setAmoledMode] = useState(false)
+  const [models, setModels] = useState<Model[]>([])
+  const [selectedModel, setSelectedModel] = useState<string>("")
+
+  const fetchModels = useCallback(async (url: string) => {
+    try {
+      const response = await fetch('/api/models', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setModels(data.models)
+        if (!selectedModel && data.models.length > 0) {
+          // Check if saved model exists in new list, otherwise pick first
+          const savedModel = localStorage.getItem("lm-studio-model")
+          if (savedModel && data.models.some((m: Model) => m.id === savedModel)) {
+            setSelectedModel(savedModel)
+          } else {
+            setSelectedModel(data.models[0].id)
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch models", error)
+    }
+  }, [selectedModel])
 
   useEffect(() => {
     const savedUrl = localStorage.getItem("lm-studio-url")
     const savedTemp = localStorage.getItem("lm-studio-temperature")
     const savedAmoled = localStorage.getItem("localce-amoled")
+    const savedModel = localStorage.getItem("lm-studio-model")
     
-    if (savedUrl) setLmStudioUrl(savedUrl)
+    if (savedUrl) {
+      setLmStudioUrl(savedUrl)
+      fetchModels(savedUrl)
+    }
     if (savedTemp) setTemperature(parseFloat(savedTemp))
     if (savedAmoled) setAmoledMode(savedAmoled === 'true')
-  }, [])
-
-  useEffect(() => {
-    if (amoledMode) {
-      document.documentElement.classList.add('amoled')
-      localStorage.setItem("localce-amoled", 'true')
-    } else {
-      document.documentElement.classList.remove('amoled')
-      localStorage.setItem("localce-amoled", 'false')
-    }
-  }, [amoledMode])
-
-  const saveSettings = () => {
-    localStorage.setItem("lm-studio-url", lmStudioUrl)
-    localStorage.setItem("lm-studio-temperature", temperature.toString())
-    toast.success(t.common.save)
-  }
+    if (savedModel) setSelectedModel(savedModel)
+  }, [fetchModels])
 
   const testConnection = async () => {
     setIsTestingConnection(true)
@@ -86,6 +108,7 @@ export default function SettingsPage() {
       
       if (data.success) {
         setConnectionStatus('success')
+        await fetchModels(lmStudioUrl)
         const modelInfo = data.models > 0 ? ` (${data.models} model${data.models > 1 ? 's' : ''})` : ''
         toast.success(`${t.settings.connectionSuccess}${modelInfo}`)
       } else {
@@ -322,6 +345,31 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">{t.settings.connectionDesc}</p>
                 </div>
+
+                {/* Model Selection */}
+                {models.length > 0 && (
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block flex items-center gap-2">
+                      <Cpu className="size-4" />
+                      Model
+                    </Label>
+                    <Select value={selectedModel} onValueChange={setSelectedModel}>
+                      <SelectTrigger className="w-full h-11 rounded-xl bg-muted/50">
+                        <SelectValue placeholder="Select a model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {models.map((model) => (
+                          <SelectItem key={model.id} value={model.id}>
+                            {model.id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {language === 'tr' ? 'Ceviri icin kullanilacak modeli secin' : 'Select the model to use for translation'}
+                    </p>
+                  </div>
+                )}
 
                 {/* Temperature */}
                 <div>
