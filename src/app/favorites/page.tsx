@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -39,7 +38,7 @@ export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<TranslationItem[]>([])
   const [search, setSearch] = useState("")
   const router = useRouter()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-favorites")
@@ -186,18 +185,18 @@ export default function FavoritesPage() {
                       </div>
 
                       {/* Content */}
-                      <div className="space-y-2 mb-4">
-                        <div>
+                      <div className="space-y-3 mb-4 flex-1 overflow-hidden">
+                        <div className="max-h-32 overflow-y-auto pr-1 custom-scrollbar">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                             {t.favorites.original}
                           </p>
-                          <p className="text-sm line-clamp-2">{item.sourceText}</p>
+                          <p className="text-sm whitespace-pre-wrap">{item.sourceText}</p>
                         </div>
-                        <div>
+                        <div className="max-h-32 overflow-y-auto pr-1 custom-scrollbar">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
                             {t.translator.translation}
                           </p>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{item.translatedText}</p>
+                          <p className="text-sm text-muted-foreground whitespace-pre-wrap">{item.translatedText}</p>
                         </div>
                       </div>
 

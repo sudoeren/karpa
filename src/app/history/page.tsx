@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  Search, Trash2, ArrowRight, History, Clock, Copy,
+  Search, Trash2, ArrowRight, History, Copy,
   ExternalLink, X
 } from "lucide-react"
 import { toast } from "sonner"
@@ -201,8 +201,8 @@ export default function HistoryPage() {
                                 {formatTime(item.timestamp)}
                               </span>
                             </div>
-                            <p className="text-sm truncate">{item.sourceText}</p>
-                            <p className="text-xs text-muted-foreground truncate">{item.translatedText}</p>
+                            <p className="text-sm line-clamp-2">{item.sourceText}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-2">{item.translatedText}</p>
                           </div>
                         </div>
                       </motion.div>
@@ -243,11 +243,11 @@ export default function HistoryPage() {
                   <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     <div>
                       <p className="text-xs text-muted-foreground mb-2">{t.translator.source}</p>
-                      <p className="text-sm leading-relaxed">{selectedItem.sourceText}</p>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedItem.sourceText}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-2">{t.translator.translation}</p>
-                      <p className="text-sm leading-relaxed">{selectedItem.translatedText}</p>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedItem.translatedText}</p>
                     </div>
                   </div>
 

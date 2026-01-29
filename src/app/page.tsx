@@ -62,7 +62,7 @@ function TranslatorWorkspace() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileContent, setFileContent] = useState("")
   const [translatedFileContent, setTranslatedFileContent] = useState("")
-  const [sourceLanguage, setSourceLanguage] = useState(nativeLanguage || "Auto Detect")
+  const [sourceLanguage, setSourceLanguage] = useState("Auto Detect")
   const [targetLanguage, setTargetLanguage] = useState(defaultTargetLang || "English")
   const [tone, setTone] = useState("standard")
   const [loading, setLoading] = useState(false)
@@ -166,14 +166,34 @@ function TranslatorWorkspace() {
 
       const newEntry: TranslationItem = {
         id: Date.now().toString(),
-        sourceText: textToTranslate.substring(0, 150) + (textToTranslate.length > 150 ? "..." : ""),
-        translatedText: data.translation.substring(0, 150) + "...",
+        sourceText: textToTranslate,
+        translatedText: data.translation,
         sourceLang: sourceLanguage,
         targetLang: targetLanguage,
         timestamp: Date.now(),
         tone
       }
       addToHistory(newEntry)
+
+      // Reset to Auto Detect and set target to most used language
+      setSourceLanguage("Auto Detect")
+      
+      const savedH = localStorage.getItem("translation-history")
+      if (savedH) {
+        const history: TranslationItem[] = JSON.parse(savedH)
+        if (history.length > 0) {
+          const counts: Record<string, number> = {}
+          history.forEach(item => {
+            counts[item.targetLang] = (counts[item.targetLang] || 0) + 1
+          })
+          const mostUsed = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b)
+          setTargetLanguage(mostUsed)
+        } else {
+          setTargetLanguage(defaultTargetLang || "English")
+        }
+      } else {
+        setTargetLanguage(defaultTargetLang || "English")
+      }
     } catch (err: any) {
       if (err.name === 'AbortError') {
         toast.info(t.translator.cancelled)
