@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppWrapper } from "@/components/app-wrapper";
+import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,7 @@ export default function RootLayout({
           <LanguageProvider>
             <OnboardingProvider>
               <AppWrapper>
+                <KeyboardShortcuts />
                 <div className="flex min-h-svh bg-background">
                   <AppSidebar />
                   <main className="flex-1 transition-all duration-300 ease-in-out pb-20 md:pb-0">
