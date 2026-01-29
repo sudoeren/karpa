@@ -35,6 +35,7 @@ export function AppSidebar() {
   const { t } = useLanguage()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isConnected, setIsConnected] = useState<boolean | null>(null)
 
   // Handle responsive behavior
   useEffect(() => {
@@ -48,6 +49,28 @@ export function AppSidebar() {
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Check connection status
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const savedUrl = localStorage.getItem("lm-studio-url") || "http://localhost:1234"
+        const response = await fetch('/api/test-connection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: savedUrl }),
+        })
+        const data = await response.json()
+        setIsConnected(data.success)
+      } catch {
+        setIsConnected(false)
+      }
+    }
+
+    checkConnection()
+    const interval = setInterval(checkConnection, 30000) // Check every 30s
+    return () => clearInterval(interval)
   }, [])
 
   // Desktop Sidebar
@@ -132,19 +155,45 @@ export function AppSidebar() {
           {/* Footer Actions */}
           <div className="p-4 border-t border-sidebar-border">
              {isCollapsed ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-full h-10 rounded-xl"
-                  onClick={() => setIsCollapsed(false)}
-                >
-                  <PanelLeftOpen className="size-5 text-muted-foreground" />
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className={cn(
+                        "size-3 rounded-full mx-auto border border-background shadow-sm transition-colors",
+                        isConnected === null ? "bg-yellow-500" : isConnected ? "bg-green-500" : "bg-red-500"
+                      )} />
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {isConnected === null ? "Checking..." : isConnected ? "Online" : "Offline"}
+                    </TooltipContent>
+                  </Tooltip>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-full h-10 rounded-xl"
+                    onClick={() => setIsCollapsed(false)}
+                  >
+                    <PanelLeftOpen className="size-5 text-muted-foreground" />
+                  </Button>
+                </div>
              ) : (
-               <div className="p-4 rounded-xl bg-sidebar-accent/50 border border-sidebar-border/50">
-                  <p className="text-xs text-muted-foreground text-center">
-                    Localce v1.0.0
-                  </p>
+               <div className="space-y-3">
+                 <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "size-2 rounded-full transition-colors",
+                        isConnected === null ? "bg-yellow-500" : isConnected ? "bg-green-500" : "bg-red-500"
+                      )} />
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {isConnected === null ? "Checking..." : isConnected ? "LM Studio Online" : "Disconnected"}
+                      </span>
+                    </div>
+                 </div>
+                 <div className="p-4 rounded-xl bg-sidebar-accent/50 border border-sidebar-border/50">
+                    <p className="text-xs text-muted-foreground text-center">
+                      Localce v1.0.0
+                    </p>
+                 </div>
                </div>
              )}
           </div>

@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Search, Trash2, ArrowRight, History, Copy,
-  ExternalLink, X
+  ExternalLink, X, Filter, Calendar
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -39,6 +40,9 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<TranslationItem[]>([])
   const [search, setSearch] = useState("")
   const [selectedItem, setSelectedItem] = useState<TranslationItem | null>(null)
+  const [filterSource, setFilterSource] = useState<string>("all")
+  const [filterTarget, setFilterTarget] = useState<string>("all")
+  
   const router = useRouter()
   const { t, language } = useLanguage()
 
@@ -76,24 +80,56 @@ export default function HistoryPage() {
     router.push(`/?${params.toString()}`)
   }
 
-  const filteredHistory = history.filter(item =>
-    item.sourceText.toLowerCase().includes(search.toLowerCase()) ||
-    item.translatedText.toLowerCase().includes(search.toLowerCase())
-  )
+  // Get unique languages for filters
+  const sourceLanguages = Array.from(new Set(history.map(item => item.sourceLang)))
+  const targetLanguages = Array.from(new Set(history.map(item => item.targetLang)))
+
+  const filteredHistory = history.filter(item => {
+    const matchesSearch = item.sourceText.toLowerCase().includes(search.toLowerCase()) ||
+      item.translatedText.toLowerCase().includes(search.toLowerCase())
+    const matchesSource = filterSource === "all" || item.sourceLang === filterSource
+    const matchesTarget = filterTarget === "all" || item.targetLang === filterTarget
+    return matchesSearch && matchesSource && matchesTarget
+  })
+
+  const groupHistoryByDate = (items: TranslationItem[]) => {
+    const groups: Record<string, TranslationItem[]> = {
+      today: [],
+      yesterday: [],
+      thisWeek: [],
+      older: []
+    }
+
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const yesterday = new Date(today - 86400000).getTime()
+    const lastWeek = new Date(today - 6 * 86400000).getTime()
+
+    items.forEach(item => {
+      if (item.timestamp >= today) groups.today.push(item)
+      else if (item.timestamp >= yesterday) groups.yesterday.push(item)
+      else if (item.timestamp >= lastWeek) groups.thisWeek.push(item)
+      else groups.older.push(item)
+    })
+
+    return groups
+  }
+
+  const groupedHistory = groupHistoryByDate(filteredHistory)
+  const hasHistory = history.length > 0
+
+  const getGroupLabel = (key: string) => {
+    switch(key) {
+      case 'today': return language === 'tr' ? 'Bugün' : 'Today'
+      case 'yesterday': return language === 'tr' ? 'Dün' : 'Yesterday'
+      case 'thisWeek': return language === 'tr' ? 'Bu Hafta' : 'This Week'
+      case 'older': return language === 'tr' ? 'Daha Eski' : 'Older'
+      default: return key
+    }
+  }
 
   const formatTime = (timestamp: number) => {
-    const now = new Date()
-    const date = new Date(timestamp)
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 1) return language === 'tr' ? 'Simdi' : 'Just now'
-    if (diffMins < 60) return `${diffMins}m`
-    if (diffHours < 24) return `${diffHours}h`
-    if (diffDays < 7) return `${diffDays}d`
-    return date.toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { month: 'short', day: 'numeric' })
+    return new Date(timestamp).toLocaleTimeString(language === 'tr' ? 'tr-TR' : 'en-US', { hour: '2-digit', minute: '2-digit' })
   }
 
   return (
@@ -117,47 +153,77 @@ export default function HistoryPage() {
         animate={{ opacity: 1, scale: 1 }}
         className="flex-1 max-w-5xl mx-auto w-full"
       >
-        <div className="h-full bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col">
+        <div className="h-[calc(100svh-12rem)] bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col">
           {/* Search & Actions */}
-          <div className="flex items-center gap-3 p-4 border-b">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                placeholder={t.common.search + "..."}
-                className="pl-10 h-10 rounded-xl bg-muted/50 border-transparent"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+          <div className="flex flex-col gap-3 p-4 border-b">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input
+                  placeholder={t.common.search + "..."}
+                  className="pl-10 h-10 rounded-xl bg-muted/50 border-transparent"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              {hasHistory && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-xl gap-2 text-muted-foreground hover:text-destructive shrink-0">
+                      <Trash2 className="size-4" />
+                      <span className="hidden sm:inline">{t.history.clearAll}</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t.history.clearAllTitle}</AlertDialogTitle>
+                      <AlertDialogDescription>{t.history.clearAllDesc}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+                      <AlertDialogAction onClick={clearHistory} className="bg-destructive text-destructive-foreground">
+                        {t.common.delete}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
-            {history.length > 0 && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-xl gap-2 text-muted-foreground hover:text-destructive">
-                    <Trash2 className="size-4" />
-                    <span className="hidden sm:inline">{t.history.clearAll}</span>
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t.history.clearAllTitle}</AlertDialogTitle>
-                    <AlertDialogDescription>{t.history.clearAllDesc}</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-                    <AlertDialogAction onClick={clearHistory} className="bg-destructive text-destructive-foreground">
-                      {t.common.delete}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+            
+            {/* Filters */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <Filter className="size-4 text-muted-foreground shrink-0" />
+              <Select value={filterSource} onValueChange={setFilterSource}>
+                <SelectTrigger className="h-8 w-[130px] rounded-lg text-xs bg-muted/30 border-transparent">
+                  <SelectValue placeholder="Source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sources</SelectItem>
+                  {sourceLanguages.map(l => (
+                    <SelectItem key={l} value={l}>{l}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <ArrowRight className="size-3 text-muted-foreground shrink-0" />
+              <Select value={filterTarget} onValueChange={setFilterTarget}>
+                <SelectTrigger className="h-8 w-[130px] rounded-lg text-xs bg-muted/30 border-transparent">
+                  <SelectValue placeholder="Target" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Targets</SelectItem>
+                  {targetLanguages.map(l => (
+                    <SelectItem key={l} value={l}>{l}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Content */}
           <div className="flex-1 flex overflow-hidden">
             {/* List */}
             <div className={cn(
-              "flex-1 overflow-y-auto",
+              "flex-1 overflow-y-auto custom-scrollbar",
               selectedItem && "hidden md:block md:w-1/2 md:border-r"
             )}>
               {filteredHistory.length === 0 ? (
@@ -171,43 +237,53 @@ export default function HistoryPage() {
                   </p>
                 </div>
               ) : (
-                <div className="p-2">
-                  <AnimatePresence>
-                    {filteredHistory.map((item, index) => (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ delay: index * 0.02 }}
-                        onClick={() => setSelectedItem(item)}
-                        className={cn(
-                          "p-3 rounded-xl cursor-pointer transition-all mb-1",
-                          "hover:bg-muted/50",
-                          selectedItem?.id === item.id && "bg-primary/10 border border-primary/20"
-                        )}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
-                                {item.sourceLang.slice(0, 2).toUpperCase()}
-                              </Badge>
-                              <ArrowRight className="size-3 text-muted-foreground" />
-                              <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 bg-primary/5">
-                                {item.targetLang.slice(0, 2).toUpperCase()}
-                              </Badge>
-                              <span className="text-[10px] text-muted-foreground ml-auto">
-                                {formatTime(item.timestamp)}
-                              </span>
-                            </div>
-                            <p className="text-sm line-clamp-2">{item.sourceText}</p>
-                            <p className="text-xs text-muted-foreground line-clamp-2">{item.translatedText}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                <div className="p-2 space-y-4">
+                  {Object.entries(groupedHistory).map(([key, items]) => items.length > 0 && (
+                    <div key={key}>
+                      <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground bg-muted/20 rounded-lg mb-2">
+                        <Calendar className="size-3" />
+                        {getGroupLabel(key)}
+                      </div>
+                      <div className="space-y-1">
+                        <AnimatePresence>
+                          {items.map((item, index) => (
+                            <motion.div
+                              key={item.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, x: -20 }}
+                              transition={{ delay: index * 0.02 }}
+                              onClick={() => setSelectedItem(item)}
+                              className={cn(
+                                "p-3 rounded-xl cursor-pointer transition-all border border-transparent",
+                                "hover:bg-muted/50 hover:border-border/50",
+                                selectedItem?.id === item.id && "bg-primary/10 border-primary/20 shadow-sm"
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 h-5">
+                                      {item.sourceLang.slice(0, 2).toUpperCase()}
+                                    </Badge>
+                                    <ArrowRight className="size-3 text-muted-foreground" />
+                                    <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 h-5 bg-primary/5">
+                                      {item.targetLang.slice(0, 2).toUpperCase()}
+                                    </Badge>
+                                    <span className="text-[10px] text-muted-foreground ml-auto">
+                                      {formatTime(item.timestamp)}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm line-clamp-2 mb-0.5 text-foreground/90">{item.sourceText}</p>
+                                  <p className="text-xs text-muted-foreground line-clamp-2">{item.translatedText}</p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
