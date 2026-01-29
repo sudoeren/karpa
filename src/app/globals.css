@@ -122,43 +122,49 @@
   --sidebar-ring: oklch(0.7 0.15 270);
 }
 
-.dark.amoled {
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.985 0 0);
+html.dark.amoled, .dark .amoled {
+  --background: black;
+  --foreground: white;
   
-  --card: oklch(0 0 0);
-  --card-foreground: oklch(0.985 0 0);
+  --card: black;
+  --card-foreground: white;
   
-  --popover: oklch(0 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --popover: black;
+  --popover-foreground: white;
   
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0 0 0);
+  --primary: white;
+  --primary-foreground: black;
   
-  --secondary: oklch(0 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
+  --secondary: black;
+  --secondary-foreground: white;
   
-  --muted: oklch(0 0 0);
-  --muted-foreground: oklch(0.7 0 0);
+  --muted: black;
+  --muted-foreground: #a1a1aa;
   
-  --accent: oklch(0.15 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --accent: #18181b; /* zinc-900 */
+  --accent-foreground: white;
   
-  --destructive: oklch(0.5 0.18 25);
-  --destructive-foreground: oklch(0.985 0 0);
+  --destructive: #7f1d1d;
+  --destructive-foreground: white;
   
-  --border: oklch(0.2 0 0);
-  --input: oklch(0.2 0 0);
-  --ring: oklch(0.985 0 0);
+  --border: #27272a; /* zinc-800 */
+  --input: #27272a;
+  --ring: white;
   
-  --sidebar-background: oklch(0 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.985 0 0);
-  --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.15 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.2 0 0);
-  --sidebar-ring: oklch(0.985 0 0);
+  --sidebar-background: black;
+  --sidebar-foreground: white;
+  --sidebar-primary: white;
+  --sidebar-primary-foreground: black;
+  --sidebar-accent: #18181b;
+  --sidebar-accent-foreground: white;
+  --sidebar-border: #27272a;
+  --sidebar-ring: white;
+}
+
+/* Force background black on body if amoled is active */
+html.dark.amoled body {
+  background-color: black !important;
+  color: white !important;
 }
 
 @layer base {
