@@ -116,6 +116,7 @@ export default function SettingsPage() {
         toast.error(data.error || t.settings.connectionFailed)
       }
     } catch (error) {
+      console.error(error)
       setConnectionStatus('error')
       toast.error(t.settings.connectionFailed)
     } finally {
