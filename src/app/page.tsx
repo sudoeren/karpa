@@ -286,7 +286,7 @@ const copyToClipboard = async (text: string) => {
   }
 
   return (
-    <div className="min-h-[calc(100svh-5rem)] flex flex-col items-center justify-center p-4">
+    <div className="h-full flex flex-col items-center justify-center">
 {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}

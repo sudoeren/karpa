@@ -134,7 +134,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="min-h-[calc(100svh-5rem)] flex flex-col p-4">
+    <div className="h-full flex flex-col">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -152,9 +152,9 @@ export default function HistoryPage() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex-1 max-w-5xl mx-auto w-full"
+        className="flex-1 max-w-5xl mx-auto w-full min-h-0"
       >
-        <div className="h-[calc(100svh-12rem)] bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col">
+        <div className="h-full bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col">
           {/* Search & Actions */}
           <div className="flex flex-col gap-3 p-4 border-b">
             <div className="flex items-center gap-3">
