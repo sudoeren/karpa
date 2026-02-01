@@ -2,10 +2,10 @@
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { 
-  Languages, 
-  History, 
-  Star, 
+import {
+  Languages,
+  History,
+  Star,
   Settings,
   CircleCheck,
   CircleX,
@@ -35,7 +35,6 @@ const navItems = [
   { href: "/favorites", icon: Star, labelKey: "favorites" as const },
   { href: "/settings", icon: Settings, labelKey: "settings" as const },
 ]
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const { t } = useLanguage()

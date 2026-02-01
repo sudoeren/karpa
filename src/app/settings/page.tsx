@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Settings, Sun, Moon, Monitor, Globe, 
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Github, Code2, Droplets, Cpu
+  Cpu, Droplets, Github, Code2, ArrowUpRight
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -29,9 +29,9 @@ import { useLanguage } from "@/contexts/language-context"
 import { useTheme } from "next-themes"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
-import { Logo } from "@/components/logo"
 import { useOnboarding } from "@/contexts/onboarding-context"
+import { Logo } from "@/components/logo"
+import Link from "next/link"
 
 type Model = {
   id: string
@@ -285,7 +285,7 @@ export default function SettingsPage() {
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       {language === 'tr' 
-                        ? 'Koyu tema icin tam siyah arka plan kullanir' 
+                        ? 'Koyu tema için tam siyah arka plan kullanır' 
                         : 'Use pure black background for dark theme'}
                     </p>
                   </div>
@@ -384,7 +384,7 @@ export default function SettingsPage() {
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {language === 'tr' ? 'Ceviri icin kullanilacak modeli secin' : 'Select the model to use for translation'}
+                      {language === 'tr' ? 'Çeviri için kullanılacak modeli seçin' : 'Select the model to use for translation'}
                     </p>
                   </div>
                 )}
@@ -466,72 +466,75 @@ export default function SettingsPage() {
             {/* About Tab */}
             {activeTab === 'about' && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-12 select-none"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center text-center space-y-10 py-6"
               >
                 {/* Brand Section */}
-                <div className="flex flex-col items-center gap-6">
-                  <motion.div 
-                    whileHover={{ scale: 1.05, rotate: 5 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  >
-                    <Logo size={56} />
-                  </motion.div>
+                <div className="space-y-6">
+                  <div className="relative inline-block group">
+                    <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative transform transition-transform duration-500 hover:scale-105">
+                      <Logo size={64} />
+                    </div>
+                  </div>
                   
-                  <div className="space-y-3 max-w-xs">
-                    <h1 className="text-lg font-medium tracking-tight text-foreground">
-                      Localce
-                    </h1>
-                    <p className="text-sm text-muted-foreground/80 leading-relaxed font-light">
+                  <div className="space-y-3 max-w-md">
+                    <h2 className="text-3xl font-bold tracking-tight">Localce</h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {t.about.description}
                     </p>
                   </div>
                 </div>
 
-                {/* Developer Section */}
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 font-medium">
-                      {t.about.developer}
-                    </p>
-                    <p className="text-sm font-medium text-foreground/80">
-                      Eren Cakar
-                    </p>
+                {/* Info Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+                  {/* Developer Card */}
+                  <div className="group rounded-2xl border bg-card/50 p-5 text-left transition-all hover:bg-card hover:shadow-md">
+                    <div className="flex flex-col h-full justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground/60 text-[10px] uppercase tracking-wider font-mono">
+                          <Code2 className="size-3" />
+                          {t.about.developer}
+                        </div>
+                        <h3 className="font-semibold text-foreground">Eren Çakar</h3>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-primary/10 hover:text-primary" asChild>
+                          <Link href="https://erencakar.com" target="_blank">
+                            <Globe className="size-4" />
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-primary/10 hover:text-primary" asChild>
+                          <Link href="https://github.com/sudoeren" target="_blank">
+                            <Github className="size-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center justify-center gap-5">
-                    <Link 
-                      href="https://erencakar.com" 
-                      target="_blank" 
-                      className="text-muted-foreground/60 hover:text-foreground transition-colors duration-300"
-                    >
-                      <Globe className="size-4" />
-                      <span className="sr-only">Website</span>
-                    </Link>
-                    <Link 
-                      href="https://github.com/sudoeren" 
-                      target="_blank" 
-                      className="text-muted-foreground/60 hover:text-foreground transition-colors duration-300"
-                    >
-                      <Github className="size-4" />
-                      <span className="sr-only">GitHub</span>
-                    </Link>
+
+                  {/* Project Card */}
+                  <div className="group rounded-2xl border bg-card/50 p-5 text-left transition-all hover:bg-card hover:shadow-md">
+                    <div className="flex flex-col h-full justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-muted-foreground/60 text-[10px] uppercase tracking-wider font-mono">
+                          <Github className="size-3" />
+                          {t.about.openSource}
+                        </div>
+                        <h3 className="font-semibold text-foreground">GitHub Repo</h3>
+                      </div>
+                      <Button variant="outline" size="sm" className="h-8 rounded-full gap-2 text-xs" asChild>
+                        <Link href="https://github.com/sudoeren/localce" target="_blank">
+                          Source Code
+                          <ArrowUpRight className="size-3 opacity-50" />
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Version & Source */}
-                <div className="pt-2">
-                  <Link 
-                    href="https://github.com/sudoeren/localce" 
-                    target="_blank"
-                    className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground transition-colors font-mono"
-                  >
-                    v1.0.0
-                  </Link>
-                </div>
+                {/* Footer (Removed version and made with) */}
               </motion.div>
             )}
           </div>

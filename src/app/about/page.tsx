@@ -2,82 +2,122 @@
 
 import { useLanguage } from "@/contexts/language-context"
 import { motion } from "framer-motion"
-import { Github, Globe } from "lucide-react"
+import { Github, Globe, Heart, Code2, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
+import { Button } from "@/components/ui/button"
 
 export default function AboutPage() {
   const { t } = useLanguage()
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100svh-4rem)] p-6 select-none">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100svh-4rem)] p-6 md:p-12">
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="flex flex-col items-center text-center max-w-xs mx-auto space-y-12"
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="max-w-2xl w-full space-y-12"
       >
-        {/* Brand Section */}
-        <div className="flex flex-col items-center gap-6">
-          <motion.div 
-            whileHover={{ scale: 1.05, rotate: 5 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          >
-            <Logo size={56} />
-          </motion.div>
+        {/* Header Section */}
+        <motion.div variants={item} className="flex flex-col items-center text-center space-y-6">
+          <div className="relative group cursor-default">
+            <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full opacity-0 group-hover:opacity-50 transition-opacity duration-700" />
+            <div className="relative transform transition-transform duration-500 hover:scale-105 hover:rotate-3">
+              <Logo size={80} />
+            </div>
+          </div>
           
-          <div className="space-y-3">
-            <h1 className="text-lg font-medium tracking-tight text-foreground">
+          <div className="space-y-4 max-w-lg">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
               Localce
             </h1>
-            <p className="text-sm text-muted-foreground/80 leading-relaxed font-light">
+            <p className="text-lg text-muted-foreground leading-relaxed">
               {t.about.description}
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Developer Section */}
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 font-medium">
-              {t.about.developer}
-            </p>
-            <p className="text-sm font-medium text-foreground/80">
-              Eren Cakar
-            </p>
+        {/* Info Grid */}
+        <motion.div variants={item} className="grid md:grid-cols-2 gap-6">
+          {/* Developer Card */}
+          <div className="group relative overflow-hidden rounded-3xl border bg-card/50 hover:bg-card/80 transition-colors p-6 md:p-8">
+            <div className="flex flex-col h-full justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground/60 text-xs font-mono uppercase tracking-wider">
+                  <Code2 className="size-3" />
+                  {t.about.developer}
+                </div>
+                <h3 className="text-xl font-medium text-foreground">Eren Cakar</h3>
+              </div>
+              
+              <div className="flex flex-wrap gap-3">
+                <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs group-hover:border-foreground/20 transition-colors" asChild>
+                  <Link href="https://erencakar.com" target="_blank">
+                    <Globe className="size-3.5" />
+                    Website
+                    <ArrowUpRight className="size-3 opacity-50" />
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs group-hover:border-foreground/20 transition-colors" asChild>
+                  <Link href="https://github.com/sudoeren" target="_blank">
+                    <Github className="size-3.5" />
+                    GitHub
+                    <ArrowUpRight className="size-3 opacity-50" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
-          
-          <div className="flex items-center justify-center gap-5">
-            <Link 
-              href="https://erencakar.com" 
-              target="_blank" 
-              className="text-muted-foreground/60 hover:text-foreground transition-colors duration-300"
-            >
-              <Globe className="size-4" />
-              <span className="sr-only">Website</span>
-            </Link>
-            <Link 
-              href="https://github.com/sudoeren" 
-              target="_blank" 
-              className="text-muted-foreground/60 hover:text-foreground transition-colors duration-300"
-            >
-              <Github className="size-4" />
-              <span className="sr-only">GitHub</span>
-            </Link>
-          </div>
-        </div>
 
-        {/* Footer / Version */}
-        <div className="pt-4">
-          <Link 
-            href="https://github.com/sudoeren/localce" 
-            target="_blank"
-            className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground transition-colors font-mono"
-          >
-            v1.0.0
-          </Link>
-        </div>
+          {/* Project Card */}
+          <div className="group relative overflow-hidden rounded-3xl border bg-card/50 hover:bg-card/80 transition-colors p-6 md:p-8">
+            <div className="flex flex-col h-full justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground/60 text-xs font-mono uppercase tracking-wider">
+                  <Github className="size-3" />
+                  {t.about.openSource}
+                </div>
+                <h3 className="text-xl font-medium text-foreground">Public Repository</h3>
+              </div>
+
+              <div>
+                <Button className="w-full rounded-full gap-2 h-10 group-hover:bg-primary/90 transition-colors" asChild>
+                  <Link href="https://github.com/sudoeren/localce" target="_blank">
+                    <Github className="size-4" />
+                    {t.about.openSource}
+                    <ArrowUpRight className="size-3.5 opacity-50" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Footer */}
+        <motion.div variants={item} className="flex flex-col items-center justify-center gap-4 pt-8 border-t border-border/40">
+           <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+             <span>v1.0.0</span>
+             <span className="w-1 h-1 rounded-full bg-border" />
+             <span className="flex items-center gap-1.5">
+               {t.about.madeWith} <Heart className="size-3.5 text-red-500 fill-red-500 animate-pulse" /> in Turkey
+             </span>
+           </div>
+        </motion.div>
       </motion.div>
     </div>
   )
