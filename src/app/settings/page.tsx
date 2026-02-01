@@ -98,8 +98,12 @@ export default function SettingsPage() {
     } else {
       document.documentElement.classList.remove('amoled')
     }
-    localStorage.setItem("localce-amoled", String(amoledMode))
   }, [amoledMode, theme])
+
+  const handleAmoledChange = (checked: boolean) => {
+    setAmoledMode(checked)
+    localStorage.setItem("localce-amoled", String(checked))
+  }
 
   const saveSettings = () => {
     localStorage.setItem("lm-studio-url", lmStudioUrl)
@@ -291,7 +295,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={amoledMode}
-                    onCheckedChange={setAmoledMode}
+                    onCheckedChange={handleAmoledChange}
                     disabled={theme === 'light'}
                   />
                 </div>
