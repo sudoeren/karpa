@@ -124,47 +124,47 @@
 
 html.dark.amoled, .dark .amoled {
   --background: black;
-  --foreground: white;
+  --foreground: oklch(0.92 0 0);
   
   --card: black;
-  --card-foreground: white;
+  --card-foreground: oklch(0.92 0 0);
   
   --popover: black;
-  --popover-foreground: white;
+  --popover-foreground: oklch(0.92 0 0);
   
-  --primary: white;
-  --primary-foreground: black;
+  --primary: oklch(0.7 0.15 270);
+  --primary-foreground: oklch(0.13 0.015 265);
   
   --secondary: black;
-  --secondary-foreground: white;
+  --secondary-foreground: oklch(0.92 0 0);
   
   --muted: black;
-  --muted-foreground: #a1a1aa;
+  --muted-foreground: #71717a;
   
   --accent: #18181b; /* zinc-900 */
-  --accent-foreground: white;
+  --accent-foreground: oklch(0.92 0 0);
   
   --destructive: #7f1d1d;
-  --destructive-foreground: white;
+  --destructive-foreground: oklch(0.92 0 0);
   
-  --border: #27272a; /* zinc-800 */
-  --input: #27272a;
-  --ring: white;
+  --border: #18181b; /* zinc-900 */
+  --input: #18181b;
+  --ring: oklch(0.7 0.15 270);
   
   --sidebar-background: black;
-  --sidebar-foreground: white;
-  --sidebar-primary: white;
-  --sidebar-primary-foreground: black;
+  --sidebar-foreground: oklch(0.92 0 0);
+  --sidebar-primary: oklch(0.7 0.15 270);
+  --sidebar-primary-foreground: oklch(0.13 0.015 265);
   --sidebar-accent: #18181b;
-  --sidebar-accent-foreground: white;
-  --sidebar-border: #27272a;
-  --sidebar-ring: white;
+  --sidebar-accent-foreground: oklch(0.92 0 0);
+  --sidebar-border: #18181b;
+  --sidebar-ring: oklch(0.7 0.15 270);
 }
 
 /* Force background black on body if amoled is active */
 html.dark.amoled body {
   background-color: black !important;
-  color: white !important;
+  color: oklch(0.92 0 0) !important;
 }
 
 @layer base {
