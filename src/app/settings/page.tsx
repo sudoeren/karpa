@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Settings, Sun, Moon, Monitor, Globe, 
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Github, Heart, Code2, ExternalLink, Droplets, Cpu
+  Github, Code2, Droplets, Cpu
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -466,98 +466,71 @@ export default function SettingsPage() {
             {/* About Tab */}
             {activeTab === 'about' && (
               <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+                className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-12 select-none"
               >
-                {/* Developer Section - Main Focus */}
-                <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-br from-card via-card to-violet-500/5">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                {/* Brand Section */}
+                <div className="flex flex-col items-center gap-6">
+                  <motion.div 
+                    whileHover={{ scale: 1.05, rotate: 5 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <Logo size={56} />
+                  </motion.div>
                   
-                  <div className="relative p-8">
-                    <div className="flex flex-col items-center text-center">
-                      {/* Avatar */}
-                      <div className="relative mb-6">
-                        <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-600 rounded-3xl blur-2xl opacity-50 scale-110" />
-                        <div className="relative size-28 rounded-3xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-4xl shadow-2xl ring-4 ring-background">
-                          EC
-                        </div>
-                      </div>
-                      
-                      {/* Info */}
-                      <h2 className="text-2xl font-bold mb-1">Eren Cakar</h2>
-                      <p className="text-muted-foreground mb-6">Full Stack Developer</p>
-                      
-                      {/* Buttons */}
-                      <div className="flex items-center gap-3">
-                        <Button 
-                          variant="outline" 
-                          className="h-11 px-5 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all" 
-                          asChild
-                        >
-                          <Link href="https://erencakar.com" target="_blank">
-                            <Globe className="size-4" />
-                            Website
-                            <ExternalLink className="size-3 opacity-50" />
-                          </Link>
-                        </Button>
-                        <Button 
-                          className="h-11 px-5 rounded-xl gap-2" 
-                          asChild
-                        >
-                          <Link href="https://github.com/sudoeren" target="_blank">
-                            <Github className="size-4" />
-                            GitHub
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
+                  <div className="space-y-3 max-w-xs">
+                    <h1 className="text-lg font-medium tracking-tight text-foreground">
+                      Localce
+                    </h1>
+                    <p className="text-sm text-muted-foreground/80 leading-relaxed font-light">
+                      {t.about.description}
+                    </p>
                   </div>
                 </div>
 
-                {/* App Info Card */}
-                <div className="relative overflow-hidden rounded-2xl border bg-muted/30 p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-background rounded-xl border shadow-sm">
-                      <Logo size={40} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg">Localce</h3>
-                      <p className="text-sm text-muted-foreground">{t.about.description}</p>
-                    </div>
-                    <Badge className="bg-primary/10 text-primary border-primary/20">v1.0.0</Badge>
+                {/* Developer Section */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 font-medium">
+                      {t.about.developer}
+                    </p>
+                    <p className="text-sm font-medium text-foreground/80">
+                      Eren Cakar
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center justify-center gap-5">
+                    <Link 
+                      href="https://erencakar.com" 
+                      target="_blank" 
+                      className="text-muted-foreground/60 hover:text-foreground transition-colors duration-300"
+                    >
+                      <Globe className="size-4" />
+                      <span className="sr-only">Website</span>
+                    </Link>
+                    <Link 
+                      href="https://github.com/sudoeren" 
+                      target="_blank" 
+                      className="text-muted-foreground/60 hover:text-foreground transition-colors duration-300"
+                    >
+                      <Github className="size-4" />
+                      <span className="sr-only">GitHub</span>
+                    </Link>
                   </div>
                 </div>
 
-                {/* Open Source CTA */}
-                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 p-6">
-                  <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <div className="flex-1 text-center sm:text-left">
-                      <h4 className="font-semibold mb-1">{t.about.openSource}</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {language === 'tr' 
-                          ? 'Kodu inceleyin, katki saglayin veya fork\'layin' 
-                          : 'View the code, contribute, or fork it'}
-                      </p>
-                    </div>
-                    <Button variant="outline" className="gap-2 rounded-xl h-11 px-6" asChild>
-                      <Link href="https://github.com/sudoeren/localce" target="_blank">
-                        <Github className="size-4" />
-                        {language === 'tr' ? 'Kaynak Kodu' : 'Source Code'}
-                        <ExternalLink className="size-3" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="text-center pt-4 border-t">
-                  <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
-                    {t.about.madeWith} 
-                    <Heart className="size-4 text-red-500 fill-red-500 animate-pulse" /> 
-                    {language === 'tr' ? "Turkiye'de" : 'in Turkey'}
-                  </p>
+                {/* Version & Source */}
+                <div className="pt-2">
+                  <Link 
+                    href="https://github.com/sudoeren/localce" 
+                    target="_blank"
+                    className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground transition-colors font-mono"
+                  >
+                    v1.0.0
+                  </Link>
                 </div>
               </motion.div>
             )}

@@ -2,172 +2,81 @@
 
 import { useLanguage } from "@/contexts/language-context"
 import { motion } from "framer-motion"
-import { 
-  Github, Globe, Heart, Code2, Shield, Zap,
-  ExternalLink
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Github, Globe } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
 
 export default function AboutPage() {
   const { t } = useLanguage()
 
-  const features = [
-    { icon: Shield, title: "100% Private", desc: "All data stays on your device" },
-    { icon: Zap, title: "AI Powered", desc: "Using local LLM via LM Studio" },
-    { icon: Code2, title: "Open Source", desc: "Free and open source forever" },
-  ]
-
-  const technologies = [
-    "Next.js 16", "React 19", "TypeScript", "Tailwind CSS", 
-    "shadcn/ui", "Framer Motion", "LM Studio"
-  ]
-
   return (
-    <div className="min-h-[calc(100svh-5rem)] flex flex-col items-center justify-center p-4">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100svh-4rem)] p-6 select-none">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="flex flex-col items-center text-center max-w-xs mx-auto space-y-12"
       >
-        <div className="bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden">
-{/* Header */}
-          <div className="relative p-8 text-center bg-gradient-to-b from-primary/10 to-transparent">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.1, type: "spring" }}
-              className="inline-flex items-center justify-center mb-4"
-            >
-              <Logo size={64} />
-            </motion.div>
-            
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text"
-            >
+        {/* Brand Section */}
+        <div className="flex flex-col items-center gap-6">
+          <motion.div 
+            whileHover={{ scale: 1.05, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <Logo size={56} />
+          </motion.div>
+          
+          <div className="space-y-3">
+            <h1 className="text-lg font-medium tracking-tight text-foreground">
               Localce
-            </motion.h1>
-            
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-sm text-muted-foreground mt-1"
-            >
+            </h1>
+            <p className="text-sm text-muted-foreground/80 leading-relaxed font-light">
               {t.about.description}
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Badge variant="secondary" className="mt-3">
-                v1.0.0
-              </Badge>
-            </motion.div>
+            </p>
           </div>
+        </div>
 
-          {/* Features */}
-          <div className="px-6 py-4 border-t border-b bg-muted/20">
-            <div className="grid grid-cols-3 gap-3">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={feature.title}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="inline-flex items-center justify-center size-10 rounded-xl bg-primary/10 mb-2">
-                    <feature.icon className="size-5 text-primary" />
-                  </div>
-                  <p className="text-xs font-medium">{feature.title}</p>
-                  <p className="text-[10px] text-muted-foreground">{feature.desc}</p>
-                </motion.div>
-              ))}
-            </div>
+        {/* Developer Section */}
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 font-medium">
+              {t.about.developer}
+            </p>
+            <p className="text-sm font-medium text-foreground/80">
+              Eren Cakar
+            </p>
           </div>
-
-          {/* Developer */}
-          <div className="p-6">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="flex items-center gap-4 p-4 rounded-2xl bg-muted/50"
+          
+          <div className="flex items-center justify-center gap-5">
+            <Link 
+              href="https://erencakar.com" 
+              target="_blank" 
+              className="text-muted-foreground/60 hover:text-foreground transition-colors duration-300"
             >
-              <div className="size-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                EC
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold">Eren Cakar</p>
-                <p className="text-xs text-muted-foreground">{t.about.developer}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Button variant="ghost" size="sm" className="h-7 px-2 rounded-lg" asChild>
-                    <Link href="https://erencakar.com" target="_blank">
-                      <Globe className="size-3.5 mr-1" />
-                      <span className="text-xs">Website</span>
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-7 px-2 rounded-lg" asChild>
-                    <Link href="https://github.com/sudoeren" target="_blank">
-                      <Github className="size-3.5 mr-1" />
-                      <span className="text-xs">GitHub</span>
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Technologies */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
-              className="mt-4"
+              <Globe className="size-4" />
+              <span className="sr-only">Website</span>
+            </Link>
+            <Link 
+              href="https://github.com/sudoeren" 
+              target="_blank" 
+              className="text-muted-foreground/60 hover:text-foreground transition-colors duration-300"
             >
-              <p className="text-xs text-muted-foreground mb-2">{t.about.technologies}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {technologies.map((tech) => (
-                  <Badge key={tech} variant="outline" className="text-[10px] font-normal">
-                    {tech}
-                  </Badge>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Links */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="mt-6 pt-4 border-t"
-            >
-              <Button variant="outline" className="w-full rounded-xl gap-2" asChild>
-                <Link href="https://github.com/sudoeren/localce" target="_blank">
-                  <Github className="size-4" />
-                  {t.about.openSource}
-                  <ExternalLink className="size-3 ml-auto" />
-                </Link>
-              </Button>
-            </motion.div>
-
-            {/* Made with */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9 }}
-              className="text-center text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1"
-            >
-              {t.about.madeWith} <Heart className="size-3 text-red-500 fill-red-500" /> in Turkey
-            </motion.p>
+              <Github className="size-4" />
+              <span className="sr-only">GitHub</span>
+            </Link>
           </div>
+        </div>
+
+        {/* Footer / Version */}
+        <div className="pt-4">
+          <Link 
+            href="https://github.com/sudoeren/localce" 
+            target="_blank"
+            className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground transition-colors font-mono"
+          >
+            v1.0.0
+          </Link>
         </div>
       </motion.div>
     </div>
