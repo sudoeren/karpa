@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import {
   ArrowRightLeft, Loader2, Copy, Check, Volume2, VolumeX, X, Star,
-  Languages, Sparkles, Wand2, FileUp, Upload
+  Languages, Sparkles, Wand2, FileUp, Upload, Info
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
@@ -17,6 +17,7 @@ import { Logo } from "@/components/logo"
 import { useTTS } from "@/hooks/use-tts"
 import { MarkdownViewer } from "@/components/markdown-viewer"
 import { useOnboarding } from "@/contexts/onboarding-context"
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
 type TranslationItem = {
   id: string
@@ -229,7 +230,7 @@ function TranslatorWorkspace() {
     const isExtensionValid = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
 
     if (!isExtensionValid && !file.type.startsWith('text/')) {
-      toast.error(t.errors.invalidFile)
+      toast.error(t.translator.unsupportedWarning)
       return
     }
 
@@ -579,6 +580,24 @@ const copyToClipboard = async (text: string) => {
                       </div>
                     )}
                   </div>
+                )}
+
+                {mode === "file" && !selectedFile && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6"
+                  >
+                    <Alert className="bg-primary/5 border-primary/20">
+                      <Info className="size-4 text-primary" />
+                      <AlertTitle className="text-primary font-semibold">
+                        {t.translator.unsupportedNote}
+                      </AlertTitle>
+                      <AlertDescription>
+                        {t.translator.unsupportedWarning}
+                      </AlertDescription>
+                    </Alert>
+                  </motion.div>
                 )}
               </motion.div>
             )}
