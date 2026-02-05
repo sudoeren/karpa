@@ -394,7 +394,7 @@ const copyToClipboard = async (text: string) => {
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-5xl flex-1 min-h-0"
         >
-          <div className="h-full bg-card/50 backdrop-blur-xl border rounded-[32px] shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col">
+          <div className="h-full bg-card/50 backdrop-blur-xl border rounded-[32px] overflow-hidden flex flex-col">
             {/* Mode Toggle & Controls */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 border-b bg-muted/30 shrink-0">
               {/* Mode Toggle */}

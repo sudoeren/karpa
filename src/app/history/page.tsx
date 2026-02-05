@@ -223,7 +223,7 @@ export default function HistoryPage() {
       <LayoutGroup>
         <motion.div
           layout
-          className="bg-card/50 backdrop-blur-xl border rounded-[32px] shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col flex-1 min-h-0"
+          className="bg-card/50 backdrop-blur-xl border rounded-[32px] overflow-hidden flex flex-col flex-1 min-h-0"
         >
           {/* Search & Filters Bar */}
           <div className="p-4 border-b bg-muted/30 flex flex-col sm:flex-row gap-4 shrink-0">

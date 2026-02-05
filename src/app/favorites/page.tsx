@@ -102,7 +102,7 @@ export default function FavoritesPage() {
         animate={{ opacity: 1, scale: 1 }}
         className="flex-1 max-w-4xl mx-auto w-full min-h-0"
       >
-        <div className="h-full bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col">
+        <div className="h-full bg-card/50 backdrop-blur-xl border rounded-3xl overflow-hidden flex flex-col">
           {/* Search & Actions */}
           <div className="flex items-center gap-3 p-4 border-b">
             <div className="flex-1 relative">

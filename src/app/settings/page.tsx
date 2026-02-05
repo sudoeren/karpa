@@ -263,7 +263,7 @@ export default function SettingsPage() {
         animate={{ opacity: 1, scale: 1 }}
         className="max-w-4xl mx-auto w-full flex-1 min-h-0 flex flex-col"
       >
-        <div className="bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden h-full flex flex-col">
+        <div className="bg-card/50 backdrop-blur-xl border rounded-3xl overflow-hidden h-full flex flex-col">
           {/* Tabs */}
           <div className="flex border-b overflow-x-auto shrink-0">
             {tabs.map((tab) => (
