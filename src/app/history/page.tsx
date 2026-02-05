@@ -442,16 +442,21 @@ export default function HistoryPage() {
                     </div>
                   </div>
 
-                                  {/* Detail Footer */}
-                                  <div className="p-6 bg-muted/5 border-t shrink-0">
-                                    <Button
-                                      className="w-full h-14 rounded-2xl gap-3 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all group"
-                                      onClick={() => restoreItem(selectedItem)}
-                                    >
-                                      <ExternalLink className="size-5 transition-transform group-hover:scale-110 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                                      {t.history.openInTranslator}
-                                    </Button>
-                                  </div>                </motion.div>
+                  {/* Detail Footer - Premium Restore Action */}
+                  <div className="p-6 bg-muted/5 border-t shrink-0">
+                    <Button
+                      size="lg"
+                      className="w-full h-16 rounded-[24px] gap-4 text-lg font-black tracking-tight bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_20px_40px_-12px_rgba(var(--primary),0.3)] hover:shadow-[0_20px_40px_-8px_rgba(var(--primary),0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 group"
+                      onClick={() => restoreItem(selectedItem)}
+                    >
+                      <div className="size-10 rounded-xl bg-white/20 flex items-center justify-center transition-transform group-hover:rotate-12 group-hover:scale-110">
+                        <ExternalLink className="size-5" />
+                      </div>
+                      <span className="flex-1 text-left font-bold">{t.history.openInTranslator}</span>
+                      <ArrowRight className="size-5 opacity-50 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </div>
+                </motion.div>
               )}
             </AnimatePresence>
 
