@@ -71,7 +71,7 @@ export default function RootLayout({
               <AppWrapper>
                 <KeyboardShortcuts />
                 <main className="min-h-svh w-full bg-background transition-colors duration-300 pb-28">
-                   <div className="h-full p-4 md:p-8 max-w-5xl mx-auto">
+                   <div className="p-4 md:p-8 max-w-5xl mx-auto">
                       {children}
                    </div>
                 </main>

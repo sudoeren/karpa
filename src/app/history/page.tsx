@@ -158,7 +158,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col min-h-full">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -176,9 +176,9 @@ export default function HistoryPage() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex-1 max-w-5xl mx-auto w-full min-h-0"
+        className="flex-1 max-w-5xl mx-auto w-full"
       >
-        <div className="h-full bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col">
+        <div className="bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col min-h-[500px]">
           {/* Search & Actions */}
           <div className="flex flex-col gap-3 p-4 border-b">
             <div className="flex items-center gap-3">
@@ -244,173 +244,228 @@ export default function HistoryPage() {
             </div>
           </div>
 
-          {/* Content */}
-          <div className="flex-1 flex overflow-hidden">
-            {/* List */}
-            <div className={cn(
-              "flex-1 overflow-y-auto custom-scrollbar",
-              selectedItem && "hidden md:block md:w-1/2 md:border-r"
-            )}>
-              {filteredHistory.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                  <div className="p-4 rounded-full bg-muted mb-4">
-                    <History className="size-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="font-medium mb-1">{t.history.noHistory}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {search ? t.history.tryDifferent : t.history.noHistoryDesc}
-                  </p>
-                </div>
-              ) : (
-                <div className="p-2 space-y-4">
-                  {Object.entries(groupedHistory).map(([key, items]) => items.length > 0 && (
-                    <div key={key}>
-                      <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground bg-muted/20 rounded-lg mb-2">
-                        <Calendar className="size-3" />
-                        {getGroupLabel(key)}
-                      </div>
-                      <div className="space-y-1">
-                        <AnimatePresence>
-                          {items.map((item, index) => (
-                            <motion.div
-                              key={item.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, x: -20 }}
-                              transition={{ delay: index * 0.02 }}
-                              onClick={() => setSelectedItem(item)}
-                              className={cn(
-                                "p-3 rounded-xl cursor-pointer transition-all border border-transparent group relative",
-                                "hover:bg-muted/50 hover:border-border/50",
-                                selectedItem?.id === item.id && "bg-primary/10 border-primary/20 shadow-sm"
-                              )}
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1.5">
-                                    <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 h-5">
-                                      {item.sourceLang.slice(0, 2).toUpperCase()}
-                                    </Badge>
-                                    <ArrowRight className="size-3 text-muted-foreground" />
-                                    <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 h-5 bg-primary/5">
-                                      {item.targetLang.slice(0, 2).toUpperCase()}
-                                    </Badge>
-                                    <span className="text-[10px] text-muted-foreground ml-auto">
-                                      {formatTime(item.timestamp)}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm line-clamp-2 mb-0.5 text-foreground/90">{item.sourceText}</p>
-                                  <p className="text-xs text-muted-foreground line-clamp-2">{item.translatedText}</p>
+                    {/* Content */}
+
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+
+                      {filteredHistory.length === 0 ? (
+
+                        <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-50">
+
+                          <History className="size-16 mb-4 text-muted-foreground/50" />
+
+                          <h3 className="text-lg font-semibold mb-2">{t.history.noHistory}</h3>
+
+                          <p className="text-muted-foreground">
+
+                            {search ? t.history.tryDifferent : t.history.noHistoryDesc}
+
+                          </p>
+
+                        </div>
+
+                      ) : (
+
+                        <div className="max-w-3xl mx-auto space-y-8">
+
+                          {Object.entries(groupedHistory).map(([key, items]) => items.length > 0 && (
+
+                            <div key={key} className="space-y-4">
+
+                              <div className="sticky top-0 z-10 flex items-center gap-2 py-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+
+                                <div className="px-3 py-1 rounded-full bg-muted text-xs font-medium flex items-center gap-2 border">
+
+                                  <Calendar className="size-3" />
+
+                                  {getGroupLabel(key)}
+
                                 </div>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className={cn(
-                                    "size-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shrink-0",
-                                    isFavorite(item) && "opacity-100 text-yellow-500 hover:text-yellow-600"
-                                  )}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    toggleFavorite(item)
-                                  }}
-                                >
-                                  <Star className={cn("size-4", isFavorite(item) && "fill-current")} />
-                                </Button>
+
+                                <div className="h-px bg-border flex-1" />
+
                               </div>
-                            </motion.div>
+
+                              
+
+                              <div className="grid gap-4">
+
+                                <AnimatePresence>
+
+                                  {items.map((item, index) => (
+
+                                    <motion.div
+
+                                      key={item.id}
+
+                                      initial={{ opacity: 0, y: 10 }}
+
+                                      animate={{ opacity: 1, y: 0 }}
+
+                                      exit={{ opacity: 0, scale: 0.95 }}
+
+                                      transition={{ delay: index * 0.05 }}
+
+                                      className="group relative bg-card hover:bg-muted/30 border rounded-2xl p-5 transition-all shadow-sm hover:shadow-md"
+
+                                    >
+
+                                      {/* Header */}
+
+                                      <div className="flex items-center justify-between mb-4">
+
+                                        <div className="flex items-center gap-2">
+
+                                          <Badge variant="outline" className="font-mono">{item.sourceLang}</Badge>
+
+                                          <ArrowRight className="size-3 text-muted-foreground" />
+
+                                          <Badge variant="outline" className="font-mono bg-primary/5 text-primary">{item.targetLang}</Badge>
+
+                                          <span className="text-xs text-muted-foreground ml-2">
+
+                                            {formatTime(item.timestamp)}
+
+                                          </span>
+
+                                        </div>
+
+                                        
+
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                                          <Button
+
+                                            variant="ghost"
+
+                                            size="icon"
+
+                                            className={cn(
+
+                                              "size-8 rounded-lg",
+
+                                              isFavorite(item) && "text-yellow-500 hover:text-yellow-600"
+
+                                            )}
+
+                                            onClick={() => toggleFavorite(item)}
+
+                                          >
+
+                                            <Star className={cn("size-4", isFavorite(item) && "fill-current")} />
+
+                                          </Button>
+
+                                          <Button
+
+                                            variant="ghost"
+
+                                            size="icon"
+
+                                            className="size-8 rounded-lg"
+
+                                            onClick={() => copyToClipboard(item.translatedText)}
+
+                                          >
+
+                                            <Copy className="size-4" />
+
+                                          </Button>
+
+                                          <Button
+
+                                            variant="ghost"
+
+                                            size="icon"
+
+                                            className="size-8 rounded-lg text-destructive hover:text-destructive hover:bg-destructive/10"
+
+                                            onClick={() => deleteItem(item.id)}
+
+                                          >
+
+                                            <Trash2 className="size-4" />
+
+                                          </Button>
+
+                                        </div>
+
+                                      </div>
+
+          
+
+                                      {/* Content */}
+
+                                      <div className="grid md:grid-cols-2 gap-4 mb-4">
+
+                                        <div className="space-y-1">
+
+                                          <p className="text-xs font-medium text-muted-foreground">{t.translator.source}</p>
+
+                                          <p className="text-sm leading-relaxed text-foreground/80 break-words">{item.sourceText}</p>
+
+                                        </div>
+
+                                        <div className="space-y-1">
+
+                                          <p className="text-xs font-medium text-muted-foreground">{t.translator.translation}</p>
+
+                                          <p className="text-sm leading-relaxed font-medium break-words">{item.translatedText}</p>
+
+                                        </div>
+
+                                      </div>
+
+          
+
+                                      {/* Footer */}
+
+                                      <div className="pt-3 border-t flex justify-end">
+
+                                        <Button
+
+                                          variant="outline"
+
+                                          size="sm"
+
+                                          className="rounded-lg gap-2 text-xs h-8"
+
+                                          onClick={() => restoreItem(item)}
+
+                                        >
+
+                                          <ExternalLink className="size-3" />
+
+                                          {t.history.openInTranslator}
+
+                                        </Button>
+
+                                      </div>
+
+                                    </motion.div>
+
+                                  ))}
+
+                                </AnimatePresence>
+
+                              </div>
+
+                            </div>
+
                           ))}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
 
-            {/* Detail Panel */}
-            <AnimatePresence>
-              {selectedItem && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className={cn(
-                    "w-full md:w-1/2 flex flex-col bg-muted/20",
-                    !selectedItem && "hidden"
-                  )}
-                >
-                  <div className="flex items-center justify-between p-4 border-b">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="font-mono">{selectedItem.sourceLang}</Badge>
-                      <ArrowRight className="size-4 text-muted-foreground" />
-                      <Badge variant="outline" className="font-mono bg-primary/5">{selectedItem.targetLang}</Badge>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 rounded-lg md:hidden"
-                      onClick={() => setSelectedItem(null)}
-                    >
-                      <X className="size-4" />
-                    </Button>
-                  </div>
+                        </div>
 
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-2">{t.translator.source}</p>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedItem.sourceText}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-2">{t.translator.translation}</p>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedItem.translatedText}</p>
-                    </div>
-                  </div>
-
-                  <div className="p-4 border-t flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={cn(
-                        "rounded-xl transition-colors",
-                        isFavorite(selectedItem) && "text-yellow-500 hover:text-yellow-600 bg-yellow-50 dark:bg-yellow-500/10"
                       )}
-                      onClick={() => toggleFavorite(selectedItem)}
-                    >
-                      <Star className={cn("size-4", isFavorite(selectedItem) && "fill-current")} />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 rounded-xl gap-2"
-                      onClick={() => copyToClipboard(selectedItem.translatedText)}
-                    >
-                      <Copy className="size-4" />
-                      {t.common.copy}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 rounded-xl gap-2"
-                      onClick={() => restoreItem(selectedItem)}
-                    >
-                      <ExternalLink className="size-4" />
-                      {t.history.openInTranslator}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="rounded-xl text-destructive hover:text-destructive"
-                      onClick={() => deleteItem(selectedItem.id)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+
+                    </div>
+
                   </div>
+
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  )
-}
+
+              </div>
+
+            )
+
+          }
