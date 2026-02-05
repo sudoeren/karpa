@@ -186,25 +186,8 @@ function TranslatorWorkspace() {
       }
       addToHistory(newEntry)
 
-      // Reset to Auto Detect and set target to most used language
+      // Reset source language to Auto Detect but KEEP the selected target language
       setSourceLanguage("Auto Detect")
-      
-      const savedH = localStorage.getItem("translation-history")
-      if (savedH) {
-        const history: TranslationItem[] = JSON.parse(savedH)
-        if (history.length > 0) {
-          const counts: Record<string, number> = {}
-          history.forEach(item => {
-            counts[item.targetLang] = (counts[item.targetLang] || 0) + 1
-          })
-          const mostUsed = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b)
-          setTargetLanguage(mostUsed)
-        } else {
-          setTargetLanguage(defaultTargetLang || "English")
-        }
-      } else {
-        setTargetLanguage(defaultTargetLang || "English")
-      }
     } catch (err) {
       if ((err as Error).name === 'AbortError') {
         toast.info(t.translator.cancelled)
@@ -272,7 +255,7 @@ function TranslatorWorkspace() {
     const nameParts = selectedFile.name.split('.')
     const ext = nameParts.pop()
     const name = nameParts.join('.')
-    const targetCode = targetLanguage.substring(0, 2).toLowerCase()
+    const targetCode = languages.find(l => l.name === targetLanguage)?.code || targetLanguage.substring(0, 2).toLowerCase()
     a.href = url
     a.download = `${name}_${targetCode}.${ext}`
     a.click()

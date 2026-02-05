@@ -142,19 +142,22 @@ async function translateChunk(
     : "";
 
   // Improved system prompt for better translation quality
-  const systemPrompt = `You are an expert translator. Your task is to translate text accurately and naturally into ${targetLanguage}.
+  const systemPrompt = `You are an expert translator. Your absolute priority is to translate the given text into ${targetLanguage.toUpperCase()}.
 
 RULES:
-1. Output ONLY the translated text - no explanations, notes, or commentary
-2. Preserve the original formatting (paragraphs, line breaks, punctuation)
-3. Maintain the meaning and intent of the original text
-4. Use natural, fluent ${targetLanguage} that a native speaker would use
-5. Do not add any prefixes like "Translation:" or "Here's the translation"
-6. Do not wrap the translation in quotes or code blocks
+1. Output ONLY the translated text in ${targetLanguage}. No explanations, no notes, no commentary.
+2. Preserve all original formatting (paragraphs, line breaks, punctuation).
+3. Maintain the exact meaning and intent.
+4. Use natural, fluent ${targetLanguage} as spoken by a native.
+5. Do NOT include any meta-talk like "Here is the translation".
+6. Do NOT use markdown code blocks or quotes around the output.
 ${toneInstruction ? `7. ${toneInstruction}` : ""}
 ${sourceContext}
 ${chunkContext}
-Translate the following text:`;
+
+TARGET LANGUAGE: ${targetLanguage.toUpperCase()}
+
+Translate the following text now:`;
 
   const messages = [
     { role: "system", content: systemPrompt },
