@@ -68,6 +68,7 @@ function TranslatorWorkspace() {
   const [tone, setTone] = useState("standard")
   const [loading, setLoading] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -222,10 +223,7 @@ function TranslatorWorkspace() {
     }
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  const processFile = (file: File) => {
     const validExtensions = ['.txt', '.md', '.json', '.csv', '.srt', '.js', '.ts', '.py', '.html', '.css', '.xml']
     const isExtensionValid = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
 
@@ -242,6 +240,28 @@ function TranslatorWorkspace() {
       setTranslatedFileContent("")
     }
     reader.readAsText(file)
+  }
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) processFile(file)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) processFile(file)
   }
 
   const handleDownload = () => {
@@ -528,9 +548,20 @@ const copyToClipboard = async (text: string) => {
                 {!selectedFile ? (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-all"
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={cn(
+                      "border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all",
+                      isDragging 
+                        ? "border-primary bg-primary/5 scale-[1.01]" 
+                        : "hover:border-primary/50 hover:bg-muted/30"
+                    )}
                   >
-                    <Upload className="size-12 mx-auto text-muted-foreground mb-4" />
+                    <Upload className={cn(
+                      "size-12 mx-auto mb-4 transition-colors",
+                      isDragging ? "text-primary" : "text-muted-foreground"
+                    )} />
                     <h3 className="font-semibold mb-1">{t.translator.uploadFile}</h3>
                     <p className="text-sm text-muted-foreground">{t.translator.dragDrop}</p>
                     <p className="text-xs text-muted-foreground mt-2">{t.translator.supportedFormats}</p>
