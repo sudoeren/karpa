@@ -209,6 +209,24 @@ function TranslatorWorkspace() {
 
       // Reset source language to Auto Detect but KEEP the selected target language
       setSourceLanguage("Auto Detect")
+
+      // Notify user
+      const notificationsEnabled = localStorage.getItem("localce-notifications") === "true"
+      if (notificationsEnabled && document.hidden) {
+        if (Notification.permission === 'granted') {
+          new Notification("Localce", {
+            body: t.translator.fileTranslated,
+            icon: "/logo.svg"
+          })
+        }
+        
+        const soundEnabled = localStorage.getItem("localce-notification-sound") !== "false"
+        if (soundEnabled) {
+          const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3")
+          audio.volume = 0.5
+          audio.play().catch(() => {})
+        }
+      }
     } catch (err) {
       if ((err as Error).name === 'AbortError') {
         toast.info(t.translator.cancelled)

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Settings, Sun, Moon, Monitor, Globe, 
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Cpu, Droplets, Github, Code2, ArrowUpRight
+  Cpu, Droplets, Github, Code2, ArrowUpRight, Bell, Volume2
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -46,10 +46,12 @@ export default function SettingsPage() {
   const [temperature, setTemperature] = useState(0.2)
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
-  const [activeTab, setActiveTab] = useState<'general' | 'connection' | 'data' | 'about'>('general')
+  const [activeTab, setActiveTab] = useState<'general' | 'notifications' | 'connection' | 'data' | 'about'>('general')
   const [amoledMode, setAmoledMode] = useState(false)
   const [models, setModels] = useState<Model[]>([])
   const [selectedModel, setSelectedModel] = useState<string>("")
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const [notificationSound, setNotificationSound] = useState(true)
 
   const fetchModels = useCallback(async (url: string) => {
     try {
@@ -81,6 +83,8 @@ export default function SettingsPage() {
     const savedTemp = localStorage.getItem("lm-studio-temperature")
     const savedAmoled = localStorage.getItem("localce-amoled")
     const savedModel = localStorage.getItem("lm-studio-model")
+    const savedNotifs = localStorage.getItem("localce-notifications")
+    const savedNotifSound = localStorage.getItem("localce-notification-sound")
     
     if (savedUrl) {
       setLmStudioUrl(savedUrl)
@@ -89,6 +93,8 @@ export default function SettingsPage() {
     if (savedTemp) setTemperature(parseFloat(savedTemp))
     if (savedAmoled) setAmoledMode(savedAmoled === 'true')
     if (savedModel) setSelectedModel(savedModel)
+    if (savedNotifs) setNotificationsEnabled(savedNotifs === 'true')
+    if (savedNotifSound) setNotificationSound(savedNotifSound !== 'false')
   }, [fetchModels])
 
   // Apply AMOLED mode
@@ -103,6 +109,30 @@ export default function SettingsPage() {
   const handleAmoledChange = (checked: boolean) => {
     setAmoledMode(checked)
     localStorage.setItem("localce-amoled", String(checked))
+  }
+
+  const handleNotificationsChange = (checked: boolean) => {
+    if (checked && Notification.permission !== 'granted') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          setNotificationsEnabled(true)
+          localStorage.setItem("localce-notifications", "true")
+          toast.success(t.settings.notifications)
+        } else {
+          setNotificationsEnabled(false)
+          localStorage.setItem("localce-notifications", "false")
+          toast.error("Notification permission denied")
+        }
+      })
+    } else {
+      setNotificationsEnabled(checked)
+      localStorage.setItem("localce-notifications", String(checked))
+    }
+  }
+
+  const handleNotificationSoundChange = (checked: boolean) => {
+    setNotificationSound(checked)
+    localStorage.setItem("localce-notification-sound", String(checked))
   }
 
   const saveSettings = () => {
@@ -149,7 +179,7 @@ export default function SettingsPage() {
     const data = {
       history: JSON.parse(localStorage.getItem("translation-history") || "[]"),
       favorites: JSON.parse(localStorage.getItem("translation-favorites") || "[]"),
-      settings: { lmStudioUrl, temperature, language, theme }
+      settings: { lmStudioUrl, temperature, language, theme, amoledMode, notificationsEnabled, notificationSound }
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = window.URL.createObjectURL(blob)
@@ -175,6 +205,9 @@ export default function SettingsPage() {
           if (data.settings.temperature) setTemperature(data.settings.temperature)
           if (data.settings.language) setLanguage(data.settings.language)
           if (data.settings.theme) setTheme(data.settings.theme)
+          if (data.settings.amoledMode !== undefined) handleAmoledChange(data.settings.amoledMode)
+          if (data.settings.notificationsEnabled !== undefined) handleNotificationsChange(data.settings.notificationsEnabled)
+          if (data.settings.notificationSound !== undefined) handleNotificationSoundChange(data.settings.notificationSound)
         }
         toast.success(t.settings.importData)
       } catch {
@@ -205,6 +238,7 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'general' as const, label: t.settings.appearance, icon: Sun },
+    { id: 'notifications' as const, label: t.settings.notifications, icon: Bell },
     { id: 'connection' as const, label: t.settings.connection, icon: Zap },
     { id: 'data' as const, label: t.settings.data, icon: Download },
     { id: 'about' as const, label: t.nav.about, icon: Code2 },
@@ -320,6 +354,50 @@ export default function SettingsPage() {
                         {language === lang.value && <Check className="size-4 text-primary ml-auto" />}
                       </button>
                     ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Notifications Tab */}
+            {activeTab === 'notifications' && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-6"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <Bell className="size-4 text-primary" />
+                        {t.settings.enableNotifications}
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {t.settings.notifyOnComplete}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={notificationsEnabled}
+                      onCheckedChange={handleNotificationsChange}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <Volume2 className="size-4 text-primary" />
+                        {t.settings.notificationSound}
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {language === 'tr' ? 'Bildirim geldiğinde ses çal' : 'Play a sound when a notification arrives'}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={notificationSound}
+                      onCheckedChange={handleNotificationSoundChange}
+                      disabled={!notificationsEnabled}
+                    />
                   </div>
                 </div>
               </motion.div>

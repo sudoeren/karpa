@@ -133,6 +133,11 @@ export const translations = {
       languageDesc: "Choose your preferred language for the interface",
       theme: "Theme",
       themeDesc: "Select your preferred color scheme",
+      notifications: "Notifications",
+      notificationsDesc: "Configure app notifications and sounds",
+      enableNotifications: "Enable Notifications",
+      notificationSound: "Notification Sound",
+      notifyOnComplete: "Notify on translation completion",
       
       connection: "Connection",
       connectionDesc: "Configure LM Studio connection",
@@ -331,6 +336,11 @@ export const translations = {
       languageDesc: "Arayüz için tercih ettiğiniz dili seçin",
       theme: "Tema",
       themeDesc: "Tercih ettiğiniz renk şemasını seçin",
+      notifications: "Bildirimler",
+      notificationsDesc: "Uygulama bildirimlerini ve seslerini yapılandırın",
+      enableNotifications: "Bildirimleri Etkinleştir",
+      notificationSound: "Bildirim Sesi",
+      notifyOnComplete: "Çeviri tamamlandığında bildir",
       
       connection: "Bağlantı",
       connectionDesc: "LM Studio bağlantısını yapılandırın",
