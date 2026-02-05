@@ -18,6 +18,8 @@ import { useTTS } from "@/hooks/use-tts"
 import { MarkdownViewer } from "@/components/markdown-viewer"
 import { useOnboarding } from "@/contexts/onboarding-context"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
+import { splitIntoChunks } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -69,6 +71,9 @@ function TranslatorWorkspace() {
   const [loading, setLoading] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [currentChunk, setCurrentChunk] = useState(0)
+  const [totalChunks, setTotalChunks] = useState(0)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -144,41 +149,57 @@ function TranslatorWorkspace() {
     abortControllerRef.current = new AbortController()
 
     setLoading(true)
+    setProgress(0)
+    
     try {
+      const chunks = splitIntoChunks(textToTranslate, 2000)
+      setTotalChunks(chunks.length)
+      
+      const translatedChunks: string[] = []
+      
       // Get settings from localStorage
       const savedModel = localStorage.getItem("lm-studio-model")
       const savedUrl = localStorage.getItem("lm-studio-url")
       const savedTemp = localStorage.getItem("lm-studio-temperature")
 
-      const response = await fetch("/api/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: textToTranslate,
-          targetLanguage,
-          sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
-          tone: tone !== "standard" ? tone : undefined,
-          model: savedModel,
-          apiUrl: savedUrl,
-          temperature: savedTemp ? parseFloat(savedTemp) : undefined
-        }),
-        signal: abortControllerRef.current.signal,
-      })
+      for (let i = 0; i < chunks.length; i++) {
+        setCurrentChunk(i + 1)
+        
+        const response = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: chunks[i],
+            targetLanguage,
+            sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
+            tone: tone !== "standard" ? tone : undefined,
+            model: savedModel,
+            apiUrl: savedUrl,
+            temperature: savedTemp ? parseFloat(savedTemp) : undefined
+          }),
+          signal: abortControllerRef.current.signal,
+        })
 
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || "Failed")
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || "Failed")
+        
+        translatedChunks.push(data.translation)
+        setProgress(Math.round(((i + 1) / chunks.length) * 100))
+      }
+
+      const fullTranslation = translatedChunks.join("\n\n")
 
       if (mode === "text") {
-        setTranslatedText(data.translation)
+        setTranslatedText(fullTranslation)
       } else {
-        setTranslatedFileContent(data.translation)
+        setTranslatedFileContent(fullTranslation)
         toast.success(t.translator.fileTranslated)
       }
 
       const newEntry: TranslationItem = {
         id: Date.now().toString(),
         sourceText: textToTranslate,
-        translatedText: data.translation,
+        translatedText: fullTranslation,
         sourceLang: sourceLanguage,
         targetLang: targetLanguage,
         timestamp: Date.now(),
@@ -455,17 +476,30 @@ const copyToClipboard = async (text: string) => {
                 {/* Target */}
                 <div className="relative bg-muted/20">
                   {loading && (
-                    <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center">
-                      <div className="flex items-center gap-3 bg-background px-4 py-2 rounded-full shadow-lg border">
-                        <Loader2 className="size-4 animate-spin text-primary" />
-                        <span className="text-sm">{t.translator.translating}</span>
+                    <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center p-6 text-center">
+                      <div className="w-full max-w-xs space-y-4">
+                        <div className="flex items-center justify-center gap-3 mb-2">
+                          <Loader2 className="size-5 animate-spin text-primary" />
+                          <span className="font-semibold">{t.translator.translating}</span>
+                        </div>
+                        
+                        <Progress value={progress} className="h-2" />
+                        
+                        <div className="flex justify-between text-xs text-muted-foreground font-medium">
+                          <span>{progress}%</span>
+                          {totalChunks > 1 && (
+                            <span>{currentChunk} / {totalChunks} {t.history.items}</span>
+                          )}
+                        </div>
+
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-6 rounded-full hover:bg-destructive/10 hover:text-destructive"
+                          variant="outline"
+                          size="sm"
+                          className="mt-2 rounded-full h-8"
                           onClick={handleCancelTranslation}
                         >
-                          <X className="size-3" />
+                          <X className="size-3 mr-2" />
+                          {t.common.cancel}
                         </Button>
                       </div>
                     </div>
@@ -580,6 +614,24 @@ const copyToClipboard = async (text: string) => {
                         <X className="size-4" />
                       </Button>
                     </div>
+
+                    {loading && (
+                      <div className="p-6 bg-muted/30 border rounded-xl space-y-4">
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="size-4 animate-spin text-primary" />
+                            <span className="font-medium">{t.translator.translating}</span>
+                          </div>
+                          <span className="text-muted-foreground">{progress}%</span>
+                        </div>
+                        <Progress value={progress} className="h-2" />
+                        {totalChunks > 1 && (
+                          <p className="text-center text-xs text-muted-foreground">
+                            {t.history.items.charAt(0).toUpperCase() + t.history.items.slice(1)}: {currentChunk} / {totalChunks}
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                     {translatedFileContent && (
                       <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl">

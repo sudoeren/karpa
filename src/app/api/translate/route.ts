@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { splitIntoChunks } from '@/lib/utils';
 
 // Post-process LLM output to clean up common issues
 function cleanTranslation(text: string): string {
@@ -45,57 +46,6 @@ function cleanTranslation(text: string): string {
   }
   
   return cleaned.trim();
-}
-
-// Split text into chunks for long translations
-function splitIntoChunks(text: string, maxChunkSize: number = 2000): string[] {
-  // If text is short enough, return as single chunk
-  if (text.length <= maxChunkSize) {
-    return [text];
-  }
-
-  const chunks: string[] = [];
-  
-  // Split by paragraphs first
-  const paragraphs = text.split(/\n\n+/);
-  let currentChunk = '';
-
-  for (const paragraph of paragraphs) {
-    // If a single paragraph is too long, split by sentences
-    if (paragraph.length > maxChunkSize) {
-      if (currentChunk) {
-        chunks.push(currentChunk.trim());
-        currentChunk = '';
-      }
-      
-      // Split by sentences
-      const sentences = paragraph.split(/(?<=[.!?])\s+/);
-      for (const sentence of sentences) {
-        if (currentChunk.length + sentence.length > maxChunkSize) {
-          if (currentChunk) {
-            chunks.push(currentChunk.trim());
-          }
-          currentChunk = sentence;
-        } else {
-          currentChunk += (currentChunk ? ' ' : '') + sentence;
-        }
-      }
-    } else if (currentChunk.length + paragraph.length + 2 > maxChunkSize) {
-      // Start new chunk
-      chunks.push(currentChunk.trim());
-      currentChunk = paragraph;
-    } else {
-      // Add to current chunk
-      currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
-    }
-  }
-
-  // Don't forget the last chunk
-  if (currentChunk) {
-    chunks.push(currentChunk.trim());
-  }
-
-  return chunks;
 }
 
 // Translate a single chunk
