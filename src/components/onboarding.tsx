@@ -119,9 +119,9 @@ export function Onboarding() {
                   className="grid grid-cols-3 gap-3 mb-8"
                 >
                   {[
-                    { icon: Shield, text: language === 'tr' ? '100% Yerel' : '100% Local' },
-                    { icon: Zap, text: language === 'tr' ? 'Yapay Zeka' : 'AI Powered' },
-                    { icon: Globe, text: language === 'tr' ? 'Coklu Dil' : 'Multi-lang' },
+                    { icon: Shield, text: t.onboarding.local },
+                    { icon: Zap, text: t.onboarding.aiPowered },
+                    { icon: Globe, text: t.onboarding.multiLang },
                   ].map((item, i) => (
                     <div key={i} className="p-3 rounded-xl bg-muted/50 text-center">
                       <item.icon className="size-5 mx-auto mb-1 text-primary" />
@@ -192,9 +192,9 @@ export function Onboarding() {
 
                 <div className="bg-muted/50 rounded-2xl p-4 text-left space-y-3">
                   {[
-                    { num: "1", title: "Download LM Studio", desc: "lmstudio.ai" },
-                    { num: "2", title: language === 'tr' ? 'Model yukle' : 'Load a model', desc: "HY-MT1.5-7B" },
-                    { num: "3", title: language === 'tr' ? 'Sunucuyu baslat' : 'Start server', desc: "Port: 1234" },
+                    { num: "1", title: t.common.download + " LM Studio", desc: "lmstudio.ai" },
+                    { num: "2", title: t.onboarding.loadModel, desc: "HY-MT1.5-7B" },
+                    { num: "3", title: t.onboarding.startServer, desc: "Port: 1234" },
                   ].map((item) => (
                     <div key={item.num} className="flex items-center gap-3">
                       <div className="size-8 rounded-lg bg-background flex items-center justify-center font-bold text-sm">
@@ -224,10 +224,10 @@ export function Onboarding() {
                 </div>
 
                 <h2 className="text-2xl font-bold mb-2">
-                  {language === 'tr' ? 'Ana Diliniz' : 'Your Native Language'}
+                  {t.onboarding.nativeLanguage}
                 </h2>
                 <p className="text-muted-foreground mb-6">
-                  {language === 'tr' ? 'Genellikle hangi dilden ceviri yapacaksiniz?' : 'What language will you usually translate from?'}
+                  {t.onboarding.nativeLanguageDesc}
                 </p>
 
                 <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto">
@@ -263,10 +263,10 @@ export function Onboarding() {
                 </div>
 
                 <h2 className="text-2xl font-bold mb-2">
-                  {language === 'tr' ? 'Hedef Dil' : 'Target Language'}
+                  {t.onboarding.targetLanguage}
                 </h2>
                 <p className="text-muted-foreground mb-6">
-                  {language === 'tr' ? 'Genellikle hangi dile ceviri yapacaksiniz?' : 'What language will you usually translate to?'}
+                  {t.onboarding.targetLanguageDesc}
                 </p>
 
                 <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto">

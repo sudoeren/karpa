@@ -114,7 +114,7 @@ export default function AboutPage() {
              <span>v1.0.0</span>
              <span className="w-1 h-1 rounded-full bg-border" />
              <span className="flex items-center gap-1.5">
-               {t.about.madeWith} <Heart className="size-3.5 text-red-500 fill-red-500 animate-pulse" /> in Turkey
+               {t.about.madeWith} <Heart className="size-3.5 text-red-500 fill-red-500 animate-pulse" /> {t.about.inTurkey}
              </span>
            </div>
         </motion.div>
