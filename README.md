@@ -30,36 +30,43 @@
 
 Traditional translation services send your text to remote servers. **Localce is different** — it uses LM Studio to run AI models locally on your computer. Your data never leaves your device.
 
-| Feature | Localce | Cloud Services |
-|---------|---------|----------------|
-| Privacy | ✅ 100% Local | ❌ Data sent to servers |
-| Internet Required | ❌ Works offline | ✅ Always required |
-| Cost | ✅ Free forever | 💰 Usually paid |
-| Speed | ⚡ Instant | 🐌 Network latency |
+| Feature           | Localce          | Cloud Services          |
+| ----------------- | ---------------- | ----------------------- |
+| Privacy           | ✅ 100% Local    | ❌ Data sent to servers |
+| Internet Required | ❌ Works offline | ✅ Always required      |
+| Cost              | ✅ Free forever  | 💰 Usually paid         |
+| Speed             | ⚡ Instant       | 🐌 Network latency      |
 
 ---
 
 ## Features
 
 ### 🔒 Complete Privacy
+
 All translations happen locally using LM Studio. No data is ever sent to external servers.
 
 ### 🌍 Multi-Language Support
+
 Translate between 12+ languages including English, Turkish, Spanish, French, German, Italian, Portuguese, Russian, Japanese, Chinese, Korean, and Arabic.
 
 ### 📄 Text & File Translation
+
 Translate plain text or upload files (`.txt`, `.md`, `.json`, `.csv`, `.srt`, and more).
 
 ### 🎭 Translation Tones
+
 Choose from Standard, Formal, Casual, or Technical tones to match your context.
 
 ### 📚 History & Favorites
+
 Automatically save your translation history and star your favorite translations.
 
 ### 🎨 Beautiful UI
+
 Modern, responsive design with dark mode support and smooth animations.
 
 ### 🔊 Text-to-Speech
+
 Listen to translations with built-in TTS support for multiple languages.
 
 ---
@@ -137,10 +144,10 @@ docker run -p 3000:3000 --add-host=host.docker.internal:host-gateway localce
 
 ### Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+Enter` | Translate |
-| `Ctrl+C` | Copy translation |
+| Shortcut     | Action           |
+| ------------ | ---------------- |
+| `Ctrl+Enter` | Translate        |
+| `Ctrl+C`     | Copy translation |
 
 ---
 
@@ -159,6 +166,7 @@ LM_STUDIO_TEMPERATURE=0.2
 ### In-App Settings
 
 Navigate to **Settings** to configure:
+
 - LM Studio connection URL
 - Model temperature
 - Theme (Light/Dark/System)
@@ -168,15 +176,15 @@ Navigate to **Settings** to configure:
 
 ## Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| Framework | Next.js 16 |
-| UI Library | React 19 |
-| Language | TypeScript |
-| Styling | Tailwind CSS v4 |
+| Category   | Technology           |
+| ---------- | -------------------- |
+| Framework  | Next.js 16           |
+| UI Library | React 19             |
+| Language   | TypeScript           |
+| Styling    | Tailwind CSS v4      |
 | Components | shadcn/ui + Radix UI |
-| Animations | Framer Motion |
-| AI Backend | LM Studio |
+| Animations | Framer Motion        |
+| AI Backend | LM Studio            |
 
 ---
 
@@ -221,10 +229,5 @@ MIT License — see [LICENSE](LICENSE) for details.
 ---
 
 <p align="center">
-  <strong>Built with ❤️ by <a href="https://erencakar.com">Eren Cakar</a></strong>
-</p>
-
-<p align="center">
-  <a href="https://github.com/sudoeren">GitHub</a> •
-  <a href="https://erencakar.com">Website</a>
+  <strong>Developed by <a href="https://erencakar.com">Eren Cakar</a></strong>
 </p>

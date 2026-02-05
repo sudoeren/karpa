@@ -219,7 +219,7 @@ export default function FavoritesPage() {
                           onClick={() => restoreItem(item)}
                         >
                           <ExternalLink className="size-3" />
-                          Open
+                          {t.common.open}
                         </Button>
                         <Button
                           variant="ghost"

@@ -151,7 +151,7 @@ export function Onboarding() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {[
                     { code: "en" as const, name: "English", nativeName: "English", flag: "🇬🇧" },
-                    { code: "tr" as const, name: "Turkish", nativeName: "Turkce", flag: "🇹🇷" },
+                    { code: "tr" as const, name: "Turkish", nativeName: "Türkçe", flag: "🇹🇷" },
                   ].map((lang) => (
                     <button
                       key={lang.code}

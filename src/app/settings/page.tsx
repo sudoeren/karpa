@@ -200,7 +200,7 @@ export default function SettingsPage() {
 
   const languages = [
     { value: "en", label: "English", flag: "GB" },
-    { value: "tr", label: "Turkce", flag: "TR" },
+    { value: "tr", label: "Türkçe", flag: "TR" },
   ]
 
   const tabs = [
@@ -530,7 +530,7 @@ export default function SettingsPage() {
                       </div>
                       <Button variant="outline" size="sm" className="h-8 rounded-full gap-2 text-xs" asChild>
                         <Link href="https://github.com/sudoeren/localce" target="_blank">
-                          Source Code
+                          {t.about.sourceCode}
                           <ArrowUpRight className="size-3 opacity-50" />
                         </Link>
                       </Button>

@@ -69,14 +69,14 @@ export default function AboutPage() {
                 <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs group-hover:border-foreground/20 transition-colors" asChild>
                   <Link href="https://erencakar.com" target="_blank">
                     <Globe className="size-3.5" />
-                    Website
+                    {t.about.website}
                     <ArrowUpRight className="size-3 opacity-50" />
                   </Link>
                 </Button>
                 <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs group-hover:border-foreground/20 transition-colors" asChild>
                   <Link href="https://github.com/sudoeren" target="_blank">
                     <Github className="size-3.5" />
-                    GitHub
+                    {t.about.github}
                     <ArrowUpRight className="size-3 opacity-50" />
                   </Link>
                 </Button>
@@ -92,7 +92,7 @@ export default function AboutPage() {
                   <Github className="size-3" />
                   {t.about.openSource}
                 </div>
-                <h3 className="text-xl font-medium text-foreground">Public Repository</h3>
+                <h3 className="text-xl font-medium text-foreground">{t.about.publicRepo}</h3>
               </div>
 
               <div>
