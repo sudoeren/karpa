@@ -394,9 +394,9 @@ const copyToClipboard = async (text: string) => {
         >
           <div className="h-full bg-card/50 backdrop-blur-xl border rounded-[32px] overflow-hidden flex flex-col">
             {/* Mode Toggle & Controls */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 border-b bg-muted/30 shrink-0">
-              {/* Mode Toggle */}
-              <div className="flex bg-muted rounded-xl p-1 self-start">
+            <div className="flex flex-col md:flex-row items-center gap-4 p-4 border-b bg-muted/30 shrink-0 relative">
+              {/* Mode Toggle - Positioned left on desktop, centered on mobile */}
+              <div className="flex bg-muted rounded-xl p-1 md:absolute md:left-4">
                 <button
                   onClick={() => setMode("text")}
                   className={cn(
@@ -425,10 +425,10 @@ const copyToClipboard = async (text: string) => {
                 </button>
               </div>
 
-              {/* Language Controls */}
-              <div className="flex flex-wrap items-center gap-2">
+              {/* Language Controls - Centered */}
+              <div className="flex flex-wrap items-center justify-center gap-2 w-full">
                 <Select value={sourceLanguage} onValueChange={setSourceLanguage}>
-                  <SelectTrigger className="w-[110px] sm:w-[130px] h-8 rounded-xl bg-background/50 text-xs font-medium border-transparent">
+                  <SelectTrigger className="w-[150px] sm:w-[180px] h-9 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -447,15 +447,15 @@ const copyToClipboard = async (text: string) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-8 rounded-xl shrink-0"
+                  className="size-9 rounded-xl shrink-0 hover:bg-background/50 transition-colors"
                   onClick={swapLanguages}
                   disabled={sourceLanguage === "Auto Detect"}
                 >
-                  <ArrowRightLeft className="size-3.5" />
+                  <ArrowRightLeft className="size-4" />
                 </Button>
 
                 <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                  <SelectTrigger className="w-[110px] sm:w-[130px] h-8 rounded-xl bg-background/50 text-xs font-medium border-transparent">
+                  <SelectTrigger className="w-[120px] sm:w-[140px] h-9 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -465,8 +465,10 @@ const copyToClipboard = async (text: string) => {
                   </SelectContent>
                 </Select>
 
+                <div className="w-px h-4 bg-border/50 mx-1 hidden sm:block" />
+
                 <Select value={tone} onValueChange={setTone}>
-                  <SelectTrigger className="w-[100px] sm:w-[120px] h-8 rounded-xl bg-background/50 text-xs font-medium border-transparent">
+                  <SelectTrigger className="w-[100px] sm:w-[120px] h-9 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
