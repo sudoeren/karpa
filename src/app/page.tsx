@@ -789,7 +789,7 @@ const copyToClipboard = async (text: string) => {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <div className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-muted border border-border">
-                          {item.sourceLang === "Auto Detect" ? "AUTO" : item.sourceLang.slice(0, 2).toUpperCase()}
+                          {item.sourceLang === "Auto Detect" ? t.translator.autoDetect.toUpperCase() : item.sourceLang.slice(0, 2).toUpperCase()}
                         </div>
                         <ArrowRight className="size-3 opacity-40" />
                         <div className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-primary/10 border border-primary/20 text-primary">
