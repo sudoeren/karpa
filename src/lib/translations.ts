@@ -110,6 +110,8 @@ export const translations = {
       cleared: "History cleared",
       allSources: "All Sources",
       allTargets: "All Targets",
+      source: "Source",
+      target: "Target",
     },
     
     // Favorites
@@ -315,6 +317,8 @@ export const translations = {
       cleared: "Geçmiş temizlendi",
       allSources: "Tüm Kaynaklar",
       allTargets: "Tüm Hedefler",
+      source: "Kaynak",
+      target: "Hedef",
     },
     
     // Favorites
