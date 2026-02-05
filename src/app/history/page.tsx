@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Search, Trash2, ArrowRight, History, Copy,
-  ExternalLink, X, Filter, Calendar, Star
+  ExternalLink, X, Filter, Calendar, Star, Sparkles
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -23,7 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useLanguage } from "@/contexts/language-context"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 type TranslationItem = {
@@ -41,7 +41,7 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<TranslationItem[]>([])
   const [favorites, setFavorites] = useState<TranslationItem[]>([])
   const [search, setSearch] = useState("")
-  const [selectedItem, setSelectedItem] = useState<TranslationItem | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [filterSource, setFilterSource] = useState<string>("all")
   const [filterTarget, setFilterTarget] = useState<string>("all")
   
@@ -50,15 +50,34 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-history")
-    if (saved) setHistory(JSON.parse(saved))
+    if (saved) {
+      const historyData = JSON.parse(saved)
+      setHistory(historyData)
+      
+      const hash = window.location.hash.replace('#', '')
+      if (hash && historyData.some((item: TranslationItem) => item.id === hash)) {
+        setSelectedId(hash)
+      }
+    }
     
     const savedF = localStorage.getItem("translation-favorites")
     if (savedF) setFavorites(JSON.parse(savedF))
   }, [])
 
+  useEffect(() => {
+    if (selectedId) {
+      window.location.hash = selectedId
+    } else {
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [selectedId])
+
+  const selectedItem = history.find(item => item.id === selectedId) || null
+
   const clearHistory = () => {
     localStorage.removeItem("translation-history")
     setHistory([])
+    setSelectedId(null)
     toast.success(t.history.cleared)
   }
 
@@ -66,7 +85,7 @@ export default function HistoryPage() {
     const newHistory = history.filter(item => item.id !== id)
     setHistory(newHistory)
     localStorage.setItem("translation-history", JSON.stringify(newHistory))
-    if (selectedItem?.id === id) setSelectedItem(null)
+    if (selectedId === id) setSelectedId(null)
     toast.info(t.history.deleted)
   }
 
@@ -105,7 +124,6 @@ export default function HistoryPage() {
     router.push(`/?${params.toString()}`)
   }
 
-  // Get unique languages for filters
   const sourceLanguages = Array.from(new Set(history.map(item => item.sourceLang)))
   const targetLanguages = Array.from(new Set(history.map(item => item.targetLang)))
 
@@ -158,84 +176,86 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-full">
+    <div className="h-full flex flex-col max-w-7xl mx-auto w-full px-4 overflow-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-6"
+        className="flex items-center justify-between mb-6 shrink-0"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-card/50 backdrop-blur-xl border rounded-full mb-2">
-          <History className="size-4 text-primary" />
-          <span className="text-sm font-medium">{t.history.title}</span>
-          <Badge variant="secondary" className="ml-1">{history.length}</Badge>
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-sm">
+            <History className="size-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">{t.history.title}</h1>
+            <p className="text-sm text-muted-foreground">{history.length} {t.history.items}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {hasHistory && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="rounded-xl gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5">
+                  <Trash2 className="size-4" />
+                  <span className="hidden sm:inline">{t.history.clearAll}</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t.history.clearAllTitle}</AlertDialogTitle>
+                  <AlertDialogDescription>{t.history.clearAllDesc}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-xl">{t.common.cancel}</AlertDialogCancel>
+                  <AlertDialogAction onClick={clearHistory} className="bg-destructive text-destructive-foreground rounded-xl">
+                    {t.common.delete}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </motion.div>
 
-      {/* Main Content */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex-1 max-w-5xl mx-auto w-full"
-      >
-        <div className="bg-card/50 backdrop-blur-xl border rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col min-h-[600px] max-h-[750px]">
-          {/* Search & Actions */}
-          <div className="flex flex-col gap-3 p-4 border-b">
-            <div className="flex items-center gap-3">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                  placeholder={t.common.search + "..."}
-                  className="pl-10 h-10 rounded-xl bg-muted/50 border-transparent"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-              {hasHistory && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="rounded-xl gap-2 text-muted-foreground hover:text-destructive shrink-0">
-                      <Trash2 className="size-4" />
-                      <span className="hidden sm:inline">{t.history.clearAll}</span>
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t.history.clearAllTitle}</AlertDialogTitle>
-                      <AlertDialogDescription>{t.history.clearAllDesc}</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-                      <AlertDialogAction onClick={clearHistory} className="bg-destructive text-destructive-foreground">
-                        {t.common.delete}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
+      {/* Island Container */}
+      <LayoutGroup>
+        <motion.div
+          layout
+          className="bg-card/50 backdrop-blur-xl border rounded-[32px] shadow-2xl shadow-black/5 dark:shadow-black/20 overflow-hidden flex flex-col flex-1 min-h-0"
+        >
+          {/* Search & Filters Bar */}
+          <div className="p-4 border-b bg-muted/30 flex flex-col sm:flex-row gap-4 shrink-0">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
+                placeholder={t.common.search + "..."}
+                className="pl-10 h-11 rounded-2xl bg-background/50 border-transparent focus:bg-background transition-all"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
             
-            {/* Filters */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
-              <Filter className="size-4 text-muted-foreground shrink-0" />
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
               <Select value={filterSource} onValueChange={setFilterSource}>
-                <SelectTrigger className="h-8 w-[130px] rounded-lg text-xs bg-muted/30 border-transparent">
-                  <SelectValue placeholder="Source" />
+                <SelectTrigger className="h-11 w-[160px] rounded-2xl bg-background/50 border-transparent">
+                  <SelectValue placeholder={t.history.allSources} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Sources</SelectItem>
+                  <SelectItem value="all">{t.history.allSources}</SelectItem>
                   {sourceLanguages.map(l => (
                     <SelectItem key={l} value={l}>{l}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <ArrowRight className="size-3 text-muted-foreground shrink-0" />
+              <ArrowRight className="size-4 text-muted-foreground shrink-0 mx-1" />
               <Select value={filterTarget} onValueChange={setFilterTarget}>
-                <SelectTrigger className="h-8 w-[130px] rounded-lg text-xs bg-muted/30 border-transparent">
-                  <SelectValue placeholder="Target" />
+                <SelectTrigger className="h-11 w-[160px] rounded-2xl bg-background/50 border-transparent">
+                  <SelectValue placeholder={t.history.allTargets} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Targets</SelectItem>
+                  <SelectItem value="all">{t.history.allTargets}</SelectItem>
                   {targetLanguages.map(l => (
                     <SelectItem key={l} value={l}>{l}</SelectItem>
                   ))}
@@ -245,51 +265,78 @@ export default function HistoryPage() {
           </div>
 
           {/* Content Island */}
-          <div className="flex-1 flex overflow-hidden">
-            {/* Left: Scrollable List */}
-            <div className="w-full md:w-1/3 border-r overflow-y-auto custom-scrollbar bg-muted/5">
+          <div className="flex-1 flex overflow-hidden relative">
+            {/* Left: History List */}
+            <motion.div 
+              layout
+              className={cn(
+                "h-full overflow-y-auto custom-scrollbar transition-all duration-500 ease-in-out",
+                selectedId ? "w-full md:w-[400px] border-r bg-muted/5" : "w-full"
+              )}
+            >
               {filteredHistory.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-50">
-                  <History className="size-12 mb-4 text-muted-foreground/30" />
-                  <p className="text-sm">{t.history.noHistory}</p>
+                <div className="flex flex-col items-center justify-center h-full text-center p-12 opacity-40">
+                  <div className="size-20 rounded-full bg-muted flex items-center justify-center mb-6">
+                    <History className="size-10" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">{t.history.noHistory}</h3>
+                  <p className="max-w-xs">{search ? t.history.tryDifferent : t.history.noHistoryDesc}</p>
                 </div>
               ) : (
-                <div className="p-3 space-y-6">
+                <div className="p-4 space-y-8">
                   {Object.entries(groupedHistory).map(([key, items]) => items.length > 0 && (
-                    <div key={key} className="space-y-2">
-                      <div className="sticky top-0 z-10 py-1 bg-background/95 backdrop-blur flex items-center gap-2">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground/70">
+                    <div key={key} className="space-y-3">
+                      <div className="sticky top-0 z-10 py-2 bg-background/80 backdrop-blur-md flex items-center gap-3">
+                        <span className="text-[11px] uppercase tracking-[0.2em] font-black text-muted-foreground/50">
                           {getGroupLabel(key)}
                         </span>
-                        <div className="h-px bg-border flex-1" />
+                        <div className="h-px bg-border/50 flex-1" />
                       </div>
                       
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {items.map((item) => (
                           <motion.div
                             key={item.id}
-                            layoutId={item.id}
-                            onClick={() => setSelectedItem(item)}
+                            layoutId={`card-${item.id}`}
+                            onClick={() => setSelectedId(item.id)}
                             className={cn(
-                              "p-3 rounded-xl cursor-pointer transition-all border group relative",
-                              selectedItem?.id === item.id 
-                                ? "bg-primary/10 border-primary/20 shadow-sm ring-1 ring-primary/20" 
-                                : "hover:bg-muted border-transparent"
+                              "p-4 rounded-2xl cursor-pointer transition-all border group relative",
+                              selectedId === item.id 
+                                ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-[0.98]" 
+                                : "bg-background hover:bg-muted/50 border-border/50 hover:border-border"
                             )}
                           >
-                            <div className="flex items-center justify-between mb-1.5">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] font-mono font-bold">{item.sourceLang.slice(0, 2).toUpperCase()}</span>
-                                <ArrowRight className="size-3 text-muted-foreground" />
-                                <span className="text-[10px] font-mono font-bold text-primary">{item.targetLang.slice(0, 2).toUpperCase()}</span>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className={cn(
+                                  "px-1.5 py-0.5 rounded text-[10px] font-bold font-mono border",
+                                  selectedId === item.id ? "bg-white/20 border-white/30" : "bg-muted border-border"
+                                )}>
+                                  {item.sourceLang === "Auto Detect" ? "AUTO" : item.sourceLang.slice(0, 2).toUpperCase()}
+                                </div>
+                                <ArrowRight className="size-3 opacity-50" />
+                                <div className={cn(
+                                  "px-1.5 py-0.5 rounded text-[10px] font-bold font-mono border",
+                                  selectedId === item.id ? "bg-white/20 border-white/30" : "bg-primary/10 border-primary/20 text-primary"
+                                )}>
+                                  {item.targetLang.slice(0, 2).toUpperCase()}
+                                </div>
                               </div>
-                              <span className="text-[10px] text-muted-foreground">
+                              <span className={cn(
+                                "text-[10px] font-medium opacity-60",
+                                selectedId === item.id ? "text-white" : ""
+                              )}>
                                 {formatTime(item.timestamp)}
                               </span>
                             </div>
-                            <p className="text-sm font-medium line-clamp-1 group-hover:text-primary transition-colors">
+                            <p className="text-sm font-medium line-clamp-2 leading-relaxed">
                               {item.sourceText}
                             </p>
+                            {selectedId !== item.id && (
+                              <p className="text-xs mt-1 text-muted-foreground line-clamp-1 italic">
+                                {item.translatedText}
+                              </p>
+                            )}
                           </motion.div>
                         ))}
                       </div>
@@ -297,151 +344,163 @@ export default function HistoryPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Right: Detail View */}
-            <div className="hidden md:flex flex-1 bg-muted/10 relative overflow-hidden">
-              <AnimatePresence mode="wait">
-                {selectedItem ? (
-                  <motion.div
-                    key={selectedItem.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    className="absolute inset-0 flex flex-col p-8"
-                  >
-                    {/* Detail Header */}
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="flex items-center gap-4">
-                        <div className="px-3 py-1 rounded-full bg-background border text-xs font-mono font-bold">
-                          {selectedItem.sourceLang}
-                        </div>
-                        <ArrowRight className="size-4 text-muted-foreground" />
-                        <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-mono font-bold">
-                          {selectedItem.targetLang}
-                        </div>
+            <AnimatePresence mode="wait">
+              {selectedId && selectedItem && (
+                <motion.div
+                  key={selectedId}
+                  initial={{ opacity: 0, x: 20, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, x: 20, filter: "blur(10px)" }}
+                  transition={{ type: "spring", damping: 25, stiffness: 120 }}
+                  className="hidden md:flex flex-1 bg-background/50 flex-col h-full overflow-hidden"
+                >
+                  {/* Detail Header */}
+                  <div className="p-6 border-b flex items-center justify-between bg-muted/10 shrink-0">
+                    <div className="flex items-center gap-4">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest leading-none mb-1">Source</span>
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {selectedItem.sourceLang === "Auto Detect" ? (
+                            <span className="flex items-center gap-1"><Sparkles className="size-3" /> Auto</span>
+                          ) : selectedItem.sourceLang}
+                        </Badge>
                       </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className={cn(
-                            "size-10 rounded-xl",
-                            isFavorite(selectedItem) && "text-yellow-500 border-yellow-500/50 bg-yellow-500/5"
-                          )}
-                          onClick={() => toggleFavorite(selectedItem)}
-                        >
-                          <Star className={cn("size-5", isFavorite(selectedItem) && "fill-current")} />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="size-10 rounded-xl text-destructive hover:bg-destructive/10"
-                          onClick={() => deleteItem(selectedItem.id)}
-                        >
-                          <Trash2 className="size-5" />
-                        </Button>
+                      <ArrowRight className="size-4 text-muted-foreground" />
+                      <div className="flex flex-col text-right">
+                        <span className="text-[10px] uppercase font-black text-primary tracking-widest leading-none mb-1">Target</span>
+                        <Badge variant="outline" className="font-mono text-xs bg-primary/5 border-primary/20 text-primary">{selectedItem.targetLang}</Badge>
                       </div>
                     </div>
-
-                    {/* Detail Body */}
-                    <div className="flex-1 space-y-8 overflow-y-auto custom-scrollbar pr-4">
-                      <div className="space-y-3">
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
-                          {t.translator.source}
-                        </h4>
-                        <div className="p-6 rounded-2xl bg-background border shadow-sm">
-                          <p className="text-lg leading-relaxed">{selectedItem.sourceText}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-primary/80">
-                            {t.translator.translation}
-                          </h4>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 rounded-lg gap-2"
-                            onClick={() => copyToClipboard(selectedItem.translatedText)}
-                          >
-                            <Copy className="size-4" />
-                            {t.common.copy}
-                          </Button>
-                        </div>
-                        <div className="p-6 rounded-2xl bg-primary/5 border border-primary/10 shadow-sm relative group">
-                          <p className="text-lg leading-relaxed font-medium text-foreground">
-                            {selectedItem.translatedText}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Detail Footer */}
-                    <div className="mt-8 pt-6 border-t">
+                    
+                    <div className="flex items-center gap-2">
                       <Button
-                        className="w-full h-12 rounded-2xl gap-3 text-base font-semibold shadow-lg shadow-primary/20"
-                        onClick={() => restoreItem(selectedItem)}
+                        variant="outline"
+                        size="icon"
+                        className={cn(
+                          "size-10 rounded-2xl transition-all",
+                          isFavorite(selectedItem) && "text-yellow-500 border-yellow-500/50 bg-yellow-500/5 shadow-sm"
+                        )}
+                        onClick={() => toggleFavorite(selectedItem)}
                       >
-                        <ExternalLink className="size-5" />
-                        {t.history.openInTranslator}
+                        <Star className={cn("size-5", isFavorite(selectedItem) && "fill-current")} />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-10 rounded-2xl text-destructive hover:bg-destructive/10 hover:border-destructive/20"
+                        onClick={() => deleteItem(selectedId)}
+                      >
+                        <Trash2 className="size-5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-10 rounded-2xl ml-2"
+                        onClick={() => setSelectedId(null)}
+                      >
+                        <X className="size-5" />
                       </Button>
                     </div>
-                  </motion.div>
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12 opacity-30">
-                    <div className="size-20 rounded-full border-4 border-dashed mb-6 flex items-center justify-center">
-                      <ArrowRight className="size-8" />
-                    </div>
-                    <h3 className="text-xl font-bold">{language === 'tr' ? 'Bir Çeviri Seçin' : 'Select a Translation'}</h3>
-                    <p className="max-w-xs mt-2">
-                      {language === 'tr' 
-                        ? 'Detayları ve tam metni görmek için soldaki listeden bir öğeye tıklayın.' 
-                        : 'Click on an item from the list on the left to see details and full text.'}
-                    </p>
                   </div>
-                )}
-              </AnimatePresence>
-            </div>
 
-            {/* Mobile Detail Modal */}
+                  {/* Detail Body */}
+                  <div className="flex-1 p-8 space-y-10 overflow-y-auto custom-scrollbar">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                          {t.translator.source}
+                        </h4>
+                        <div className="h-px flex-1 bg-border/30" />
+                      </div>
+                      <div className="p-6 rounded-3xl bg-muted/20 border border-border/50 text-xl leading-relaxed tracking-tight break-words">
+                        {selectedItem.sourceText}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/60">
+                          {t.translator.translation}
+                        </h4>
+                        <div className="h-px flex-1 bg-primary/10" />
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 rounded-xl gap-2 text-xs"
+                          onClick={() => copyToClipboard(selectedItem.translatedText)}
+                        >
+                          <Copy className="size-3.5" />
+                          {t.common.copy}
+                        </Button>
+                      </div>
+                      <div className="p-8 rounded-[32px] bg-primary/5 border border-primary/10 shadow-inner text-2xl font-semibold leading-relaxed tracking-tight text-foreground selection:bg-primary selection:text-primary-foreground break-words">
+                        {selectedItem.translatedText}
+                      </div>
+                    </div>
+                  </div>
+
+                                  {/* Detail Footer */}
+                                  <div className="p-6 bg-muted/5 border-t shrink-0">
+                                    <Button
+                                      className="w-full h-14 rounded-2xl gap-3 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all group"
+                                      onClick={() => restoreItem(selectedItem)}
+                                    >
+                                      <ExternalLink className="size-5 transition-transform group-hover:scale-110 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                                      {t.history.openInTranslator}
+                                    </Button>
+                                  </div>                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Mobile Detail Overlay */}
             <AnimatePresence>
-              {selectedItem && (
+              {selectedId && selectedItem && (
                 <motion.div
                   initial={{ opacity: 0, y: "100%" }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: "100%" }}
-                  className="fixed inset-0 z-50 bg-background md:hidden flex flex-col"
+                  className="fixed inset-0 z-[60] bg-background md:hidden flex flex-col"
                 >
                   <div className="p-4 border-b flex items-center justify-between">
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedItem(null)}>
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedId(null)}>
                       <X className="size-6" />
                     </Button>
-                    <span className="font-bold">{t.history.title}</span>
-                    <div className="size-10" />
+                    <span className="font-bold">{formatTime(selectedItem.timestamp)}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive"
+                      onClick={() => deleteItem(selectedId)}
+                    >
+                      <Trash2 className="size-5" />
+                    </Button>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                  <div className="flex-1 overflow-y-auto p-6 space-y-8">
                     <div className="space-y-2">
-                      <Badge variant="outline">{selectedItem.sourceLang} → {selectedItem.targetLang}</Badge>
-                      <div className="p-4 rounded-xl bg-muted/50 border">
-                        <p className="text-sm">{selectedItem.sourceText}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{selectedItem.sourceLang}</Badge>
+                        <ArrowRight className="size-4" />
+                        <Badge variant="outline" className="text-primary border-primary/20">{selectedItem.targetLang}</Badge>
+                      </div>
+                      <div className="p-5 rounded-2xl bg-muted/50 border">
+                        <p className="text-base leading-relaxed break-words">{selectedItem.sourceText}</p>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-xs font-bold text-primary">{t.translator.translation}</p>
-                      <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
-                        <p className="text-base font-medium">{selectedItem.translatedText}</p>
+                      <p className="text-xs font-black uppercase tracking-widest text-primary">{t.translator.translation}</p>
+                      <div className="p-6 rounded-[24px] bg-primary/5 border border-primary/10">
+                        <p className="text-xl font-bold leading-tight break-words">{selectedItem.translatedText}</p>
                       </div>
                     </div>
                   </div>
-                  <div className="p-6 border-t grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="rounded-xl" onClick={() => restoreItem(selectedItem)}>
+                  <div className="p-6 border-t grid grid-cols-2 gap-3 pb-safe">
+                    <Button variant="outline" className="h-12 rounded-xl" onClick={() => restoreItem(selectedItem)}>
                       {t.history.openInTranslator}
                     </Button>
-                    <Button className="rounded-xl" onClick={() => copyToClipboard(selectedItem.translatedText)}>
+                    <Button className="h-12 rounded-xl font-bold" onClick={() => copyToClipboard(selectedItem.translatedText)}>
                       {t.common.copy}
                     </Button>
                   </div>
@@ -449,8 +508,8 @@ export default function HistoryPage() {
               )}
             </AnimatePresence>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </LayoutGroup>
     </div>
   )
 }

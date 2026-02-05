@@ -108,6 +108,8 @@ export const translations = {
       copyTranslation: "Copy Translation",
       deleted: "Item removed",
       cleared: "History cleared",
+      allSources: "All Sources",
+      allTargets: "All Targets",
     },
     
     // Favorites
@@ -311,6 +313,8 @@ export const translations = {
       copyTranslation: "Çeviriyi Kopyala",
       deleted: "Öğe silindi",
       cleared: "Geçmiş temizlendi",
+      allSources: "Tüm Kaynaklar",
+      allTargets: "Tüm Hedefler",
     },
     
     // Favorites

@@ -70,10 +70,11 @@ export default function RootLayout({
             <OnboardingProvider>
               <AppWrapper>
                 <KeyboardShortcuts />
-                <main className="min-h-svh w-full bg-background transition-colors duration-300 pb-28">
-                   <div className="p-4 md:p-8 max-w-5xl mx-auto">
+                <main className="h-svh w-full bg-background transition-colors duration-300 overflow-hidden flex flex-col">
+                   <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full overflow-hidden">
                       {children}
                    </div>
+                   <div className="h-24 shrink-0" /> {/* Navbar spacer */}
                 </main>
                 <FloatingNavbar />
               </AppWrapper>
