@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Search, Trash2, ArrowRight, History, Copy,
-  ExternalLink, X, Filter, Calendar
+  ExternalLink, X, Filter, Calendar, Star
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -34,10 +34,12 @@ type TranslationItem = {
   targetLang: string
   timestamp: number
   tone?: string
+  isFavorite?: boolean
 }
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<TranslationItem[]>([])
+  const [favorites, setFavorites] = useState<TranslationItem[]>([])
   const [search, setSearch] = useState("")
   const [selectedItem, setSelectedItem] = useState<TranslationItem | null>(null)
   const [filterSource, setFilterSource] = useState<string>("all")
@@ -48,8 +50,10 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-history")
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved) setHistory(JSON.parse(saved))
+    
+    const savedF = localStorage.getItem("translation-favorites")
+    if (savedF) setFavorites(JSON.parse(savedF))
   }, [])
 
   const clearHistory = () => {
@@ -64,6 +68,26 @@ export default function HistoryPage() {
     localStorage.setItem("translation-history", JSON.stringify(newHistory))
     if (selectedItem?.id === id) setSelectedItem(null)
     toast.info(t.history.deleted)
+  }
+
+  const toggleFavorite = (item: TranslationItem) => {
+    const isFav = favorites.some(f => f.translatedText === item.translatedText)
+    let newFavorites: TranslationItem[]
+    
+    if (isFav) {
+      newFavorites = favorites.filter(f => f.translatedText !== item.translatedText)
+      toast.info(t.favorites.removed)
+    } else {
+      newFavorites = [{ ...item, timestamp: Date.now() }, ...favorites]
+      toast.success(t.favorites.added)
+    }
+    
+    setFavorites(newFavorites)
+    localStorage.setItem("translation-favorites", JSON.stringify(newFavorites))
+  }
+
+  const isFavorite = (item: TranslationItem) => {
+    return favorites.some(f => f.translatedText === item.translatedText)
   }
 
   const copyToClipboard = async (text: string) => {
@@ -256,7 +280,7 @@ export default function HistoryPage() {
                               transition={{ delay: index * 0.02 }}
                               onClick={() => setSelectedItem(item)}
                               className={cn(
-                                "p-3 rounded-xl cursor-pointer transition-all border border-transparent",
+                                "p-3 rounded-xl cursor-pointer transition-all border border-transparent group relative",
                                 "hover:bg-muted/50 hover:border-border/50",
                                 selectedItem?.id === item.id && "bg-primary/10 border-primary/20 shadow-sm"
                               )}
@@ -278,6 +302,20 @@ export default function HistoryPage() {
                                   <p className="text-sm line-clamp-2 mb-0.5 text-foreground/90">{item.sourceText}</p>
                                   <p className="text-xs text-muted-foreground line-clamp-2">{item.translatedText}</p>
                                 </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={cn(
+                                    "size-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shrink-0",
+                                    isFavorite(item) && "opacity-100 text-yellow-500 hover:text-yellow-600"
+                                  )}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    toggleFavorite(item)
+                                  }}
+                                >
+                                  <Star className={cn("size-4", isFavorite(item) && "fill-current")} />
+                                </Button>
                               </div>
                             </motion.div>
                           ))}
@@ -329,6 +367,17 @@ export default function HistoryPage() {
                   </div>
 
                   <div className="p-4 border-t flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={cn(
+                        "rounded-xl transition-colors",
+                        isFavorite(selectedItem) && "text-yellow-500 hover:text-yellow-600 bg-yellow-50 dark:bg-yellow-500/10"
+                      )}
+                      onClick={() => toggleFavorite(selectedItem)}
+                    >
+                      <Star className={cn("size-4", isFavorite(selectedItem) && "fill-current")} />
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
