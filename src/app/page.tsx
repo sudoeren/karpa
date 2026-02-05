@@ -223,8 +223,6 @@ function TranslatorWorkspace() {
         setTranslatedFileContent(fullTranslation)
         toast.success(t.translator.fileTranslated)
       }
-      
-      setIsHistoryOpen(true)
 
       const newEntry: TranslationItem = {
         id: Date.now().toString(),
