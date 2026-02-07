@@ -5,65 +5,63 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function splitIntoChunks(text: string, maxChunkSize: number = 2000): string[] {
+export function splitIntoChunks(text: string, maxChunkSize: number = 2000, preserveFormatting: boolean = false): string[] {
   if (text.length <= maxChunkSize) {
     return [text];
   }
 
   const chunks: string[] = [];
-  const paragraphs = text.split(/\n\n+/);
+  const paragraphs = preserveFormatting ? text.split(/(\n)/) : text.split(/\n\n+/); // Split by newline keeping separators if preserving
   let currentChunk = '';
 
   for (const paragraph of paragraphs) {
+    // If preserving formatting, paragraph might be just a newline
+    if (preserveFormatting && paragraph === '\n') {
+       if (currentChunk.length + 1 > maxChunkSize) {
+          chunks.push(currentChunk);
+          currentChunk = '\n';
+       } else {
+          currentChunk += '\n';
+       }
+       continue;
+    }
+
     if (paragraph.length > maxChunkSize) {
       if (currentChunk) {
-        chunks.push(currentChunk.trim());
+        chunks.push(preserveFormatting ? currentChunk : currentChunk.trim());
         currentChunk = '';
       }
       
-      const sentences = paragraph.split(/(?<=[.!?])\s+/);
-      for (const sentence of sentences) {
-        if (currentChunk.length + sentence.length > maxChunkSize) {
-          if (currentChunk) {
-            chunks.push(currentChunk.trim());
-            currentChunk = '';
-          }
-          
-          // If the sentence itself is longer than maxChunkSize, hard split it
-          if (sentence.length > maxChunkSize) {
-             let remaining = sentence;
-             while (remaining.length > maxChunkSize) {
-               chunks.push(remaining.substring(0, maxChunkSize));
-               remaining = remaining.substring(maxChunkSize);
-             }
-             currentChunk = remaining;
-          } else {
-             currentChunk = sentence;
-          }
-        } else {
-          currentChunk += (currentChunk ? ' ' : '') + sentence;
-        }
+      // Hard split logic
+      let remaining = paragraph;
+      while (remaining.length > maxChunkSize) {
+           // Find nearest space or newline to split safely if possible
+           let splitIndex = maxChunkSize;
+           if (!preserveFormatting) {
+               // Try to find a sentence ending
+               const match = remaining.substring(0, maxChunkSize).match(/(?<=[.!?])\s+$/);
+               if (match && match.index) splitIndex = match.index;
+           }
+           
+           chunks.push(remaining.substring(0, splitIndex));
+           remaining = remaining.substring(splitIndex);
       }
-    } else if (currentChunk.length + paragraph.length + 2 > maxChunkSize) {
-      chunks.push(currentChunk.trim());
-      // Check if paragraph needs hard split
-      if (paragraph.length > maxChunkSize) {
-          let remaining = paragraph;
-          while (remaining.length > maxChunkSize) {
-               chunks.push(remaining.substring(0, maxChunkSize));
-               remaining = remaining.substring(maxChunkSize);
-          }
-          currentChunk = remaining;
-      } else {
-          currentChunk = paragraph;
-      }
+      currentChunk = remaining;
+
+    } else if (currentChunk.length + paragraph.length + (preserveFormatting ? 0 : 2) > maxChunkSize) {
+      chunks.push(preserveFormatting ? currentChunk : currentChunk.trim());
+      currentChunk = paragraph;
     } else {
-      currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
+      if (preserveFormatting) {
+        currentChunk += paragraph;
+      } else {
+        currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
+      }
     }
   }
 
   if (currentChunk) {
-    chunks.push(currentChunk.trim());
+    chunks.push(preserveFormatting ? currentChunk : currentChunk.trim());
   }
 
   return chunks;

@@ -122,6 +122,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // If text is only whitespace, return it as is (preserves formatting)
+    if (!text.trim()) {
+      return NextResponse.json({ 
+        translation: text,
+        model: 'skipped-whitespace',
+        sourceDetected: 'auto'
+      });
+    }
+
     // Determine URL: remove trailing slash if present, add /v1/chat/completions if missing
     let LM_STUDIO_URL = apiUrl || process.env.LM_STUDIO_URL || 'http://localhost:1234';
     if (LM_STUDIO_URL.endsWith('/')) LM_STUDIO_URL = LM_STUDIO_URL.slice(0, -1);

@@ -175,7 +175,8 @@ function TranslatorWorkspace() {
     setProgress(0)
     
     try {
-      const chunks = splitIntoChunks(textToTranslate, 2000)
+      // Use preserveFormatting=true to keep original whitespace/indentation for files
+      const chunks = splitIntoChunks(textToTranslate, 2000, true)
       setTotalChunks(chunks.length)
       
       const translatedChunks: string[] = []
@@ -188,6 +189,13 @@ function TranslatorWorkspace() {
       for (let i = 0; i < chunks.length; i++) {
         setCurrentChunk(i + 1)
         
+        // Skip API call for whitespace-only chunks to save time (though API handles it too)
+        if (!chunks[i].trim()) {
+           translatedChunks.push(chunks[i]);
+           setProgress(Math.round(((i + 1) / chunks.length) * 100));
+           continue;
+        }
+
         const response = await fetch("/api/translate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -210,7 +218,8 @@ function TranslatorWorkspace() {
         setProgress(Math.round(((i + 1) / chunks.length) * 100))
       }
 
-      const fullTranslation = translatedChunks.join("\n\n")
+      // Join with empty string because separators are preserved in chunks
+      const fullTranslation = translatedChunks.join("")
 
       if (mode === "text") {
         setTranslatedText(fullTranslation)
