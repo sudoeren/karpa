@@ -7,9 +7,11 @@ import { useLanguage } from "@/contexts/language-context"
 import { useOnboarding } from "@/contexts/onboarding-context"
 import { Logo } from "@/components/logo"
 import { 
-  Languages, Shield, Zap, ArrowRight, Check, Globe, Sparkles
+  Languages, Shield, Zap, ArrowRight, Check, Globe, Sparkles, RefreshCw, AlertCircle, Link2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
 
 const translationLanguages = [
   { code: "en", name: "English" },
@@ -32,12 +34,47 @@ export function Onboarding() {
   const { completeOnboarding } = useOnboarding()
   const [nativeLang, setNativeLang] = useState("Turkish")
   const [targetLang, setTargetLang] = useState("English")
+  
+  // Connection Wizard states
+  const [apiUrl, setApiUrl] = useState("http://localhost:1234")
+  const [connectionStatus, setConnectionStatus] = useState<"idle" | "testing" | "success" | "error">("idle")
+
+  const testConnection = async () => {
+    setConnectionStatus("testing")
+    try {
+      let url = apiUrl.trim()
+      if (url.endsWith('/')) url = url.slice(0, -1)
+      
+      const response = await fetch(`${url}/v1/models`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000)
+      })
+
+      if (response.ok) {
+        setConnectionStatus("success")
+        localStorage.setItem("lm-studio-url", url)
+        toast.success(t.settings.connectionSuccess)
+      } else {
+        setConnectionStatus("error")
+        toast.error(t.settings.connectionFailed)
+      }
+    } catch (error) {
+      setConnectionStatus("error")
+      toast.error(t.settings.connectionFailed)
+    }
+  }
 
   const handleComplete = () => {
     completeOnboarding(nativeLang, targetLang)
   }
 
   const nextStep = () => {
+    if (step === 2 && connectionStatus !== "success") {
+       toast.info("Bağlantı kurulmadan devam ediyorsunuz. Çeviri özelliği çalışmayabilir.", {
+         description: "LM Studio'nun açık olduğundan emin olun."
+       })
+    }
+
     if (step < 4) {
       setStep(step + 1)
     } else {
@@ -174,7 +211,7 @@ export function Onboarding() {
               </motion.div>
             )}
 
-            {/* Step 2: LM Studio Setup */}
+            {/* Step 2: LM Studio Setup Wizard */}
             {step === 2 && (
               <motion.div
                 key="step2"
@@ -183,29 +220,92 @@ export function Onboarding() {
                 exit={{ opacity: 0, y: -20 }}
                 className="text-center"
               >
-                <div className="inline-flex items-center justify-center size-16 rounded-2xl bg-green-500/10 mb-6">
-                  <Zap className="size-8 text-green-500" />
+                <div className={cn(
+                  "inline-flex items-center justify-center size-16 rounded-2xl mb-6 transition-colors",
+                  connectionStatus === "success" ? "bg-green-500/10" : "bg-primary/10"
+                )}>
+                  {connectionStatus === "success" ? (
+                    <Check className="size-8 text-green-500" />
+                  ) : (
+                    <Zap className="size-8 text-primary" />
+                  )}
                 </div>
 
                 <h2 className="text-2xl font-bold mb-2">{t.onboarding.step2Title}</h2>
-                <p className="text-muted-foreground mb-6">{t.onboarding.step2Desc}</p>
+                <p className="text-muted-foreground mb-6 text-sm">
+                  {t.onboarding.step2Desc}
+                </p>
 
-                <div className="bg-muted/50 rounded-2xl p-4 text-left space-y-3">
-                  {[
-                    { num: "1", title: t.common.download + " LM Studio", desc: "lmstudio.ai" },
-                    { num: "2", title: t.onboarding.loadModel, desc: "HY-MT1.5-7B" },
-                    { num: "3", title: t.onboarding.startServer, desc: "Port: 1234" },
-                  ].map((item) => (
-                    <div key={item.num} className="flex items-center gap-3">
-                      <div className="size-8 rounded-lg bg-background flex items-center justify-center font-bold text-sm">
-                        {item.num}
+                <div className="space-y-4 mb-6">
+                  <div className="relative">
+                    <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input 
+                      value={apiUrl}
+                      onChange={(e) => {
+                        setApiUrl(e.target.value)
+                        if (connectionStatus !== "idle") setConnectionStatus("idle")
+                      }}
+                      placeholder="http://localhost:1234"
+                      className="pl-10 h-12 rounded-xl bg-muted/50 border-transparent focus:border-primary transition-all"
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={testConnection}
+                    disabled={connectionStatus === "testing"}
+                    variant={connectionStatus === "success" ? "outline" : "default"}
+                    className={cn(
+                      "w-full h-12 rounded-xl font-bold transition-all",
+                      connectionStatus === "success" && "border-green-500/50 text-green-600"
+                    )}
+                  >
+                    {connectionStatus === "testing" ? (
+                      <RefreshCw className="size-4 mr-2 animate-spin" />
+                    ) : connectionStatus === "success" ? (
+                      <Check className="size-4 mr-2" />
+                    ) : (
+                      <Zap className="size-4 mr-2" />
+                    )}
+                    {connectionStatus === "success" ? t.settings.connectionSuccess : t.settings.testConnection}
+                  </Button>
+
+                  {connectionStatus === "error" && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="p-3 bg-destructive/5 rounded-xl border border-destructive/10 text-[11px] text-destructive text-left"
+                    >
+                      <div className="flex gap-2">
+                        <AlertCircle className="size-4 shrink-0" />
+                        <ul className="list-disc pl-3 space-y-1 opacity-90">
+                          <li>LM Studio'nun açık olduğundan emin olun.</li>
+                          <li>"Start Server" butonuna bastığınızdan emin olun.</li>
+                          <li>Portun 1234 olduğunu doğrulayın.</li>
+                          <li>LM Studio ayarlarından CORS'u açın.</li>
+                        </ul>
                       </div>
-                      <div>
-                        <p className="font-medium text-sm">{item.title}</p>
-                        <p className="text-xs text-muted-foreground">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
+                    </motion.div>
+                  )}
+                </div>
+
+                <div className="bg-muted/30 rounded-2xl p-4 text-left">
+                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">Hızlı Kurulum Rehberi</p>
+                   <div className="space-y-2">
+                      {[
+                        { num: "1", title: "Modeli Yükle", desc: "HY-MT1.5-7B" },
+                        { num: "2", title: "Sunucuyu Başlat", desc: "Local Server -> Start Server" }
+                      ].map((item) => (
+                        <div key={item.num} className="flex items-center gap-3">
+                          <div className="size-6 rounded-lg bg-background flex items-center justify-center font-bold text-[10px] border">
+                            {item.num}
+                          </div>
+                          <div>
+                            <p className="font-bold text-[11px] leading-tight">{item.title}</p>
+                            <p className="text-[10px] text-muted-foreground leading-tight">{item.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                   </div>
                 </div>
               </motion.div>
             )}
