@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { Toaster } from "@/components/ui/sonner";
 import { FloatingNavbar } from "@/components/floating-navbar";
+import { MobileNav } from "@/components/mobile-nav";
 import { AppWrapper } from "@/components/app-wrapper";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 
@@ -76,7 +77,10 @@ export default function RootLayout({
                    </div>
                    <div className="h-24 shrink-0" /> {/* Navbar spacer */}
                 </main>
-                <FloatingNavbar />
+                <div className="hidden md:block">
+                  <FloatingNavbar />
+                </div>
+                <MobileNav />
               </AppWrapper>
             </OnboardingProvider>
           </LanguageProvider>
