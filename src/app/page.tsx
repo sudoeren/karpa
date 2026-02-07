@@ -21,6 +21,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { splitIntoChunks } from "@/lib/utils"
+import { ConnectionStatus } from "@/components/connection-status"
 
 type TranslationItem = {
   id: string
@@ -374,6 +375,10 @@ const copyToClipboard = async (text: string) => {
         </div>
         <p className="text-xs text-muted-foreground">{t.translator.title}</p>
         
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 hidden md:block">
+           <ConnectionStatus />
+        </div>
+
         <Button
           variant="ghost"
           size="sm"
