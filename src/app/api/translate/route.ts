@@ -1,52 +1,5 @@
 import { NextResponse } from 'next/server';
-import { splitIntoChunks } from '@/lib/utils';
-
-// Post-process LLM output to clean up common issues
-function cleanTranslation(text: string): string {
-  if (!text) return text;
-  
-  let cleaned = text;
-  
-  // Remove common prefixes that LLMs add
-  const prefixPatterns = [
-    /^(Here'?s?\s+(the\s+)?translation:?\s*)/i,
-    /^(Translation:?\s*)/i,
-    /^(Translated\s+text:?\s*)/i,
-    /^(The\s+translation\s+(is|would\s+be):?\s*)/i,
-    /^(In\s+\w+:?\s*)/i,
-    /^(Sure[,!]?\s*(here'?s?\s+(the\s+)?translation)?:?\s*)/i,
-    /^(Of\s+course[,!]?\s*)/i,
-    /^(Certainly[,!]?\s*)/i,
-  ];
-  
-  for (const pattern of prefixPatterns) {
-    cleaned = cleaned.replace(pattern, '');
-  }
-  
-  // Remove common suffixes
-  const suffixPatterns = [
-    /(\n+Note:.*$)/i,
-    /(\n+Please\s+note.*$)/i,
-    /(\n+I'?ve?\s+translated.*$)/i,
-    /(\n+Let\s+me\s+know.*$)/i,
-    /(\n+Hope\s+this\s+helps.*$)/i,
-  ];
-  
-  for (const pattern of suffixPatterns) {
-    cleaned = cleaned.replace(pattern, '');
-  }
-  
-  // Remove markdown code blocks if present
-  cleaned = cleaned.replace(/^```[\w]*\n?/gm, '').replace(/\n?```$/gm, '');
-  
-  // Remove quotes if the entire text is quoted
-  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || 
-      (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
-    cleaned = cleaned.slice(1, -1);
-  }
-  
-  return cleaned.trim();
-}
+import { splitIntoChunks, cleanTranslation } from '@/lib/utils';
 
 // Translate a single chunk
 async function translateChunk(
