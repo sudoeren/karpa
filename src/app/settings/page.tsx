@@ -9,11 +9,10 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
-  Settings, Sun, Moon, Monitor, Globe, 
+  Sun, Moon, Monitor, Globe, 
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Cpu, Droplets, Github, Code2, ArrowUpRight, Bell, Volume2,
-  Shield, Server, Terminal, Sparkles, User, ExternalLink, Database,
-  LayoutGrid, Sliders, HardDrive, Info, ArrowLeft
+  Github, Code2, ArrowUpRight, Bell, Volume2,
+  Shield, Terminal, LayoutGrid, Sliders, HardDrive, Info, User, ExternalLink
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -214,17 +213,17 @@ export default function SettingsPage() {
   return (
     <div className="h-full flex items-center justify-center p-4">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-5xl h-[700px] bg-black border border-white/10 rounded-[40px] shadow-2xl overflow-hidden flex"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-5xl h-[700px] bg-card border border-border rounded-[32px] shadow-2xl overflow-hidden flex"
       >
         {/* Sidebar */}
-        <div className="w-64 border-r border-white/5 bg-white/[0.02] flex flex-col p-6 space-y-8">
+        <div className="w-64 border-r border-border bg-muted/20 flex flex-col p-6 space-y-8">
           <div className="flex items-center gap-3 px-2">
             <div className="p-2 bg-primary/10 rounded-xl">
               <Logo size={24} />
             </div>
-            <h1 className="font-black tracking-tighter text-xl">Settings</h1>
+            <h1 className="font-bold text-lg tracking-tight">{t.settings.title}</h1>
           </div>
 
           <nav className="flex-1 space-y-1">
@@ -235,28 +234,21 @@ export default function SettingsPage() {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group relative",
+                    "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative",
                     isActive 
-                      ? "text-white" 
-                      : "text-white/40 hover:text-white/70 hover:bg-white/5"
+                      ? "text-foreground bg-accent/50 shadow-sm" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  {isActive && (
-                    <motion.div
-                      layoutId="sidebar-active"
-                      className="absolute inset-0 bg-white/5 rounded-2xl border border-white/5 shadow-sm"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
                   <item.icon className={cn(
-                    "size-5 transition-colors",
-                    isActive ? "text-primary" : "text-white/20"
+                    "size-4.5 transition-colors",
+                    isActive ? "text-primary" : "text-muted-foreground/50"
                   )} />
-                  <span className="text-sm font-bold tracking-tight relative z-10">{item.label}</span>
+                  <span className="text-sm font-medium relative z-10">{item.label}</span>
                   {isActive && (
                     <motion.div 
-                      layoutId="sidebar-dot"
-                      className="size-1 bg-primary rounded-full ml-auto relative z-10" 
+                      layoutId="sidebar-active-indicator"
+                      className="w-1 h-4 bg-primary rounded-full absolute left-0" 
                     />
                   )}
                 </button>
@@ -264,14 +256,14 @@ export default function SettingsPage() {
             })}
           </nav>
 
-          <div className="pt-6 border-t border-white/5">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-primary/5 border border-primary/10">
+          <div className="pt-6 border-t border-border space-y-4">
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/30 border border-border">
                <div className={cn(
                  "size-1.5 rounded-full",
-                 connectionStatus === 'success' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-white/20"
+                 connectionStatus === 'success' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" : "bg-muted-foreground/30"
                )} />
-               <span className="text-[9px] font-black uppercase tracking-widest text-primary/80">
-                 {connectionStatus === 'success' ? "Core Online" : "Core Offline"}
+               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                 {connectionStatus === 'success' ? t.settings.coreOnline : t.settings.coreOffline}
                </span>
             </div>
           </div>
@@ -282,63 +274,60 @@ export default function SettingsPage() {
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, x: 10, filter: "blur(4px)" }}
-              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, x: -10, filter: "blur(4px)" }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="flex-1 p-10 overflow-y-auto custom-scrollbar"
+              initial={{ opacity: 0, x: 5 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -5 }}
+              transition={{ duration: 0.2 }}
+              className="flex-1 p-12 overflow-y-auto custom-scrollbar"
             >
               {activeTab === 'appearance' && (
-                <div className="space-y-10">
-                  <SectionHeader title={t.settings.appearance} desc="Customize your visual experience." icon={LayoutGrid} />
+                <div className="max-w-2xl space-y-10">
+                  <SectionHeader title={t.settings.appearance} desc={t.settings.appearanceDesc} icon={LayoutGrid} />
                   
-                  <div className="space-y-6">
-                    <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">Color Theme</Label>
-                    <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-4">
+                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.colorTheme}</Label>
+                    <div className="grid grid-cols-3 gap-3">
                       {[
                         { id: 'light', icon: Sun, label: t.common.light },
                         { id: 'dark', icon: Moon, label: t.common.dark },
                         { id: 'system', icon: Monitor, label: t.common.system }
-                      ].map((t) => (
+                      ].map((tItem) => (
                         <button
-                          key={t.id}
-                          onClick={() => setTheme(t.id)}
+                          key={tItem.id}
+                          onClick={() => setTheme(tItem.id)}
                           className={cn(
-                            "flex flex-col items-center gap-4 p-6 rounded-[32px] border transition-all duration-300 group",
-                            theme === t.id 
-                              ? "bg-white text-black border-white shadow-xl scale-105" 
-                              : "bg-white/5 border-white/5 text-white/40 hover:text-white hover:bg-white/10"
+                            "flex items-center gap-3 p-4 rounded-2xl border transition-all duration-200",
+                            theme === tItem.id 
+                              ? "bg-foreground text-background border-foreground shadow-lg" 
+                              : "bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
                           )}
                         >
-                          <t.icon className="size-6 group-hover:scale-110 transition-transform" />
-                          <span className="text-[10px] font-black uppercase tracking-widest">{t.label}</span>
+                          <tItem.icon className="size-4" />
+                          <span className="text-xs font-bold uppercase tracking-wider">{tItem.label}</span>
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  <div className="space-y-6">
-                    <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">System Language</Label>
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.systemLanguage}</Label>
+                    <div className="grid grid-cols-2 gap-3">
                       {[
-                        { id: 'en', label: 'English', native: 'English', flag: '🇺🇸' },
-                        { id: 'tr', label: 'Turkish', native: 'Türkçe', flag: '🇹🇷' }
+                        { id: 'en', native: 'English', flag: '🇺🇸' },
+                        { id: 'tr', native: 'Türkçe', flag: '🇹🇷' }
                       ].map((l) => (
                         <button
                           key={l.id}
                           onClick={() => setLanguage(l.id as any)}
                           className={cn(
-                            "flex items-center gap-4 p-5 rounded-[28px] border transition-all duration-300",
+                            "flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200",
                             language === l.id 
-                              ? "bg-primary/10 border-primary/40 text-primary shadow-[0_0_20px_rgba(var(--primary),0.1)]" 
-                              : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10"
+                              ? "bg-primary/10 border-primary/30 text-primary" 
+                              : "bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
                           )}
                         >
-                          <span className="text-2xl">{l.flag}</span>
-                          <div className="text-left">
-                            <p className="font-bold">{l.native}</p>
-                            <p className="text-[9px] uppercase tracking-widest opacity-50">{l.label}</p>
-                          </div>
+                          <span className="text-xl">{l.flag}</span>
+                          <span className="text-sm font-bold">{l.native}</span>
                           {language === l.id && <Check className="size-4 ml-auto" />}
                         </button>
                       ))}
@@ -348,38 +337,38 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'connection' && (
-                <div className="space-y-10">
-                  <SectionHeader title={t.settings.connection} desc="Configure your local AI engine." icon={Sliders} />
+                <div className="max-w-2xl space-y-8">
+                  <SectionHeader title={t.settings.connection} desc={t.settings.connectionDesc} icon={Sliders} />
                   
-                  <div className="p-8 rounded-[32px] bg-white/5 border border-white/5 space-y-8">
-                    <div className="space-y-4">
-                      <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">Engine URL</Label>
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.engineUrl}</Label>
                       <div className="flex gap-2">
                         <Input
                           value={lmStudioUrl}
                           onChange={(e) => setLmStudioUrl(e.target.value)}
-                          className="h-14 pl-6 rounded-2xl bg-black/50 border-white/5 focus:border-primary transition-all font-mono text-sm"
+                          className="h-12 pl-5 rounded-xl bg-background border-border focus:border-primary transition-all font-mono text-sm"
                           placeholder="http://localhost:1234"
                         />
                         <Button
                           variant="outline"
-                          className="h-14 px-6 rounded-2xl border-white/10 bg-white/5"
+                          className="h-12 px-6 rounded-xl border-border bg-muted/20"
                           onClick={testConnection}
                           disabled={isTestingConnection}
                         >
                           {isTestingConnection ? <Loader2 className="size-4 animate-spin mr-2" /> : <RefreshCw className="size-4 mr-2" />}
-                          Test
+                          {t.settings.testConnection}
                         </Button>
                       </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">Active Model</Label>
+                    <div className="space-y-3">
+                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.activeModel}</Label>
                       <Select value={selectedModel} onValueChange={setSelectedModel}>
-                        <SelectTrigger className="h-14 rounded-2xl bg-black/50 border-white/5 px-6">
+                        <SelectTrigger className="h-12 rounded-xl bg-background border-border px-5">
                           <SelectValue placeholder="Select Model" />
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-950 border-white/10">
+                        <SelectContent className="bg-popover border-border">
                           {models.map((m) => (
                             <SelectItem key={m.id} value={m.id}>{m.id}</SelectItem>
                           ))}
@@ -387,10 +376,10 @@ export default function SettingsPage() {
                       </Select>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4 pt-2">
                       <div className="flex items-center justify-between">
-                        <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">Temperature</Label>
-                        <Badge variant="outline" className="font-mono text-primary border-primary/20 bg-primary/5">{temperature.toFixed(1)}</Badge>
+                        <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.temperature}</Label>
+                        <span className="text-xs font-mono font-bold text-primary">{temperature.toFixed(1)}</span>
                       </div>
                       <Slider
                         value={[temperature]}
@@ -398,33 +387,33 @@ export default function SettingsPage() {
                         min={0}
                         max={1}
                         step={0.1}
-                        className="py-4"
                       />
+                      <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">{t.settings.temperatureDesc}</p>
                     </div>
 
-                    <Button onClick={saveSettings} className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20">
-                      Save configuration
+                    <Button onClick={saveSettings} className="w-full h-12 rounded-xl font-bold text-sm shadow-xl shadow-primary/10">
+                      {t.settings.saveConfig}
                     </Button>
                   </div>
                 </div>
               )}
 
               {activeTab === 'notifications' && (
-                <div className="space-y-10">
-                  <SectionHeader title={t.settings.notifications} desc="Stay updated on translation tasks." icon={Bell} />
+                <div className="max-w-2xl space-y-6">
+                  <SectionHeader title={t.settings.notifications} desc={t.settings.notificationsDesc} icon={Bell} />
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <ToggleTile 
                       icon={Bell} 
-                      title="Enable Notifications" 
-                      desc="Get notified when translations are ready." 
+                      title={t.settings.enableNotifications} 
+                      desc={t.settings.notifyOnComplete} 
                       checked={notificationsEnabled} 
                       onChange={handleNotificationsChange} 
                     />
                     <ToggleTile 
                       icon={Volume2} 
-                      title="Audio Feedback" 
-                      desc="Play a sound on successful translation." 
+                      title={t.settings.audioFeedback} 
+                      desc={t.settings.audioFeedbackDesc} 
                       checked={notificationSound} 
                       onChange={handleNotificationSoundChange} 
                       disabled={!notificationsEnabled}
@@ -434,50 +423,48 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'data' && (
-                <div className="space-y-10">
-                  <SectionHeader title={t.settings.data} desc="Manage your personal translation vault." icon={HardDrive} />
+                <div className="max-w-2xl space-y-10">
+                  <SectionHeader title={t.settings.vaultTitle} desc={t.settings.vaultDesc} icon={HardDrive} />
                   
                   <div className="grid grid-cols-2 gap-4">
                     <DataButton 
                       icon={Download} 
-                      title="Export Vault" 
-                      desc="Download your history & favorites." 
+                      title={t.settings.exportData} 
                       onClick={exportData} 
                     />
                     <label className="block cursor-pointer">
                       <DataButton 
                         icon={Upload} 
-                        title="Import Vault" 
-                        desc="Restore from a JSON backup." 
+                        title={t.settings.importData} 
                         onClick={() => {}} 
                       />
                       <input type="file" accept=".json" className="hidden" onChange={importData} />
                     </label>
                   </div>
 
-                  <div className="pt-10 border-t border-white/5 space-y-6">
-                    <SectionHeader title="Danger Zone" desc="Destructive actions that cannot be undone." icon={Shield} color="text-rose-500" />
+                  <div className="pt-8 border-t border-border space-y-6">
+                    <SectionHeader title={t.settings.purgeTitle} desc={t.settings.purgeDesc} icon={Shield} color="text-destructive" />
                     
                     <div className="space-y-3">
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <button className="w-full flex items-center justify-between p-6 rounded-[28px] border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition-all group">
+                          <button className="w-full flex items-center justify-between p-5 rounded-2xl border border-destructive/10 bg-destructive/[0.02] hover:bg-destructive/[0.05] transition-all group">
                             <div className="text-left">
-                              <p className="font-bold text-rose-500">Purge All Data</p>
-                              <p className="text-xs text-rose-500/60 font-medium">Clear history, favorites and all preferences.</p>
+                              <p className="font-bold text-destructive text-sm">{t.settings.clearData}</p>
+                              <p className="text-[11px] text-destructive/40 font-medium">{t.settings.clearDataDesc}</p>
                             </div>
-                            <Trash2 className="size-5 text-rose-500 group-hover:scale-110 transition-transform" />
+                            <Trash2 className="size-4 text-destructive opacity-40 group-hover:opacity-100 transition-opacity" />
                           </button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-zinc-950 border-rose-500/20">
+                        <AlertDialogContent className="bg-popover border-border">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-2xl font-black tracking-tighter text-rose-500 uppercase">Confirm Purge</AlertDialogTitle>
-                            <AlertDialogDescription className="text-white/50">{t.settings.clearDataDesc}</AlertDialogDescription>
+                            <AlertDialogTitle className="text-xl font-bold tracking-tight">{t.settings.clearDataTitle}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-muted-foreground text-sm">{t.settings.clearDataDesc}</AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel className="bg-white/5 border-white/5 rounded-xl">Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={clearAllData} className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl">
-                              Confirm Delete
+                            <AlertDialogCancel className="rounded-xl">{t.common.cancel}</AlertDialogCancel>
+                            <AlertDialogAction onClick={clearAllData} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl">
+                              {t.common.delete}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -485,13 +472,13 @@ export default function SettingsPage() {
 
                       <button 
                         onClick={resetOnboarding}
-                        className="w-full flex items-center justify-between p-6 rounded-[28px] border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-all group"
+                        className="w-full flex items-center justify-between p-5 rounded-2xl border border-border bg-muted/10 hover:bg-muted/20 transition-all group"
                       >
                         <div className="text-left">
-                          <p className="font-bold">Reset Welcome Experience</p>
-                          <p className="text-xs text-white/40 font-medium">Re-run the initial setup wizard.</p>
+                          <p className="font-bold text-sm">{t.settings.resetOnboarding}</p>
+                          <p className="text-[11px] text-muted-foreground font-medium">{t.settings.resetOnboardingDesc}</p>
                         </div>
-                        <RefreshCw className="size-5 text-white/20 group-hover:rotate-180 transition-transform duration-500" />
+                        <RefreshCw className="size-4 text-muted-foreground group-hover:rotate-180 transition-transform duration-500" />
                       </button>
                     </div>
                   </div>
@@ -499,38 +486,38 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'about' && (
-                <div className="space-y-12">
-                  <div className="flex flex-col items-center text-center space-y-6 pt-6">
-                    <div className="size-24 bg-gradient-to-br from-primary to-violet-600 rounded-[32px] p-1 shadow-2xl shadow-primary/20">
-                      <div className="w-full h-full bg-black rounded-[28px] flex items-center justify-center">
-                        <Logo size={48} />
+                <div className="max-w-2xl space-y-10">
+                  <div className="flex flex-col items-center text-center space-y-6 py-4">
+                    <div className="size-20 bg-gradient-to-br from-primary to-violet-600 rounded-3xl p-1 shadow-2xl shadow-primary/20">
+                      <div className="w-full h-full bg-background rounded-[22px] flex items-center justify-center">
+                        <Logo size={40} />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <h2 className="text-5xl font-black tracking-tighter">Localce</h2>
-                      <p className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px]">Version 1.2.4 • Private AI</p>
+                    <div className="space-y-1">
+                      <h2 className="text-4xl font-black tracking-tighter">Localce</h2>
+                      <p className="text-muted-foreground font-bold uppercase tracking-[0.2em] text-[10px]">Version 1.2.4</p>
                     </div>
-                    <p className="text-lg text-white/60 leading-relaxed max-w-lg">
+                    <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
                       {t.about.description}
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <AboutCard 
                       icon={User} 
-                      title="Lead Developer" 
+                      title={t.about.developer} 
                       value="Eren Çakar" 
                       href="https://erencakar.com" 
                     />
                     <AboutCard 
                       icon={Github} 
-                      title="Source Code" 
+                      title={t.about.sourceCode} 
                       value="sudoeren/localce" 
                       href="https://github.com/sudoeren/localce" 
                     />
                   </div>
 
-                  <div className="flex justify-center gap-6 pt-4">
+                  <div className="flex justify-center gap-4">
                     <SocialIcon icon={Globe} href="https://erencakar.com" />
                     <SocialIcon icon={Github} href="https://github.com/sudoeren" />
                     <SocialIcon icon={Code2} href="https://github.com/sudoeren/localce" />
@@ -539,18 +526,6 @@ export default function SettingsPage() {
               )}
             </motion.div>
           </AnimatePresence>
-
-          {/* Footer Info */}
-          <div className="px-10 py-4 border-t border-white/5 bg-white/[0.01] flex items-center justify-between">
-            <p className="text-[9px] font-black uppercase tracking-widest text-white/20">© 2026 Localce AI. All rights reserved.</p>
-            <div className="flex items-center gap-4">
-               <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Secure</span>
-               <div className="size-1 rounded-full bg-white/10" />
-               <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Private</span>
-               <div className="size-1 rounded-full bg-white/10" />
-               <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Local</span>
-            </div>
-          </div>
         </div>
       </motion.div>
     </div>
@@ -559,14 +534,14 @@ export default function SettingsPage() {
 
 /* SUB-COMPONENTS */
 
-function SectionHeader({ title, desc, icon: Icon, color = "text-white" }: { title: string, desc: string, icon: any, color?: string }) {
+function SectionHeader({ title, desc, icon: Icon, color = "text-foreground" }: { title: string, desc: string, icon: any, color?: string }) {
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-3">
-        <Icon className={cn("size-6", color)} />
-        <h2 className={cn("text-3xl font-black tracking-tight", color)}>{title}</h2>
+        <Icon className={cn("size-5", color)} />
+        <h2 className={cn("text-2xl font-bold tracking-tight", color)}>{title}</h2>
       </div>
-      <p className="text-sm text-white/40 font-medium ml-9">{desc}</p>
+      <p className="text-sm text-muted-foreground font-medium ml-8 leading-relaxed">{desc}</p>
     </div>
   )
 }
@@ -574,36 +549,33 @@ function SectionHeader({ title, desc, icon: Icon, color = "text-white" }: { titl
 function ToggleTile({ icon: Icon, title, desc, checked, onChange, disabled = false }: { icon: any, title: string, desc: string, checked: boolean, onChange: any, disabled?: boolean }) {
   return (
     <div className={cn(
-      "flex items-center justify-between p-6 rounded-[28px] border border-white/5 bg-white/[0.02] transition-all",
-      disabled && "opacity-50 pointer-events-none"
+      "flex items-center justify-between p-5 rounded-2xl border border-border bg-muted/10 transition-all",
+      disabled && "opacity-40 pointer-events-none"
     )}>
       <div className="flex items-center gap-4">
-        <div className="p-2.5 bg-white/5 rounded-2xl">
-          <Icon className="size-5 text-white/40" />
+        <div className="p-2 bg-muted/20 rounded-xl">
+          <Icon className="size-4.5 text-muted-foreground" />
         </div>
         <div className="text-left">
-          <p className="font-bold">{title}</p>
-          <p className="text-xs text-white/40 font-medium">{desc}</p>
+          <p className="text-sm font-bold">{title}</p>
+          <p className="text-[11px] text-muted-foreground font-medium">{desc}</p>
         </div>
       </div>
-      <Switch checked={checked} onCheckedChange={onChange} />
+      <Switch checked={checked} onCheckedChange={onChange} className="scale-90" />
     </div>
   )
 }
 
-function DataButton({ icon: Icon, title, desc, onClick }: { icon: any, title: string, desc: string, onClick: any }) {
+function DataButton({ icon: Icon, title, onClick }: { icon: any, title: string, onClick: any }) {
   return (
     <button 
       onClick={onClick}
-      className="w-full flex flex-col gap-4 p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-all group text-left"
+      className="w-full flex items-center gap-4 p-5 rounded-2xl border border-border bg-muted/10 hover:bg-muted/20 transition-all group"
     >
-      <div className="p-3 bg-white/5 rounded-2xl w-fit group-hover:scale-110 transition-transform">
-        <Icon className="size-6 text-white/40" />
+      <div className="p-2.5 bg-muted/20 rounded-xl group-hover:scale-105 transition-transform">
+        <Icon className="size-4.5 text-muted-foreground" />
       </div>
-      <div>
-        <p className="font-bold text-lg">{title}</p>
-        <p className="text-xs text-white/40 font-medium">{desc}</p>
-      </div>
+      <p className="font-bold text-sm">{title}</p>
     </button>
   )
 }
@@ -613,9 +585,9 @@ function AboutCard({ icon: Icon, title, value, href }: { icon: any, title: strin
     <Link 
       href={href} 
       target="_blank"
-      className="p-6 rounded-[28px] border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-all group"
+      className="p-6 rounded-2xl border border-border bg-muted/10 hover:bg-muted/20 transition-all group"
     >
-      <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-2 flex items-center gap-2">
+      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2">
         <Icon className="size-3" />
         {title}
       </p>
@@ -632,40 +604,9 @@ function SocialIcon({ icon: Icon, href }: { icon: any, href: string }) {
     <Link 
       href={href} 
       target="_blank" 
-      className="p-3 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-white/40 hover:text-white transition-all hover:scale-110"
+      className="p-3 rounded-full bg-muted/20 border border-border hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-all hover:scale-110"
     >
       <Icon className="size-5" />
-    </Link>
-  )
-}
-
-function SettingsCard({ children, className }: { children: React.ReactNode, className?: string }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ type: "spring", duration: 0.5 }}
-      className={cn(
-        "rounded-[40px] border border-white/5 bg-white/5 backdrop-blur-3xl shadow-2xl",
-        className
-      )}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-function SocialLink({ href, icon: Icon, label }: { href: string, icon: any, label: string }) {
-  return (
-    <Link 
-      href={href} 
-      target="_blank"
-      className="flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
-    >
-      <Icon className="size-4 text-white/40 group-hover:text-primary transition-colors" />
-      <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
-      <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
     </Link>
   )
 }

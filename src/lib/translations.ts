@@ -138,11 +138,16 @@ export const translations = {
       languageDesc: "Choose your preferred language for the interface",
       theme: "Theme",
       themeDesc: "Select your preferred color scheme",
+      colorTheme: "Color Theme",
+      systemLanguage: "System Language",
+
       notifications: "Notifications",
       notificationsDesc: "Configure app notifications and sounds",
       enableNotifications: "Enable Notifications",
       notificationSound: "Notification Sound",
       notifyOnComplete: "Notify on translation completion",
+      audioFeedback: "Audio Feedback",
+      audioFeedbackDesc: "Play a sound on successful translation",
       
       connection: "Connection",
       connectionDesc: "Configure LM Studio connection",
@@ -151,6 +156,11 @@ export const translations = {
       testConnection: "Test Connection",
       connectionSuccess: "Connection successful!",
       connectionFailed: "Connection failed. Make sure LM Studio is running.",
+      coreOnline: "Core Online",
+      coreOffline: "Core Offline",
+      engineUrl: "Engine URL",
+      activeModel: "Active Model",
+      saveConfig: "Save Configuration",
       
       model: "Model Settings",
       modelDesc: "Configure translation model behavior",
@@ -164,10 +174,16 @@ export const translations = {
       clearData: "Clear All Data",
       clearDataTitle: "Clear all data?",
       clearDataDesc: "This will delete all your history and favorites. This action cannot be undone.",
+      purgeTitle: "Purge All Data",
+      purgeDesc: "Clear history, favorites and all preferences",
+      vaultTitle: "Translation Vault",
+      vaultDesc: "Manage your personal history and favorites",
       
       reset: "Reset Settings",
       resetTitle: "Reset all settings?",
       resetDesc: "This will restore all settings to their default values.",
+      resetOnboarding: "Reset Welcome Experience",
+      resetOnboardingDesc: "Re-run the initial setup wizard",
     },
     
     // About
@@ -346,11 +362,16 @@ export const translations = {
       languageDesc: "Arayüz için tercih ettiğiniz dili seçin",
       theme: "Tema",
       themeDesc: "Tercih ettiğiniz renk şemasını seçin",
+      colorTheme: "Renk Teması",
+      systemLanguage: "Sistem Dili",
+
       notifications: "Bildirimler",
       notificationsDesc: "Uygulama bildirimlerini ve seslerini yapılandırın",
       enableNotifications: "Bildirimleri Etkinleştir",
       notificationSound: "Bildirim Sesi",
       notifyOnComplete: "Çeviri tamamlandığında bildir",
+      audioFeedback: "Sesli Geri Bildirim",
+      audioFeedbackDesc: "Başarılı çeviri yapıldığında ses çal",
       
       connection: "Bağlantı",
       connectionDesc: "LM Studio bağlantısını yapılandırın",
@@ -359,6 +380,11 @@ export const translations = {
       testConnection: "Bağlantıyı Test Et",
       connectionSuccess: "Bağlantı başarılı!",
       connectionFailed: "Bağlantı başarısız. LM Studio'nun çalıştığından emin olun.",
+      coreOnline: "Motor Çevrimiçi",
+      coreOffline: "Motor Çevrimdışı",
+      engineUrl: "Motor URL'si",
+      activeModel: "Aktif Model",
+      saveConfig: "Yapılandırmayı Kaydet",
       
       model: "Model Ayarları",
       modelDesc: "Çeviri modeli davranışını yapılandırın",
@@ -372,10 +398,16 @@ export const translations = {
       clearData: "Tüm Verileri Temizle",
       clearDataTitle: "Tüm veriler silinsin mi?",
       clearDataDesc: "Bu, tüm geçmişinizi ve favorilerinizi silecek. Bu işlem geri alınamaz.",
+      purgeTitle: "Tüm Verileri Temizle",
+      purgeDesc: "Geçmişi, favorileri ve tüm tercihleri temizle",
+      vaultTitle: "Çeviri Kasası",
+      vaultDesc: "Kişisel geçmişinizi ve favorilerinizi yönetin",
       
       reset: "Ayarları Sıfırla",
       resetTitle: "Tüm ayarlar sıfırlansın mı?",
       resetDesc: "Bu, tüm ayarları varsayılan değerlerine geri yükleyecek.",
+      resetOnboarding: "Karşılama Deneyimini Sıfırla",
+      resetOnboardingDesc: "İlk kurulum sihirbazını tekrar çalıştır",
     },
     
     // About

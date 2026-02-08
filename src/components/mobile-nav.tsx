@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { Languages, History, Star, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
@@ -34,8 +34,6 @@ export function MobileNav() {
     }
   ]
 
-  const activeIndex = items.findIndex(item => item.href === pathname)
-
   return (
     <div className="fixed bottom-6 left-0 right-0 z-50 px-6 md:hidden pointer-events-none">
       <motion.div 
@@ -43,28 +41,7 @@ export function MobileNav() {
         animate={{ y: 0, opacity: 1 }}
         className="mx-auto max-w-sm pointer-events-auto"
       >
-        <div className="relative flex items-center justify-around h-16 p-1.5 bg-black/80 backdrop-blur-3xl border border-white/10 rounded-[28px] shadow-2xl shadow-black/50 ring-1 ring-white/5 overflow-hidden">
-          {/* Sliding Active Indicator */}
-          <AnimatePresence>
-            {activeIndex !== -1 && (
-              <motion.div
-                layoutId="mobile-nav-pill"
-                className="absolute bg-white/10 rounded-[22px] z-0"
-                initial={false}
-                animate={{
-                  left: `calc(${activeIndex * 25}% + 6px)`,
-                  width: "calc(25% - 12px)",
-                  height: 48
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 350,
-                  damping: 30
-                }}
-              />
-            )}
-          </AnimatePresence>
-
+        <div className="flex items-center justify-around h-16 px-2 bg-background/60 backdrop-blur-xl border border-border rounded-2xl shadow-xl shadow-black/5">
           {items.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -72,25 +49,26 @@ export function MobileNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative z-10 flex flex-col items-center justify-center w-full h-full gap-1 transition-colors duration-300",
-                  isActive ? "text-primary" : "text-white/40"
+                  "relative flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-200",
+                  isActive ? "text-primary" : "text-muted-foreground"
                 )}
               >
                 <item.icon className={cn(
-                  "size-5 transition-all duration-300",
+                  "size-5 transition-transform duration-200",
                   isActive && "scale-110"
                 )} />
                 <span className={cn(
-                  "text-[8px] font-black uppercase tracking-widest transition-all duration-300",
-                  isActive ? "opacity-100" : "opacity-40"
+                  "text-[9px] font-bold uppercase tracking-tight transition-all duration-200",
+                  isActive ? "opacity-100" : "opacity-60"
                 )}>
                   {item.label}
                 </span>
                 
                 {isActive && (
                   <motion.div
-                    layoutId="mobile-nav-active-dot"
-                    className="absolute bottom-1 size-0.5 rounded-full bg-primary"
+                    layoutId="mobile-nav-active-bar"
+                    className="absolute -bottom-1 w-6 h-0.5 rounded-full bg-primary"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
               </Link>
