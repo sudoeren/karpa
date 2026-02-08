@@ -47,7 +47,6 @@ export default function SettingsPage() {
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [activeTab, setActiveTab] = useState<'general' | 'notifications' | 'connection' | 'data' | 'about'>('general')
-  const [amoledMode, setAmoledMode] = useState(false)
   const [models, setModels] = useState<Model[]>([])
   const [selectedModel, setSelectedModel] = useState<string>("")
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
@@ -81,7 +80,6 @@ export default function SettingsPage() {
   useEffect(() => {
     const savedUrl = localStorage.getItem("lm-studio-url")
     const savedTemp = localStorage.getItem("lm-studio-temperature")
-    const savedAmoled = localStorage.getItem("localce-amoled")
     const savedModel = localStorage.getItem("lm-studio-model")
     const savedNotifs = localStorage.getItem("localce-notifications")
     const savedNotifSound = localStorage.getItem("localce-notification-sound")
@@ -91,25 +89,10 @@ export default function SettingsPage() {
       fetchModels(savedUrl)
     }
     if (savedTemp) setTemperature(parseFloat(savedTemp))
-    if (savedAmoled) setAmoledMode(savedAmoled === 'true')
     if (savedModel) setSelectedModel(savedModel)
     if (savedNotifs) setNotificationsEnabled(savedNotifs === 'true')
     if (savedNotifSound) setNotificationSound(savedNotifSound !== 'false')
   }, [fetchModels])
-
-  // Apply AMOLED mode
-  useEffect(() => {
-    if (amoledMode && theme === 'dark') {
-      document.documentElement.classList.add('amoled')
-    } else {
-      document.documentElement.classList.remove('amoled')
-    }
-  }, [amoledMode, theme])
-
-  const handleAmoledChange = (checked: boolean) => {
-    setAmoledMode(checked)
-    localStorage.setItem("localce-amoled", String(checked))
-  }
 
   const handleNotificationsChange = (checked: boolean) => {
     if (checked && Notification.permission !== 'granted') {
@@ -179,7 +162,7 @@ export default function SettingsPage() {
     const data = {
       history: JSON.parse(localStorage.getItem("translation-history") || "[]"),
       favorites: JSON.parse(localStorage.getItem("translation-favorites") || "[]"),
-      settings: { lmStudioUrl, temperature, language, theme, amoledMode, notificationsEnabled, notificationSound }
+      settings: { lmStudioUrl, temperature, language, theme, notificationsEnabled, notificationSound }
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = window.URL.createObjectURL(blob)
@@ -205,7 +188,6 @@ export default function SettingsPage() {
           if (data.settings.temperature) setTemperature(data.settings.temperature)
           if (data.settings.language) setLanguage(data.settings.language)
           if (data.settings.theme) setTheme(data.settings.theme)
-          if (data.settings.amoledMode !== undefined) handleAmoledChange(data.settings.amoledMode)
           if (data.settings.notificationsEnabled !== undefined) handleNotificationsChange(data.settings.notificationsEnabled)
           if (data.settings.notificationSound !== undefined) handleNotificationSoundChange(data.settings.notificationSound)
         }
@@ -312,26 +294,6 @@ export default function SettingsPage() {
                       </button>
                     ))}
                   </div>
-                </div>
-
-                {/* AMOLED Mode */}
-                <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-medium flex items-center gap-2">
-                      <Droplets className="size-4" />
-                      {language === 'tr' ? 'AMOLED Modu (Tam Siyah)' : 'AMOLED Mode (Pitch Black)'}
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      {language === 'tr' 
-                        ? 'Koyu tema için tam siyah arka plan kullanır' 
-                        : 'Use pure black background for dark theme'}
-                    </p>
-                  </div>
-                  <Switch
-                    checked={amoledMode}
-                    onCheckedChange={handleAmoledChange}
-                    disabled={theme === 'light'}
-                  />
                 </div>
 
                 {/* Language */}

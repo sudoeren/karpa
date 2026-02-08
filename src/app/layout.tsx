@@ -34,30 +34,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const amoled = localStorage.getItem('localce-amoled');
-                  const theme = localStorage.getItem('theme');
-                  const element = document.documentElement;
-                  
-                  if (amoled === 'true') {
-                    element.classList.add('amoled');
-                    element.classList.add('dark');
-                    element.style.backgroundColor = '#000000';
-                  } else {
-                    element.classList.remove('amoled');
-                    element.style.backgroundColor = '';
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground transition-colors duration-300`}
       >
