@@ -491,7 +491,7 @@ export default function SettingsPage() {
                     <motion.div 
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="size-24 bg-gradient-to-br from-primary to-violet-600 rounded-[32px] p-1 shadow-2xl shadow-primary/20 rotate-3"
+                      className="size-24 bg-gradient-to-br from-primary to-violet-600 rounded-[32px] p-1 shadow-2xl shadow-primary/20"
                     >
                       <div className="w-full h-full bg-background rounded-[28px] flex items-center justify-center">
                         <Logo size={48} />
@@ -499,7 +499,7 @@ export default function SettingsPage() {
                     </motion.div>
                     <div className="space-y-2">
                       <h2 className="text-5xl font-black tracking-tighter text-foreground">Localce</h2>
-                      <p className="text-primary font-mono text-[10px] uppercase tracking-[0.4em]">Privacy First AI</p>
+                      <p className="text-primary font-mono text-[10px] uppercase tracking-[0.4em]">{t.about.privacyFirst}</p>
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
                       {t.about.description}
@@ -515,21 +515,17 @@ export default function SettingsPage() {
                     />
                     <AboutCard 
                       icon={Github} 
-                      title="Source Code" 
+                      title={t.about.sourceCode} 
                       value="sudoeren/localce" 
                       href="https://github.com/sudoeren/localce" 
                     />
                   </div>
 
-                  <div className="flex justify-center items-center gap-8 pt-4 border-t border-border">
-                    <div className="text-center">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 mb-1">{t.about.version}</p>
-                      <p className="text-xs font-bold font-mono text-foreground">v1.2.4</p>
-                    </div>
-                    <div className="w-px h-8 bg-border" />
-                    <div className="text-center">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 mb-1">Status</p>
-                      <p className="text-xs font-bold text-emerald-500 uppercase tracking-tighter">Stable Release</p>
+                  <div className="flex flex-col items-center gap-2 pt-8 border-t border-border">
+                    <div className="px-4 py-1.5 rounded-full bg-muted/50 border border-border flex items-center gap-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t.about.version}</span>
+                      <div className="w-px h-3 bg-border" />
+                      <span className="text-xs font-bold font-mono text-foreground">1.2.4</span>
                     </div>
                   </div>
                 </div>
