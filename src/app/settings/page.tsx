@@ -11,7 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Settings, Sun, Moon, Monitor, Globe, 
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Cpu, Droplets, Github, Code2, ArrowUpRight, Bell, Volume2
+  Cpu, Droplets, Github, Code2, ArrowUpRight, Bell, Volume2,
+  Shield, Server, Terminal, Sparkles, User, ExternalLink, Database,
+  LayoutGrid, Sliders, HardDrive, Info, ArrowLeft
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -27,7 +29,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { useTheme } from "next-themes"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useOnboarding } from "@/contexts/onboarding-context"
 import { Logo } from "@/components/logo"
@@ -38,15 +40,18 @@ type Model = {
   object: string
 }
 
+type TabType = 'appearance' | 'connection' | 'notifications' | 'data' | 'about'
+
 export default function SettingsPage() {
   const { t, language, setLanguage } = useLanguage()
   const { theme, setTheme } = useTheme()
   const { resetOnboarding } = useOnboarding()
+  const [activeTab, setActiveTab] = useState<TabType>('appearance')
+  
   const [lmStudioUrl, setLmStudioUrl] = useState("http://localhost:1234")
   const [temperature, setTemperature] = useState(0.2)
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
-  const [activeTab, setActiveTab] = useState<'general' | 'notifications' | 'connection' | 'data' | 'about'>('general')
   const [models, setModels] = useState<Model[]>([])
   const [selectedModel, setSelectedModel] = useState<string>("")
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
@@ -63,7 +68,6 @@ export default function SettingsPage() {
       if (data.success) {
         setModels(data.models)
         if (!selectedModel && data.models.length > 0) {
-          // Check if saved model exists in new list, otherwise pick first
           const savedModel = localStorage.getItem("lm-studio-model")
           if (savedModel && data.models.some((m: Model) => m.id === savedModel)) {
             setSelectedModel(savedModel)
@@ -125,39 +129,6 @@ export default function SettingsPage() {
     toast.success(t.settings.saved)
   }
 
-  const testConnection = async () => {
-    setIsTestingConnection(true)
-    setConnectionStatus('idle')
-    
-    try {
-      const response = await fetch('/api/test-connection', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: lmStudioUrl }),
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        setConnectionStatus('success')
-        await fetchModels(lmStudioUrl)
-        const modelInfo = data.models > 0 ? ` (${data.models} model${data.models > 1 ? 's' : ''})` : ''
-        toast.success(`${t.settings.connectionSuccess}${modelInfo}`)
-      } else {
-        setConnectionStatus('error')
-        toast.error(data.error || t.settings.connectionFailed)
-      }
-    } catch (error) {
-      console.error(error)
-      setConnectionStatus('error')
-      toast.error(t.settings.connectionFailed)
-    } finally {
-      setIsTestingConnection(false)
-    }
-  }
-
   const exportData = () => {
     const data = {
       history: JSON.parse(localStorage.getItem("translation-history") || "[]"),
@@ -203,387 +174,498 @@ export default function SettingsPage() {
     localStorage.removeItem("translation-history")
     localStorage.removeItem("translation-favorites")
     toast.success(t.settings.clearData)
-    // Reset onboarding to show it again
     resetOnboarding()
   }
 
-  const themes = [
-    { value: "light", icon: Sun, label: t.common.light },
-    { value: "dark", icon: Moon, label: t.common.dark },
-    { value: "system", icon: Monitor, label: t.common.system },
-  ]
+  const testConnection = async () => {
+    setIsTestingConnection(true)
+    setConnectionStatus('idle')
+    try {
+      const response = await fetch('/api/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: lmStudioUrl }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setConnectionStatus('success')
+        await fetchModels(lmStudioUrl)
+        toast.success(t.settings.connectionSuccess)
+      } else {
+        setConnectionStatus('error')
+        toast.error(data.error || t.settings.connectionFailed)
+      }
+    } catch (error) {
+      setConnectionStatus('error')
+      toast.error(t.settings.connectionFailed)
+    } finally {
+      setIsTestingConnection(false)
+    }
+  }
 
-  const languages = [
-    { value: "en", label: "English", flag: "GB" },
-    { value: "tr", label: "Türkçe", flag: "TR" },
-  ]
-
-  const tabs = [
-    { id: 'general' as const, label: t.settings.appearance, icon: Sun },
-    { id: 'notifications' as const, label: t.settings.notifications, icon: Bell },
-    { id: 'connection' as const, label: t.settings.connection, icon: Zap },
-    { id: 'data' as const, label: t.settings.data, icon: Download },
-    { id: 'about' as const, label: t.nav.about, icon: Code2 },
-  ]
+  const sidebarItems = [
+    { id: 'appearance', label: t.settings.appearance, icon: LayoutGrid },
+    { id: 'connection', label: t.settings.connection, icon: Sliders },
+    { id: 'notifications', label: t.settings.notifications, icon: Bell },
+    { id: 'data', label: t.settings.data, icon: HardDrive },
+    { id: 'about', label: t.nav.about, icon: Info },
+  ] as const
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-6"
-      >
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-card/50 backdrop-blur-xl border rounded-full mb-2">
-          <Settings className="size-4 text-primary" />
-          <span className="text-sm font-medium">{t.settings.title}</span>
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+    <div className="h-full flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-4xl mx-auto w-full flex-1 min-h-0 flex flex-col"
+        className="w-full max-w-5xl h-[700px] bg-black border border-white/10 rounded-[40px] shadow-2xl overflow-hidden flex"
       >
-        <div className="bg-card/50 backdrop-blur-xl border rounded-3xl overflow-hidden h-full flex flex-col">
-          {/* Tabs */}
-          <div className="flex border-b overflow-x-auto shrink-0">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 whitespace-nowrap",
-                  activeTab === tab.id
-                    ? "border-primary text-primary bg-primary/5"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                <tab.icon className="size-4" />
-                {tab.label}
-              </button>
-            ))}
+        {/* Sidebar */}
+        <div className="w-64 border-r border-white/5 bg-white/[0.02] flex flex-col p-6 space-y-8">
+          <div className="flex items-center gap-3 px-2">
+            <div className="p-2 bg-primary/10 rounded-xl">
+              <Logo size={24} />
+            </div>
+            <h1 className="font-black tracking-tighter text-xl">Settings</h1>
           </div>
 
-          {/* Content */}
-          <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
-            {/* General Tab */}
-            {activeTab === 'general' && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                {/* Theme */}
-                <div>
-                  <Label className="text-sm font-medium mb-3 block">{t.settings.theme}</Label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {themes.map((t2) => (
-                      <button
-                        key={t2.value}
-                        onClick={() => setTheme(t2.value)}
-                        className={cn(
-                          "flex flex-col items-center gap-2 p-4 rounded-xl border transition-all",
-                          theme === t2.value
-                            ? "border-primary bg-primary/5 shadow-sm"
-                            : "border-transparent bg-muted/50 hover:bg-muted"
-                        )}
-                      >
-                        <t2.icon className={cn("size-6", theme === t2.value && "text-primary")} />
-                        <span className="text-sm">{t2.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Language */}
-                <div>
-                  <Label className="text-sm font-medium mb-3 block">{t.settings.language}</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.value}
-                        onClick={() => setLanguage(lang.value as "en" | "tr")}
-                        className={cn(
-                          "flex items-center gap-3 p-4 rounded-xl border transition-all",
-                          language === lang.value
-                            ? "border-primary bg-primary/5 shadow-sm"
-                            : "border-transparent bg-muted/50 hover:bg-muted"
-                        )}
-                      >
-                        <Globe className={cn("size-5", language === lang.value && "text-primary")} />
-                        <span className="text-sm font-medium">{lang.label}</span>
-                        {language === lang.value && <Check className="size-4 text-primary ml-auto" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Notifications Tab */}
-            {activeTab === 'notifications' && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-medium flex items-center gap-2">
-                        <Bell className="size-4 text-primary" />
-                        {t.settings.enableNotifications}
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        {t.settings.notifyOnComplete}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={notificationsEnabled}
-                      onCheckedChange={handleNotificationsChange}
+          <nav className="flex-1 space-y-1">
+            {sidebarItems.map((item) => {
+              const isActive = activeTab === item.id
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group relative",
+                    isActive 
+                      ? "text-white" 
+                      : "text-white/40 hover:text-white/70 hover:bg-white/5"
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebar-active"
+                      className="absolute inset-0 bg-white/5 rounded-2xl border border-white/5 shadow-sm"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
+                  )}
+                  <item.icon className={cn(
+                    "size-5 transition-colors",
+                    isActive ? "text-primary" : "text-white/20"
+                  )} />
+                  <span className="text-sm font-bold tracking-tight relative z-10">{item.label}</span>
+                  {isActive && (
+                    <motion.div 
+                      layoutId="sidebar-dot"
+                      className="size-1 bg-primary rounded-full ml-auto relative z-10" 
+                    />
+                  )}
+                </button>
+              )
+            })}
+          </nav>
+
+          <div className="pt-6 border-t border-white/5">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-primary/5 border border-primary/10">
+               <div className={cn(
+                 "size-1.5 rounded-full",
+                 connectionStatus === 'success' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-white/20"
+               )} />
+               <span className="text-[9px] font-black uppercase tracking-widest text-primary/80">
+                 {connectionStatus === 'success' ? "Core Online" : "Core Offline"}
+               </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 10, filter: "blur(4px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: -10, filter: "blur(4px)" }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="flex-1 p-10 overflow-y-auto custom-scrollbar"
+            >
+              {activeTab === 'appearance' && (
+                <div className="space-y-10">
+                  <SectionHeader title={t.settings.appearance} desc="Customize your visual experience." icon={LayoutGrid} />
+                  
+                  <div className="space-y-6">
+                    <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">Color Theme</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {[
+                        { id: 'light', icon: Sun, label: t.common.light },
+                        { id: 'dark', icon: Moon, label: t.common.dark },
+                        { id: 'system', icon: Monitor, label: t.common.system }
+                      ].map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => setTheme(t.id)}
+                          className={cn(
+                            "flex flex-col items-center gap-4 p-6 rounded-[32px] border transition-all duration-300 group",
+                            theme === t.id 
+                              ? "bg-white text-black border-white shadow-xl scale-105" 
+                              : "bg-white/5 border-white/5 text-white/40 hover:text-white hover:bg-white/10"
+                          )}
+                        >
+                          <t.icon className="size-6 group-hover:scale-110 transition-transform" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">{t.label}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-medium flex items-center gap-2">
-                        <Volume2 className="size-4 text-primary" />
-                        {t.settings.notificationSound}
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        {language === 'tr' ? 'Bildirim geldiğinde ses çal' : 'Play a sound when a notification arrives'}
-                      </p>
+                  <div className="space-y-6">
+                    <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">System Language</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        { id: 'en', label: 'English', native: 'English', flag: '🇺🇸' },
+                        { id: 'tr', label: 'Turkish', native: 'Türkçe', flag: '🇹🇷' }
+                      ].map((l) => (
+                        <button
+                          key={l.id}
+                          onClick={() => setLanguage(l.id as any)}
+                          className={cn(
+                            "flex items-center gap-4 p-5 rounded-[28px] border transition-all duration-300",
+                            language === l.id 
+                              ? "bg-primary/10 border-primary/40 text-primary shadow-[0_0_20px_rgba(var(--primary),0.1)]" 
+                              : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10"
+                          )}
+                        >
+                          <span className="text-2xl">{l.flag}</span>
+                          <div className="text-left">
+                            <p className="font-bold">{l.native}</p>
+                            <p className="text-[9px] uppercase tracking-widest opacity-50">{l.label}</p>
+                          </div>
+                          {language === l.id && <Check className="size-4 ml-auto" />}
+                        </button>
+                      ))}
                     </div>
-                    <Switch
-                      checked={notificationSound}
-                      onCheckedChange={handleNotificationSoundChange}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'connection' && (
+                <div className="space-y-10">
+                  <SectionHeader title={t.settings.connection} desc="Configure your local AI engine." icon={Sliders} />
+                  
+                  <div className="p-8 rounded-[32px] bg-white/5 border border-white/5 space-y-8">
+                    <div className="space-y-4">
+                      <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">Engine URL</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          value={lmStudioUrl}
+                          onChange={(e) => setLmStudioUrl(e.target.value)}
+                          className="h-14 pl-6 rounded-2xl bg-black/50 border-white/5 focus:border-primary transition-all font-mono text-sm"
+                          placeholder="http://localhost:1234"
+                        />
+                        <Button
+                          variant="outline"
+                          className="h-14 px-6 rounded-2xl border-white/10 bg-white/5"
+                          onClick={testConnection}
+                          disabled={isTestingConnection}
+                        >
+                          {isTestingConnection ? <Loader2 className="size-4 animate-spin mr-2" /> : <RefreshCw className="size-4 mr-2" />}
+                          Test
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">Active Model</Label>
+                      <Select value={selectedModel} onValueChange={setSelectedModel}>
+                        <SelectTrigger className="h-14 rounded-2xl bg-black/50 border-white/5 px-6">
+                          <SelectValue placeholder="Select Model" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-950 border-white/10">
+                          {models.map((m) => (
+                            <SelectItem key={m.id} value={m.id}>{m.id}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-[10px] uppercase tracking-[0.2em] font-black text-white/30 ml-1">Temperature</Label>
+                        <Badge variant="outline" className="font-mono text-primary border-primary/20 bg-primary/5">{temperature.toFixed(1)}</Badge>
+                      </div>
+                      <Slider
+                        value={[temperature]}
+                        onValueChange={(v) => setTemperature(v[0])}
+                        min={0}
+                        max={1}
+                        step={0.1}
+                        className="py-4"
+                      />
+                    </div>
+
+                    <Button onClick={saveSettings} className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20">
+                      Save configuration
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'notifications' && (
+                <div className="space-y-10">
+                  <SectionHeader title={t.settings.notifications} desc="Stay updated on translation tasks." icon={Bell} />
+                  
+                  <div className="space-y-4">
+                    <ToggleTile 
+                      icon={Bell} 
+                      title="Enable Notifications" 
+                      desc="Get notified when translations are ready." 
+                      checked={notificationsEnabled} 
+                      onChange={handleNotificationsChange} 
+                    />
+                    <ToggleTile 
+                      icon={Volume2} 
+                      title="Audio Feedback" 
+                      desc="Play a sound on successful translation." 
+                      checked={notificationSound} 
+                      onChange={handleNotificationSoundChange} 
                       disabled={!notificationsEnabled}
                     />
                   </div>
                 </div>
-              </motion.div>
-            )}
+              )}
 
-            {/* Connection Tab */}
-            {activeTab === 'connection' && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                {/* URL */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <Label className="text-sm font-medium">{t.settings.lmStudioUrl}</Label>
-                    {connectionStatus === 'success' && (
-                      <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-                        Connected
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={lmStudioUrl}
-                      onChange={(e) => setLmStudioUrl(e.target.value)}
-                      className="flex-1 h-11 rounded-xl bg-muted/50"
-                      placeholder="http://localhost:1234"
+              {activeTab === 'data' && (
+                <div className="space-y-10">
+                  <SectionHeader title={t.settings.data} desc="Manage your personal translation vault." icon={HardDrive} />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <DataButton 
+                      icon={Download} 
+                      title="Export Vault" 
+                      desc="Download your history & favorites." 
+                      onClick={exportData} 
                     />
-                    <Button
-                      variant="outline"
-                      className="h-11 rounded-xl gap-2 px-4"
-                      onClick={testConnection}
-                      disabled={isTestingConnection}
-                    >
-                      {isTestingConnection ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : connectionStatus === 'success' ? (
-                        <Check className="size-4 text-green-500" />
-                      ) : (
-                        <RefreshCw className="size-4" />
-                      )}
-                      Test
-                    </Button>
+                    <label className="block cursor-pointer">
+                      <DataButton 
+                        icon={Upload} 
+                        title="Import Vault" 
+                        desc="Restore from a JSON backup." 
+                        onClick={() => {}} 
+                      />
+                      <input type="file" accept=".json" className="hidden" onChange={importData} />
+                    </label>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">{t.settings.connectionDesc}</p>
-                </div>
 
-                {/* Model Selection */}
-                {models.length > 0 && (
-                  <div>
-                    <Label className="text-sm font-medium mb-3 block flex items-center gap-2">
-                      <Cpu className="size-4" />
-                      Model
-                    </Label>
-                    <Select value={selectedModel} onValueChange={setSelectedModel}>
-                      <SelectTrigger className="w-full h-11 rounded-xl bg-muted/50">
-                        <SelectValue placeholder="Select a model" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {models.map((model) => (
-                          <SelectItem key={model.id} value={model.id}>
-                            {model.id}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {language === 'tr' ? 'Çeviri için kullanılacak modeli seçin' : 'Select the model to use for translation'}
-                    </p>
-                  </div>
-                )}
+                  <div className="pt-10 border-t border-white/5 space-y-6">
+                    <SectionHeader title="Danger Zone" desc="Destructive actions that cannot be undone." icon={Shield} color="text-rose-500" />
+                    
+                    <div className="space-y-3">
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button className="w-full flex items-center justify-between p-6 rounded-[28px] border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition-all group">
+                            <div className="text-left">
+                              <p className="font-bold text-rose-500">Purge All Data</p>
+                              <p className="text-xs text-rose-500/60 font-medium">Clear history, favorites and all preferences.</p>
+                            </div>
+                            <Trash2 className="size-5 text-rose-500 group-hover:scale-110 transition-transform" />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-zinc-950 border-rose-500/20">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-2xl font-black tracking-tighter text-rose-500 uppercase">Confirm Purge</AlertDialogTitle>
+                            <AlertDialogDescription className="text-white/50">{t.settings.clearDataDesc}</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="bg-white/5 border-white/5 rounded-xl">Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={clearAllData} className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl">
+                              Confirm Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
 
-                {/* Temperature */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <Label className="text-sm font-medium">{t.settings.temperature}</Label>
-                    <Badge variant="outline" className="font-mono">{temperature.toFixed(1)}</Badge>
-                  </div>
-                  <Slider
-                    value={[temperature]}
-                    onValueChange={(v) => setTemperature(v[0])}
-                    min={0}
-                    max={1}
-                    step={0.1}
-                    className="py-2"
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">{t.settings.temperatureDesc}</p>
-                </div>
-
-                {/* Save */}
-                <Button onClick={saveSettings} className="w-full h-11 rounded-xl">
-                  {t.common.save}
-                </Button>
-              </motion.div>
-            )}
-
-            {/* Data Tab */}
-            {activeTab === 'data' && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div>
-                  <Label className="text-sm font-medium mb-3 block">{t.settings.dataDesc}</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="h-12 rounded-xl gap-2" onClick={exportData}>
-                      <Download className="size-4" />
-                      {t.settings.exportData}
-                    </Button>
-                    <Button variant="outline" className="h-12 rounded-xl gap-2" asChild>
-                      <label className="cursor-pointer">
-                        <Upload className="size-4" />
-                        {t.settings.importData}
-                        <input type="file" accept=".json" className="hidden" onChange={importData} />
-                      </label>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t">
-                  <Label className="text-sm font-medium mb-3 block text-destructive">{t.settings.clearDataTitle}</Label>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" className="w-full h-12 rounded-xl gap-2 text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10">
-                        <Trash2 className="size-4" />
-                        {t.settings.clearData}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>{t.settings.clearDataTitle}</AlertDialogTitle>
-                        <AlertDialogDescription>{t.settings.clearDataDesc}</AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-                        <AlertDialogAction onClick={clearAllData} className="bg-destructive text-destructive-foreground">
-                          {t.common.delete}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </motion.div>
-            )}
-
-            {/* About Tab */}
-            {activeTab === 'about' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center text-center space-y-10 py-6"
-              >
-                {/* Brand Section */}
-                <div className="space-y-6">
-                  <div className="relative inline-block group">
-                    <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="relative transform transition-transform duration-500 hover:scale-105">
-                      <Logo size={64} />
+                      <button 
+                        onClick={resetOnboarding}
+                        className="w-full flex items-center justify-between p-6 rounded-[28px] border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-all group"
+                      >
+                        <div className="text-left">
+                          <p className="font-bold">Reset Welcome Experience</p>
+                          <p className="text-xs text-white/40 font-medium">Re-run the initial setup wizard.</p>
+                        </div>
+                        <RefreshCw className="size-5 text-white/20 group-hover:rotate-180 transition-transform duration-500" />
+                      </button>
                     </div>
                   </div>
-                  
-                  <div className="space-y-3 max-w-md">
-                    <h2 className="text-3xl font-bold tracking-tight">Localce</h2>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                </div>
+              )}
+
+              {activeTab === 'about' && (
+                <div className="space-y-12">
+                  <div className="flex flex-col items-center text-center space-y-6 pt-6">
+                    <div className="size-24 bg-gradient-to-br from-primary to-violet-600 rounded-[32px] p-1 shadow-2xl shadow-primary/20">
+                      <div className="w-full h-full bg-black rounded-[28px] flex items-center justify-center">
+                        <Logo size={48} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <h2 className="text-5xl font-black tracking-tighter">Localce</h2>
+                      <p className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px]">Version 1.2.4 • Private AI</p>
+                    </div>
+                    <p className="text-lg text-white/60 leading-relaxed max-w-lg">
                       {t.about.description}
                     </p>
                   </div>
-                </div>
 
-                {/* Info Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
-                  {/* Developer Card */}
-                  <div className="group rounded-2xl border bg-card/50 p-5 text-left transition-all hover:bg-card hover:shadow-md">
-                    <div className="flex flex-col h-full justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-muted-foreground/60 text-[10px] uppercase tracking-wider font-mono">
-                          <Code2 className="size-3" />
-                          {t.about.developer}
-                        </div>
-                        <h3 className="font-semibold text-foreground">Eren Çakar</h3>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-primary/10 hover:text-primary" asChild>
-                          <Link href="https://erencakar.com" target="_blank">
-                            <Globe className="size-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-primary/10 hover:text-primary" asChild>
-                          <Link href="https://github.com/sudoeren" target="_blank">
-                            <Github className="size-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <AboutCard 
+                      icon={User} 
+                      title="Lead Developer" 
+                      value="Eren Çakar" 
+                      href="https://erencakar.com" 
+                    />
+                    <AboutCard 
+                      icon={Github} 
+                      title="Source Code" 
+                      value="sudoeren/localce" 
+                      href="https://github.com/sudoeren/localce" 
+                    />
                   </div>
 
-                  {/* Project Card */}
-                  <div className="group rounded-2xl border bg-card/50 p-5 text-left transition-all hover:bg-card hover:shadow-md">
-                    <div className="flex flex-col h-full justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-muted-foreground/60 text-[10px] uppercase tracking-wider font-mono">
-                          <Github className="size-3" />
-                          {t.about.openSource}
-                        </div>
-                        <h3 className="font-semibold text-foreground">GitHub Repo</h3>
-                      </div>
-                      <Button variant="outline" size="sm" className="h-8 rounded-full gap-2 text-xs" asChild>
-                        <Link href="https://github.com/sudoeren/localce" target="_blank">
-                          {t.about.sourceCode}
-                          <ArrowUpRight className="size-3 opacity-50" />
-                        </Link>
-                      </Button>
-                    </div>
+                  <div className="flex justify-center gap-6 pt-4">
+                    <SocialIcon icon={Globe} href="https://erencakar.com" />
+                    <SocialIcon icon={Github} href="https://github.com/sudoeren" />
+                    <SocialIcon icon={Code2} href="https://github.com/sudoeren/localce" />
                   </div>
                 </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
-                {/* Footer (Removed version and made with) */}
-              </motion.div>
-            )}
+          {/* Footer Info */}
+          <div className="px-10 py-4 border-t border-white/5 bg-white/[0.01] flex items-center justify-between">
+            <p className="text-[9px] font-black uppercase tracking-widest text-white/20">© 2026 Localce AI. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+               <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Secure</span>
+               <div className="size-1 rounded-full bg-white/10" />
+               <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Private</span>
+               <div className="size-1 rounded-full bg-white/10" />
+               <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Local</span>
+            </div>
           </div>
         </div>
       </motion.div>
     </div>
+  )
+}
+
+/* SUB-COMPONENTS */
+
+function SectionHeader({ title, desc, icon: Icon, color = "text-white" }: { title: string, desc: string, icon: any, color?: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-3">
+        <Icon className={cn("size-6", color)} />
+        <h2 className={cn("text-3xl font-black tracking-tight", color)}>{title}</h2>
+      </div>
+      <p className="text-sm text-white/40 font-medium ml-9">{desc}</p>
+    </div>
+  )
+}
+
+function ToggleTile({ icon: Icon, title, desc, checked, onChange, disabled = false }: { icon: any, title: string, desc: string, checked: boolean, onChange: any, disabled?: boolean }) {
+  return (
+    <div className={cn(
+      "flex items-center justify-between p-6 rounded-[28px] border border-white/5 bg-white/[0.02] transition-all",
+      disabled && "opacity-50 pointer-events-none"
+    )}>
+      <div className="flex items-center gap-4">
+        <div className="p-2.5 bg-white/5 rounded-2xl">
+          <Icon className="size-5 text-white/40" />
+        </div>
+        <div className="text-left">
+          <p className="font-bold">{title}</p>
+          <p className="text-xs text-white/40 font-medium">{desc}</p>
+        </div>
+      </div>
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
+  )
+}
+
+function DataButton({ icon: Icon, title, desc, onClick }: { icon: any, title: string, desc: string, onClick: any }) {
+  return (
+    <button 
+      onClick={onClick}
+      className="w-full flex flex-col gap-4 p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-all group text-left"
+    >
+      <div className="p-3 bg-white/5 rounded-2xl w-fit group-hover:scale-110 transition-transform">
+        <Icon className="size-6 text-white/40" />
+      </div>
+      <div>
+        <p className="font-bold text-lg">{title}</p>
+        <p className="text-xs text-white/40 font-medium">{desc}</p>
+      </div>
+    </button>
+  )
+}
+
+function AboutCard({ icon: Icon, title, value, href }: { icon: any, title: string, value: string, href: string }) {
+  return (
+    <Link 
+      href={href} 
+      target="_blank"
+      className="p-6 rounded-[28px] border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-all group"
+    >
+      <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-2 flex items-center gap-2">
+        <Icon className="size-3" />
+        {title}
+      </p>
+      <p className="text-lg font-bold group-hover:text-primary transition-colors flex items-center justify-between">
+        {value}
+        <ExternalLink className="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+      </p>
+    </Link>
+  )
+}
+
+function SocialIcon({ icon: Icon, href }: { icon: any, href: string }) {
+  return (
+    <Link 
+      href={href} 
+      target="_blank" 
+      className="p-3 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-white/40 hover:text-white transition-all hover:scale-110"
+    >
+      <Icon className="size-5" />
+    </Link>
+  )
+}
+
+function SettingsCard({ children, className }: { children: React.ReactNode, className?: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ type: "spring", duration: 0.5 }}
+      className={cn(
+        "rounded-[40px] border border-white/5 bg-white/5 backdrop-blur-3xl shadow-2xl",
+        className
+      )}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+function SocialLink({ href, icon: Icon, label }: { href: string, icon: any, label: string }) {
+  return (
+    <Link 
+      href={href} 
+      target="_blank"
+      className="flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
+    >
+      <Icon className="size-4 text-white/40 group-hover:text-primary transition-colors" />
+      <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+      <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
+    </Link>
   )
 }
