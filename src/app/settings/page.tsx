@@ -270,7 +270,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden flex flex-col bg-muted/[0.02]">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -486,23 +486,27 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'about' && (
-                <div className="max-w-2xl space-y-10">
-                  <div className="flex flex-col items-center text-center space-y-6 py-4">
-                    <div className="size-20 bg-gradient-to-br from-primary to-violet-600 rounded-3xl p-1 shadow-2xl shadow-primary/20">
-                      <div className="w-full h-full bg-background rounded-[22px] flex items-center justify-center">
-                        <Logo size={40} />
+                <div className="max-w-2xl space-y-12">
+                  <div className="flex flex-col items-center text-center space-y-8 py-4">
+                    <motion.div 
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="size-24 bg-gradient-to-br from-primary to-violet-600 rounded-[32px] p-1 shadow-2xl shadow-primary/20 rotate-3"
+                    >
+                      <div className="w-full h-full bg-background rounded-[28px] flex items-center justify-center">
+                        <Logo size={48} />
                       </div>
-                    </div>
-                    <div className="space-y-1">
-                      <h2 className="text-4xl font-black tracking-tighter">Localce</h2>
-                      <p className="text-muted-foreground font-bold uppercase tracking-[0.2em] text-[10px]">Version 1.2.4</p>
+                    </motion.div>
+                    <div className="space-y-2">
+                      <h2 className="text-5xl font-black tracking-tighter text-foreground">Localce</h2>
+                      <p className="text-primary font-mono text-[10px] uppercase tracking-[0.4em]">Privacy First AI</p>
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
                       {t.about.description}
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <AboutCard 
                       icon={User} 
                       title={t.about.developer} 
@@ -511,16 +515,22 @@ export default function SettingsPage() {
                     />
                     <AboutCard 
                       icon={Github} 
-                      title={t.about.sourceCode} 
+                      title="Source Code" 
                       value="sudoeren/localce" 
                       href="https://github.com/sudoeren/localce" 
                     />
                   </div>
 
-                  <div className="flex justify-center gap-4">
-                    <SocialIcon icon={Globe} href="https://erencakar.com" />
-                    <SocialIcon icon={Github} href="https://github.com/sudoeren" />
-                    <SocialIcon icon={Code2} href="https://github.com/sudoeren/localce" />
+                  <div className="flex justify-center items-center gap-8 pt-4 border-t border-border">
+                    <div className="text-center">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 mb-1">{t.about.version}</p>
+                      <p className="text-xs font-bold font-mono text-foreground">v1.2.4</p>
+                    </div>
+                    <div className="w-px h-8 bg-border" />
+                    <div className="text-center">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 mb-1">Status</p>
+                      <p className="text-xs font-bold text-emerald-500 uppercase tracking-tighter">Stable Release</p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -591,22 +601,24 @@ function AboutCard({ icon: Icon, title, value, href }: { icon: any, title: strin
         <Icon className="size-3" />
         {title}
       </p>
-      <p className="text-lg font-bold group-hover:text-primary transition-colors flex items-center justify-between">
-        {value}
-        <ExternalLink className="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-lg font-bold group-hover:text-primary transition-colors">{value}</p>
+        <ExternalLink className="size-4 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+      </div>
     </Link>
   )
 }
 
-function SocialIcon({ icon: Icon, href }: { icon: any, href: string }) {
+function SocialLinkItem({ icon: Icon, label, href }: { icon: any, label: string, href: string }) {
   return (
     <Link 
       href={href} 
-      target="_blank" 
-      className="p-3 rounded-full bg-muted/20 border border-border hover:bg-muted/30 text-muted-foreground hover:text-foreground transition-all hover:scale-110"
+      target="_blank"
+      className="flex items-center gap-3 px-4 py-2 rounded-xl border border-border bg-muted/10 hover:bg-muted/20 hover:border-primary/20 hover:text-primary transition-all group"
     >
-      <Icon className="size-5" />
+      <Icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+      <span className="text-xs font-bold tracking-tight">{label}</span>
+      <ExternalLink className="size-3 opacity-30 group-hover:opacity-100 transition-all" />
     </Link>
   )
 }
