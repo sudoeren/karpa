@@ -514,9 +514,9 @@ export default function SettingsPage() {
                       href="https://erencakar.com" 
                     />
                     <AboutCard 
-                      icon={Github} 
+                      icon={Code2} 
                       title={t.about.sourceCode} 
-                      value="sudoeren/localce" 
+                      value={t.about.openSource} 
                       href="https://github.com/sudoeren/localce" 
                     />
                   </div>
@@ -591,16 +591,22 @@ function AboutCard({ icon: Icon, title, value, href }: { icon: any, title: strin
     <Link 
       href={href} 
       target="_blank"
-      className="p-6 rounded-2xl border border-border bg-muted/10 hover:bg-muted/20 transition-all group"
+      className="group relative flex flex-col items-center justify-center p-8 rounded-[32px] bg-muted/5 border border-border/50 hover:bg-primary/[0.02] hover:border-primary/20 transition-all duration-500 overflow-hidden"
     >
-      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2">
-        <Icon className="size-3" />
-        {title}
-      </p>
-      <div className="flex items-center justify-between">
-        <p className="text-lg font-bold group-hover:text-primary transition-colors">{value}</p>
-        <ExternalLink className="size-4 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+      {/* Background Glow */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      
+      <div className="relative z-10 flex flex-col items-center gap-4">
+        <div className="p-4 rounded-2xl bg-background shadow-sm border border-border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+          <Icon className="size-6 text-muted-foreground group-hover:text-primary transition-colors" />
+        </div>
+        <div className="text-center">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 mb-1">{title}</p>
+          <p className="text-xl font-bold tracking-tight text-foreground">{value}</p>
+        </div>
       </div>
+
+      <ArrowUpRight className="absolute top-6 right-6 size-4 text-muted-foreground/20 group-hover:text-primary/40 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
     </Link>
   )
 }
