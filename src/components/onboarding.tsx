@@ -80,8 +80,8 @@ export function Onboarding() {
 
   const nextStep = () => {
     if (step === 2 && connectionStatus !== "success") {
-       toast.info(language === 'tr' ? "Bağlantı kurulmadan devam ediyorsunuz." : "Continuing without connection.", {
-         description: language === 'tr' ? "Motorunuzun çalıştığından emin olun." : "Make sure your AI engine is running."
+       toast.info(t.onboarding.continuingWithout, {
+         description: t.onboarding.ensureEngineRunning
        })
     }
     if (step < 4) setStep(step + 1)
@@ -125,7 +125,7 @@ export function Onboarding() {
                   </div>
                   <div>
                     <h2 className="text-sm font-mono tracking-[0.3em] text-primary uppercase">LOCALCE AI</h2>
-                    <p className="text-xs text-white/40 font-medium">STEP {step + 1} OF 5</p>
+                    <p className="text-xs text-white/40 font-medium">{t.onboarding.stepOf.replace('{current}', String(step + 1)).replace('{total}', '5')}</p>
                   </div>
                 </div>
 
@@ -184,7 +184,8 @@ export function Onboarding() {
                     apiKey={apiKey}
                     setApiKey={setApiKey}
                     testConnection={testConnection} 
-                    status={connectionStatus} 
+                    status={connectionStatus}
+                    t={t}
                   />
                 )}
                 {(step === 3 || step === 4) && (
@@ -239,10 +240,10 @@ function WelcomeStep({ t }: { t: any }) {
 
 function WelcomeVisuals({ t }: { t: any }) {
   const cards = [
-    { icon: Shield, title: t.onboarding.local, desc: "Private and secure.", color: "text-emerald-500" },
-    { icon: Zap, title: t.onboarding.aiPowered, desc: "Multiple AI providers.", color: "text-amber-500" },
-    { icon: Globe, title: t.onboarding.multiLang, desc: "World-class models.", color: "text-blue-500" },
-    { icon: Sparkles, title: "Modern UI", desc: "Designed for speed.", color: "text-violet-500" },
+    { icon: Shield, title: t.onboarding.local, desc: t.onboarding.privateSecure, color: "text-emerald-500" },
+    { icon: Zap, title: t.onboarding.aiPowered, desc: t.onboarding.multipleProviders, color: "text-amber-500" },
+    { icon: Globe, title: t.onboarding.multiLang, desc: t.onboarding.worldClassModels, color: "text-blue-500" },
+    { icon: Sparkles, title: t.onboarding.modernUI, desc: t.onboarding.designedForSpeed, color: "text-violet-500" },
   ]
   
   return (
@@ -317,7 +318,7 @@ function ConnectionStep({ t, connectionStatus }: { t: any, connectionStatus: str
         connectionStatus === "success" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : "bg-primary/10 border-primary/20 text-primary"
       )}>
         <div className={cn("size-1.5 rounded-full", connectionStatus === "success" ? "bg-emerald-500 animate-pulse" : "bg-primary")} />
-        {connectionStatus === "success" ? "System Online" : "Configuration Needed"}
+        {connectionStatus === "success" ? t.onboarding.systemOnline : t.onboarding.configNeeded}
       </div>
       <h1 className="text-5xl font-black tracking-tight leading-tight">
         {t.onboarding.step2Title}
@@ -338,9 +339,10 @@ type ConnectionVisualsProps = {
   setApiKey: (key: string) => void
   testConnection: () => void
   status: string
+  t: any
 }
 
-function ConnectionVisuals({ selectedProvider, onProviderSelect, apiUrl, setApiUrl, apiKey, setApiKey, testConnection, status }: ConnectionVisualsProps) {
+function ConnectionVisuals({ selectedProvider, onProviderSelect, apiUrl, setApiUrl, apiKey, setApiKey, testConnection, status, t }: ConnectionVisualsProps) {
   const [showApiKey, setShowApiKey] = useState(false)
   const providerInfo = PROVIDERS[selectedProvider]
 
@@ -381,7 +383,7 @@ function ConnectionVisuals({ selectedProvider, onProviderSelect, apiUrl, setApiU
             <div className="p-2 bg-primary/20 rounded-xl">
               <Network className="size-5 text-primary" />
             </div>
-            <h3 className="font-bold tracking-tight">{providerInfo.name} Configuration</h3>
+            <h3 className="font-bold tracking-tight">{providerInfo.name} {t.onboarding.configuration}</h3>
           </div>
           <Badge variant="outline" className="font-mono text-[10px] opacity-50">
             {providerInfo.requiresApiKey ? "API" : "LOCAL"}
@@ -409,7 +411,7 @@ function ConnectionVisuals({ selectedProvider, onProviderSelect, apiUrl, setApiU
                 onChange={(e) => setApiKey(e.target.value)}
                 type={showApiKey ? "text" : "password"}
                 className="h-14 pl-12 pr-12 rounded-2xl bg-black/50 border-white/10 focus:border-white transition-all font-mono text-sm"
-                placeholder="Enter your API key..."
+                placeholder={t.onboarding.enterApiKey}
               />
               <button
                 type="button"
@@ -430,7 +432,7 @@ function ConnectionVisuals({ selectedProvider, onProviderSelect, apiUrl, setApiU
             )}
           >
             {status === "testing" ? <RefreshCw className="size-4 animate-spin mr-2" /> : status === "success" ? <Check className="size-4 mr-2" /> : <Zap className="size-4 mr-2" />}
-            {status === "testing" ? "Testing Link..." : status === "success" ? "Connected Successfully" : "Establish Connection"}
+            {status === "testing" ? t.onboarding.testingLink : status === "success" ? t.onboarding.connectedSuccessfully : t.onboarding.establishConnection}
           </Button>
         </div>
 
@@ -439,19 +441,19 @@ function ConnectionVisuals({ selectedProvider, onProviderSelect, apiUrl, setApiU
             <div className="flex gap-4">
               <AlertCircle className="size-5 text-red-500 shrink-0" />
               <div className="space-y-2">
-                <p className="text-xs font-bold text-red-500 uppercase tracking-widest">Troubleshooting</p>
+                <p className="text-xs font-bold text-red-500 uppercase tracking-widest">{t.onboarding.troubleshooting}</p>
                 <ul className="text-[11px] text-white/60 space-y-1 font-medium">
                   {!providerInfo.requiresApiKey ? (
                     <>
-                      <li>• Make sure {providerInfo.name} is running</li>
-                      <li>• Verify the URL and port are correct</li>
-                      <li>• Check that CORS is enabled (if applicable)</li>
+                      <li>• {t.onboarding.troubleLocalRunning.replace('{name}', providerInfo.name)}</li>
+                      <li>• {t.onboarding.troubleLocalUrl}</li>
+                      <li>• {t.onboarding.troubleLocalCors}</li>
                     </>
                   ) : (
                     <>
-                      <li>• Verify your API key is correct</li>
-                      <li>• Check your account has sufficient credits</li>
-                      <li>• Ensure the API URL is correct</li>
+                      <li>• {t.onboarding.troubleCloudKey}</li>
+                      <li>• {t.onboarding.troubleCloudCredits}</li>
+                      <li>• {t.onboarding.troubleCloudUrl}</li>
                     </>
                   )}
                 </ul>
@@ -465,13 +467,13 @@ function ConnectionVisuals({ selectedProvider, onProviderSelect, apiUrl, setApiU
         <div className="p-6 rounded-[32px] bg-white/5 border border-white/10 flex items-center gap-4">
           <Cpu className="size-6 text-white/20" />
           <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-            {providerInfo.requiresApiKey ? "Cloud Powered" : "GPU Acceleration"}
+            {providerInfo.requiresApiKey ? t.onboarding.cloudPowered : t.onboarding.gpuAcceleration}
           </div>
         </div>
         <div className="p-6 rounded-[32px] bg-white/5 border border-white/10 flex items-center gap-4">
           <Database className="size-6 text-white/20" />
           <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-            {providerInfo.requiresApiKey ? "Fast Response" : "Zero Data Leak"}
+            {providerInfo.requiresApiKey ? t.onboarding.fastResponse : t.onboarding.zeroDataLeak}
           </div>
         </div>
       </div>
@@ -484,7 +486,7 @@ function LanguageSetupStep({ t, type }: { t: any, type: "native" | "target" }) {
     <div className="space-y-4">
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-500 text-[10px] font-black uppercase tracking-widest">
         <Sparkles className="size-3" />
-        Translation Engine
+        {t.onboarding.translationEngine}
       </div>
       <h1 className="text-5xl font-black tracking-tight leading-tight">
         {type === "native" ? t.onboarding.nativeLanguage : t.onboarding.targetLanguage}
