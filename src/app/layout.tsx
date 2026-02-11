@@ -22,8 +22,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Localce | AI Translator",
-  description: "Secure, local, and fast AI translation powered by LM Studio.",
-  keywords: ["translator", "AI", "local", "privacy", "LM Studio"],
+  description: "Secure, local, and fast AI translation. Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini and more.",
+  keywords: ["translator", "AI", "local", "privacy", "LM Studio", "Ollama", "OpenAI", "Anthropic", "Gemini"],
   authors: [{ name: "Eren Cakar", url: "https://erencakar.com" }],
 };
 

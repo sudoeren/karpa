@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import {
   ArrowRightLeft, Loader2, Copy, Check, Volume2, VolumeX, X, Star,
-  Languages, Sparkles, Wand2, FileUp, Upload, Info, History, Calendar, Trash2, ArrowRight, ExternalLink
+  Languages, Sparkles, Wand2, FileUp, Upload, Download, Info, History, Calendar, Trash2, ArrowRight, ExternalLink
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
@@ -182,9 +182,11 @@ function TranslatorWorkspace() {
       const translatedChunks: string[] = []
       
       // Get settings from localStorage
-      const savedModel = localStorage.getItem("lm-studio-model")
-      const savedUrl = localStorage.getItem("lm-studio-url")
-      const savedTemp = localStorage.getItem("lm-studio-temperature")
+      const savedModel = localStorage.getItem("llm-model") || localStorage.getItem("lm-studio-model")
+      const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url")
+      const savedTemp = localStorage.getItem("llm-temperature") || localStorage.getItem("lm-studio-temperature")
+      const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
+      const savedApiKey = localStorage.getItem("llm-api-key")
 
       for (let i = 0; i < chunks.length; i++) {
         setCurrentChunk(i + 1)
@@ -200,14 +202,16 @@ function TranslatorWorkspace() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            text: chunks[i],
-            targetLanguage,
-            sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
-            tone: tone !== "standard" ? tone : undefined,
-            model: savedModel,
-            apiUrl: savedUrl,
-            temperature: savedTemp ? parseFloat(savedTemp) : undefined
-          }),
+              text: chunks[i],
+              targetLanguage,
+              sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
+              tone: tone !== "standard" ? tone : undefined,
+              model: savedModel,
+              apiUrl: savedUrl,
+              temperature: savedTemp ? parseFloat(savedTemp) : undefined,
+              provider: savedProvider,
+              apiKey: savedApiKey || undefined,
+            }),
           signal: abortControllerRef.current.signal,
         })
 

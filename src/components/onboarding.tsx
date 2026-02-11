@@ -8,11 +8,12 @@ import { useOnboarding } from "@/contexts/onboarding-context"
 import { Logo } from "@/components/logo"
 import { 
   Languages, Shield, Zap, ArrowRight, Check, Globe, Sparkles, RefreshCw, AlertCircle, 
-  Link2, Terminal, Cpu, Database, Network
+  Link2, Terminal, Cpu, Database, Network, Server, Cloud, Key, Eye, EyeOff
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import { type ProviderType, PROVIDERS } from "@/lib/providers"
 
 const translationLanguages = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -33,7 +34,9 @@ export function Onboarding() {
   const [nativeLang, setNativeLang] = useState("Turkish")
   const [targetLang, setTargetLang] = useState("English")
   
+  const [selectedProvider, setSelectedProvider] = useState<ProviderType>("lmstudio")
   const [apiUrl, setApiUrl] = useState("http://localhost:1234")
+  const [apiKey, setApiKey] = useState("")
   const [connectionStatus, setConnectionStatus] = useState<"idle" | "testing" | "success" | "error">("idle")
 
   const testConnection = async () => {
@@ -45,17 +48,21 @@ export function Onboarding() {
       const response = await fetch('/api/test-connection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, provider: selectedProvider, apiKey: apiKey || undefined }),
       })
 
       const data = await response.json()
       if (data.success) {
         setConnectionStatus("success")
-        localStorage.setItem("lm-studio-url", url)
+        // Save to localStorage
+        localStorage.setItem("llm-provider", selectedProvider)
+        localStorage.setItem("llm-api-url", url)
+        localStorage.setItem("lm-studio-url", url) // backward compat
+        if (apiKey) localStorage.setItem("llm-api-key", apiKey)
         toast.success(t.settings.connectionSuccess)
       } else {
         setConnectionStatus("error")
-        toast.error(t.settings.connectionFailed)
+        toast.error(data.error || t.settings.connectionFailed)
       }
     } catch (error) {
       setConnectionStatus("error")
@@ -63,10 +70,18 @@ export function Onboarding() {
     }
   }
 
+  const handleProviderSelect = (provider: ProviderType) => {
+    setSelectedProvider(provider)
+    const info = PROVIDERS[provider]
+    setApiUrl(info.defaultUrl)
+    setApiKey("")
+    setConnectionStatus("idle")
+  }
+
   const nextStep = () => {
     if (step === 2 && connectionStatus !== "success") {
        toast.info(language === 'tr' ? "Bağlantı kurulmadan devam ediyorsunuz." : "Continuing without connection.", {
-         description: language === 'tr' ? "LM Studio'nun açık olduğundan emin olun." : "Make sure LM Studio is running."
+         description: language === 'tr' ? "Motorunuzun çalıştığından emin olun." : "Make sure your AI engine is running."
        })
     }
     if (step < 4) setStep(step + 1)
@@ -160,7 +175,18 @@ export function Onboarding() {
               <div className="w-full grid grid-cols-2 gap-4">
                 {step === 0 && <WelcomeVisuals t={t} />}
                 {step === 1 && <InterfaceVisuals language={language} setLanguage={setLanguage} />}
-                {step === 2 && <ConnectionVisuals apiUrl={apiUrl} setApiUrl={setApiUrl} testConnection={testConnection} status={connectionStatus} />}
+                {step === 2 && (
+                  <ConnectionVisuals 
+                    selectedProvider={selectedProvider}
+                    onProviderSelect={handleProviderSelect}
+                    apiUrl={apiUrl} 
+                    setApiUrl={setApiUrl} 
+                    apiKey={apiKey}
+                    setApiKey={setApiKey}
+                    testConnection={testConnection} 
+                    status={connectionStatus} 
+                  />
+                )}
                 {(step === 3 || step === 4) && (
                   <LanguageVisuals 
                     selected={step === 3 ? nativeLang : targetLang} 
@@ -214,7 +240,7 @@ function WelcomeStep({ t }: { t: any }) {
 function WelcomeVisuals({ t }: { t: any }) {
   const cards = [
     { icon: Shield, title: t.onboarding.local, desc: "Private and secure.", color: "text-emerald-500" },
-    { icon: Zap, title: t.onboarding.aiPowered, desc: "Powered by LM Studio.", color: "text-amber-500" },
+    { icon: Zap, title: t.onboarding.aiPowered, desc: "Multiple AI providers.", color: "text-amber-500" },
     { icon: Globe, title: t.onboarding.multiLang, desc: "World-class models.", color: "text-blue-500" },
     { icon: Sparkles, title: "Modern UI", desc: "Designed for speed.", color: "text-violet-500" },
   ]
@@ -303,30 +329,97 @@ function ConnectionStep({ t, connectionStatus }: { t: any, connectionStatus: str
   )
 }
 
-function ConnectionVisuals({ apiUrl, setApiUrl, testConnection, status }: { apiUrl: string, setApiUrl: any, testConnection: any, status: string }) {
+type ConnectionVisualsProps = {
+  selectedProvider: ProviderType
+  onProviderSelect: (provider: ProviderType) => void
+  apiUrl: string
+  setApiUrl: (url: string) => void
+  apiKey: string
+  setApiKey: (key: string) => void
+  testConnection: () => void
+  status: string
+}
+
+function ConnectionVisuals({ selectedProvider, onProviderSelect, apiUrl, setApiUrl, apiKey, setApiKey, testConnection, status }: ConnectionVisualsProps) {
+  const [showApiKey, setShowApiKey] = useState(false)
+  const providerInfo = PROVIDERS[selectedProvider]
+
+  const providerList: { key: ProviderType; icon: any; label: string }[] = [
+    { key: 'lmstudio', icon: Terminal, label: 'LM Studio' },
+    { key: 'ollama', icon: Server, label: 'Ollama' },
+    { key: 'openai', icon: Cloud, label: 'OpenAI' },
+    { key: 'anthropic', icon: Cloud, label: 'Anthropic' },
+    { key: 'gemini', icon: Cloud, label: 'Gemini' },
+    { key: 'custom', icon: Server, label: 'Custom' },
+  ]
+
   return (
     <div className="col-span-2 space-y-6">
-      <div className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-8 backdrop-blur-xl">
+      {/* Provider Selection */}
+      <div className="grid grid-cols-3 gap-2">
+        {providerList.map((p) => (
+          <button
+            key={p.key}
+            onClick={() => onProviderSelect(p.key)}
+            className={cn(
+              "p-3 rounded-2xl border transition-all duration-300 flex items-center gap-3",
+              selectedProvider === p.key
+                ? "bg-white text-black border-white shadow-lg"
+                : "bg-white/5 border-white/10 text-white hover:bg-white/10"
+            )}
+          >
+            <p.icon className={cn("size-4", selectedProvider === p.key ? "text-black" : "text-white/50")} />
+            <span className="text-xs font-bold">{p.label}</span>
+            {selectedProvider === p.key && <Check className="size-3 ml-auto" />}
+          </button>
+        ))}
+      </div>
+
+      <div className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-6 backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/20 rounded-xl">
               <Network className="size-5 text-primary" />
             </div>
-            <h3 className="font-bold tracking-tight">API Configuration</h3>
+            <h3 className="font-bold tracking-tight">{providerInfo.name} Configuration</h3>
           </div>
-          <Badge variant="outline" className="font-mono text-[10px] opacity-50">v1.0.0</Badge>
+          <Badge variant="outline" className="font-mono text-[10px] opacity-50">
+            {providerInfo.requiresApiKey ? "API" : "LOCAL"}
+          </Badge>
         </div>
 
         <div className="space-y-4">
+          {/* API URL */}
           <div className="relative group">
             <Link2 className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/30 group-focus-within:text-white transition-colors" />
             <Input 
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
               className="h-14 pl-12 rounded-2xl bg-black/50 border-white/10 focus:border-white transition-all font-mono text-sm"
-              placeholder="http://localhost:1234"
+              placeholder={providerInfo.placeholder}
             />
           </div>
+
+          {/* API Key (for cloud providers) */}
+          {providerInfo.requiresApiKey && (
+            <div className="relative group">
+              <Key className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/30 group-focus-within:text-white transition-colors" />
+              <Input 
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                type={showApiKey ? "text" : "password"}
+                className="h-14 pl-12 pr-12 rounded-2xl bg-black/50 border-white/10 focus:border-white transition-all font-mono text-sm"
+                placeholder="Enter your API key..."
+              />
+              <button
+                type="button"
+                onClick={() => setShowApiKey(!showApiKey)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+              >
+                {showApiKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+          )}
           
           <Button 
             onClick={testConnection}
@@ -348,9 +441,19 @@ function ConnectionVisuals({ apiUrl, setApiUrl, testConnection, status }: { apiU
               <div className="space-y-2">
                 <p className="text-xs font-bold text-red-500 uppercase tracking-widest">Troubleshooting</p>
                 <ul className="text-[11px] text-white/60 space-y-1 font-medium">
-                  <li>• Start LM Studio & enable "Local Server"</li>
-                  <li>• Ensure "Cross-Origin (CORS)" is checked</li>
-                  <li>• Verify Port (1234) and Address</li>
+                  {!providerInfo.requiresApiKey ? (
+                    <>
+                      <li>• Make sure {providerInfo.name} is running</li>
+                      <li>• Verify the URL and port are correct</li>
+                      <li>• Check that CORS is enabled (if applicable)</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>• Verify your API key is correct</li>
+                      <li>• Check your account has sufficient credits</li>
+                      <li>• Ensure the API URL is correct</li>
+                    </>
+                  )}
                 </ul>
               </div>
             </div>
@@ -361,11 +464,15 @@ function ConnectionVisuals({ apiUrl, setApiUrl, testConnection, status }: { apiU
       <div className="grid grid-cols-2 gap-4">
         <div className="p-6 rounded-[32px] bg-white/5 border border-white/10 flex items-center gap-4">
           <Cpu className="size-6 text-white/20" />
-          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">GPU Acceleration</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+            {providerInfo.requiresApiKey ? "Cloud Powered" : "GPU Acceleration"}
+          </div>
         </div>
         <div className="p-6 rounded-[32px] bg-white/5 border border-white/10 flex items-center gap-4">
           <Database className="size-6 text-white/20" />
-          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">Zero Data Leak</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+            {providerInfo.requiresApiKey ? "Fast Response" : "Zero Data Leak"}
+          </div>
         </div>
       </div>
     </div>

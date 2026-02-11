@@ -31,11 +31,13 @@ export function FloatingNavbar() {
   React.useEffect(() => {
     const checkConnection = async () => {
       try {
-        const savedUrl = localStorage.getItem("lm-studio-url") || "http://localhost:1234"
+        const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url") || "http://localhost:1234"
+        const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
+        const savedApiKey = localStorage.getItem("llm-api-key") || undefined
         const response = await fetch('/api/test-connection', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: savedUrl }),
+          body: JSON.stringify({ url: savedUrl, provider: savedProvider, apiKey: savedApiKey }),
         })
         const data = await response.json()
         setIsConnected(data.success)

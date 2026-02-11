@@ -44,11 +44,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const savedUrl = localStorage.getItem("lm-studio-url") || "http://localhost:1234"
+        const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url") || "http://localhost:1234"
+        const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
+        const savedApiKey = localStorage.getItem("llm-api-key") || undefined
         const response = await fetch('/api/test-connection', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: savedUrl }),
+          body: JSON.stringify({ url: savedUrl, provider: savedProvider, apiKey: savedApiKey }),
         })
         const data = await response.json()
         setIsConnected(data.success)
@@ -139,7 +141,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isConnected === true && "text-green-600 dark:text-green-400",
                   isConnected === false && "text-red-600 dark:text-red-400"
                 )}>
-                  {isConnected === null ? "Checking..." : isConnected ? "LM Studio Ready" : "Disconnected"}
+                  {isConnected === null ? "Checking..." : isConnected ? "Engine Ready" : "Disconnected"}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
                   {isConnected === null ? "Please wait" : isConnected ? "v1.0.0" : "Check connection"}

@@ -1,22 +1,58 @@
 import { NextResponse } from 'next/server'
+import {
+  type ProviderType,
+  PROVIDERS,
+  KNOWN_MODELS,
+  getModelsUrl,
+  parseModelsResponse,
+} from '@/lib/providers'
 
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { url } = body
+    const { url, provider: providerParam, apiKey } = body
 
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 })
     }
 
-    // Ensure URL doesn't end with slash
-    const baseUrl = url.replace(/\/$/, '')
-    
-    const response = await fetch(`${baseUrl}/v1/models`, {
+    const provider: ProviderType = providerParam || 'lmstudio'
+    const providerInfo = PROVIDERS[provider]
+
+    if (!providerInfo) {
+      return NextResponse.json({ error: `Unknown provider: ${provider}` }, { status: 400 })
+    }
+
+    // For providers without a models endpoint, return known models
+    if (!providerInfo.modelsEndpoint) {
+      const knownModels = KNOWN_MODELS[provider] || []
+      return NextResponse.json({
+        success: true,
+        models: knownModels.map(id => ({ id, object: 'model' })),
+      })
+    }
+
+    const baseUrl = url.replace(/\/+$/, '')
+    const modelsUrl = getModelsUrl(provider, baseUrl, apiKey)
+
+    if (!modelsUrl) {
+      return NextResponse.json({
+        success: true,
+        models: (KNOWN_MODELS[provider] || []).map(id => ({ id, object: 'model' })),
+      })
+    }
+
+    // Build headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+    if (apiKey && (provider === 'openai' || provider === 'custom')) {
+      headers['Authorization'] = `Bearer ${apiKey}`
+    }
+
+    const response = await fetch(modelsUrl, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     })
 
     if (!response.ok) {
@@ -24,9 +60,11 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json()
+    const models = parseModelsResponse(provider, data)
+
     return NextResponse.json({ 
       success: true, 
-      models: data.data || [] 
+      models, 
     })
 
   } catch (error) {

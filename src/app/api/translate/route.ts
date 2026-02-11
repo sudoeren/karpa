@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
 import { splitIntoChunks, cleanTranslation } from '@/lib/utils';
+import {
+  type ProviderType,
+  PROVIDERS,
+  getChatCompletionUrl,
+  getHeaders,
+  buildRequestBody,
+  getGeminiUrl,
+  extractTranslation,
+} from '@/lib/providers';
 
 // Translate a single chunk
 async function translateChunk(
@@ -7,7 +16,9 @@ async function translateChunk(
   targetLanguage: string,
   tone: string | undefined,
   sourceLanguage: string | undefined,
-  lmStudioUrl: string,
+  provider: ProviderType,
+  apiUrl: string,
+  apiKey: string | undefined,
   modelName: string,
   temperature: number,
   chunkIndex?: number,
@@ -71,17 +82,22 @@ Translate the following text now:`;
   const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for long texts
 
   try {
-    const response = await fetch(lmStudioUrl, {
+    // Build URL based on provider
+    let fetchUrl: string;
+    if (provider === 'gemini') {
+      if (!apiKey) throw new Error('Gemini requires an API key.');
+      fetchUrl = getGeminiUrl(apiUrl, modelName, apiKey);
+    } else {
+      fetchUrl = getChatCompletionUrl(provider, apiUrl);
+    }
+
+    const headers = getHeaders(provider, apiKey);
+    const body = buildRequestBody(provider, modelName, messages, temperature);
+
+    const response = await fetch(fetchUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: modelName,
-        messages: messages,
-        temperature: temperature,
-        max_tokens: 4096,
-        stream: false,
-        stop: ["Note:", "Please note", "\n\nI've", "\n\nLet me know"]
-      }),
+      headers,
+      body: JSON.stringify(body),
       signal: controller.signal
     });
 
@@ -89,16 +105,18 @@ Translate the following text now:`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`LM Studio Error: ${response.status} - ${errorText}`);
+      const providerName = PROVIDERS[provider]?.name || provider;
+      throw new Error(`${providerName} Error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
     
-    if (!data.choices || data.choices.length === 0) {
+    let translation = extractTranslation(provider, data);
+    
+    if (!translation) {
       throw new Error("No translation returned.");
     }
 
-    let translation = data.choices[0]?.message?.content?.trim();
     translation = cleanTranslation(translation);
     
     if (!translation) {
@@ -113,7 +131,7 @@ Translate the following text now:`;
 
 export async function POST(req: Request) {
   try {
-    const { text, targetLanguage, tone, sourceLanguage, model, apiUrl, temperature } = await req.json();
+    const { text, targetLanguage, tone, sourceLanguage, model, apiUrl, temperature, provider: providerParam, apiKey } = await req.json();
 
     if (!text || !targetLanguage) {
       return NextResponse.json(
@@ -131,18 +149,42 @@ export async function POST(req: Request) {
       });
     }
 
-    // Determine URL: remove trailing slash if present, add /v1/chat/completions if missing
-    let LM_STUDIO_URL = apiUrl || process.env.LM_STUDIO_URL || 'http://localhost:1234';
-    if (LM_STUDIO_URL.endsWith('/')) LM_STUDIO_URL = LM_STUDIO_URL.slice(0, -1);
-    if (!LM_STUDIO_URL.endsWith('/v1/chat/completions')) {
-        // If it ends with /v1, add /chat/completions
-        if (LM_STUDIO_URL.endsWith('/v1')) LM_STUDIO_URL += '/chat/completions';
-        // Otherwise assume base URL and add full path
-        else LM_STUDIO_URL += '/v1/chat/completions';
+    // Determine provider
+    const provider: ProviderType = providerParam || process.env.LLM_PROVIDER as ProviderType || 'lmstudio';
+    const providerInfo = PROVIDERS[provider];
+
+    if (!providerInfo) {
+      return NextResponse.json(
+        { error: `Unknown provider: ${provider}` },
+        { status: 400 }
+      );
     }
 
-    const MODEL_NAME = model || process.env.LM_STUDIO_MODEL || 'hy-mt1.5-7b/HY-MT1.5-7B-Q4_K_M.gguf';
-    const TEMPERATURE = temperature !== undefined ? parseFloat(temperature) : parseFloat(process.env.LM_STUDIO_TEMPERATURE || '0.2');
+    // Determine URL
+    let API_URL = apiUrl || process.env.LLM_API_URL || process.env.LM_STUDIO_URL || providerInfo.defaultUrl;
+    if (API_URL.endsWith('/')) API_URL = API_URL.slice(0, -1);
+
+    // Determine API key
+    const API_KEY = apiKey || process.env.LLM_API_KEY || undefined;
+
+    // Validate API key requirement
+    if (providerInfo.requiresApiKey && !API_KEY) {
+      return NextResponse.json(
+        { error: `${providerInfo.name} requires an API key. Please add it in Settings.` },
+        { status: 401 }
+      );
+    }
+
+    const MODEL_NAME = model || process.env.LLM_MODEL || process.env.LM_STUDIO_MODEL || providerInfo.defaultModel;
+    
+    if (!MODEL_NAME) {
+      return NextResponse.json(
+        { error: 'No model selected. Please select a model in Settings.' },
+        { status: 400 }
+      );
+    }
+
+    const TEMPERATURE = temperature !== undefined ? parseFloat(temperature) : parseFloat(process.env.LLM_TEMPERATURE || process.env.LM_STUDIO_TEMPERATURE || '0.2');
 
     // Split text into chunks for long translations
     const chunks = splitIntoChunks(text, 2000);
@@ -164,7 +206,9 @@ export async function POST(req: Request) {
               targetLanguage,
               tone,
               sourceLanguage,
-              LM_STUDIO_URL,
+              provider,
+              API_URL,
+              API_KEY,
               MODEL_NAME,
               TEMPERATURE,
               i,
@@ -189,7 +233,9 @@ export async function POST(req: Request) {
             targetLanguage,
             tone,
             sourceLanguage,
-            LM_STUDIO_URL,
+            provider,
+            API_URL,
+            API_KEY,
             MODEL_NAME,
             TEMPERATURE
           );
@@ -220,9 +266,10 @@ export async function POST(req: Request) {
     }
 
     // If we get here, all retries failed
+    const providerName = PROVIDERS[provider]?.name || provider;
     console.error('All translation attempts failed:', lastError);
     return NextResponse.json(
-      { error: 'Failed to connect to LM Studio. Make sure it is running on port 1234.' },
+      { error: `Failed to connect to ${providerName}. Make sure it is running and accessible.` },
       { status: 503 }
     );
 
