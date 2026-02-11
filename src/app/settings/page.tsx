@@ -486,46 +486,50 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'about' && (
-                <div className="max-w-2xl space-y-12">
-                  <div className="flex flex-col items-center text-center space-y-8 py-4">
-                    <motion.div 
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="size-24 bg-gradient-to-br from-primary to-violet-600 rounded-[32px] p-1 shadow-2xl shadow-primary/20"
-                    >
-                      <div className="w-full h-full bg-background rounded-[28px] flex items-center justify-center">
-                        <Logo size={48} />
-                      </div>
-                    </motion.div>
-                    <div className="space-y-2">
-                      <h2 className="text-5xl font-black tracking-tighter text-foreground">Localce</h2>
-                      <p className="text-primary font-mono text-[10px] uppercase tracking-[0.4em]">{t.about.privacyFirst}</p>
+                <div className="max-w-2xl mx-auto space-y-10">
+                  {/* Brand & Identity Header */}
+                  <div className="relative p-12 rounded-[48px] bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent border border-primary/5 overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-1000">
+                      <Logo size={240} />
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-                      {t.about.description}
-                    </p>
+                    
+                    <div className="relative z-10 space-y-8">
+                      <div className="space-y-4">
+                        <h2 className="text-7xl font-black tracking-tighter leading-none text-foreground">Localce</h2>
+                        <p className="text-lg text-muted-foreground/80 font-medium leading-relaxed max-w-md">
+                          {t.about.description}
+                        </p>
+                      </div>
+
+                      {/* Developer & Project Info - Unified Layout */}
+                      <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center gap-8 border-t border-border/40">
+                        <Link href="https://erencakar.com" target="_blank" className="group/dev">
+                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2 group-hover/dev:text-primary transition-colors">{t.about.developer}</p>
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl font-bold tracking-tight group-hover/dev:underline decoration-primary/30 underline-offset-8 transition-all">Eren Çakar</span>
+                            <ArrowUpRight className="size-4 text-muted-foreground/20 group-hover/dev:text-primary group-hover/dev:translate-x-0.5 group-hover/dev:-translate-y-0.5 transition-all" />
+                          </div>
+                        </Link>
+
+                        <div className="hidden sm:block w-px h-10 bg-border/40" />
+
+                        <Link href="https://github.com/sudoeren/localce" target="_blank" className="group/code">
+                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2 group-hover/code:text-primary transition-colors">{t.about.sourceCode}</p>
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl font-bold tracking-tight group-hover/code:underline decoration-primary/30 underline-offset-8 transition-all">{t.about.openSource}</span>
+                            <Github className="size-5 text-muted-foreground/30 group-hover/code:text-foreground transition-colors" />
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <AboutCard 
-                      icon={User} 
-                      title={t.about.developer} 
-                      value="Eren Çakar" 
-                      href="https://erencakar.com" 
-                    />
-                    <AboutCard 
-                      icon={Code2} 
-                      title={t.about.sourceCode} 
-                      value={t.about.openSource} 
-                      href="https://github.com/sudoeren/localce" 
-                    />
-                  </div>
-
-                  <div className="flex flex-col items-center gap-2 pt-8 border-t border-border">
-                    <div className="px-4 py-1.5 rounded-full bg-muted/50 border border-border flex items-center gap-3">
+                  {/* Footer Meta */}
+                  <div className="flex justify-center px-6">
+                    <div className="flex items-center gap-3 px-4 py-1.5 rounded-2xl bg-muted/30 border border-border/50">
                       <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t.about.version}</span>
                       <div className="w-px h-3 bg-border" />
-                      <span className="text-xs font-bold font-mono text-foreground">1.2.4</span>
+                      <span className="text-xs font-bold font-mono">1.2.4</span>
                     </div>
                   </div>
                 </div>
@@ -583,31 +587,6 @@ function DataButton({ icon: Icon, title, onClick }: { icon: any, title: string, 
       </div>
       <p className="font-bold text-sm">{title}</p>
     </button>
-  )
-}
-
-function AboutCard({ icon: Icon, title, value, href }: { icon: any, title: string, value: string, href: string }) {
-  return (
-    <Link 
-      href={href} 
-      target="_blank"
-      className="group relative flex flex-col items-center justify-center p-8 rounded-[32px] bg-muted/5 border border-border/50 hover:bg-primary/[0.02] hover:border-primary/20 transition-all duration-500 overflow-hidden"
-    >
-      {/* Background Glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-      
-      <div className="relative z-10 flex flex-col items-center gap-4">
-        <div className="p-4 rounded-2xl bg-background shadow-sm border border-border group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-          <Icon className="size-6 text-muted-foreground group-hover:text-primary transition-colors" />
-        </div>
-        <div className="text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 mb-1">{title}</p>
-          <p className="text-xl font-bold tracking-tight text-foreground">{value}</p>
-        </div>
-      </div>
-
-      <ArrowUpRight className="absolute top-6 right-6 size-4 text-muted-foreground/20 group-hover:text-primary/40 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
-    </Link>
   )
 }
 
