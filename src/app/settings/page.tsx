@@ -578,47 +578,86 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'data' && (
-                <div className="max-w-2xl space-y-10">
-                  <SectionHeader title={t.settings.vaultTitle} desc={t.settings.vaultDesc} icon={HardDrive} />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <DataButton 
-                      icon={Download} 
-                      title={t.settings.exportData} 
-                      onClick={exportData} 
-                    />
-                    <label className="block cursor-pointer">
-                      <DataButton 
-                        icon={Upload} 
-                        title={t.settings.importData} 
-                        onClick={() => {}} 
-                      />
-                      <input type="file" accept=".json" className="hidden" onChange={importData} />
-                    </label>
+                <div className="max-w-2xl space-y-12">
+                  <div className="space-y-6">
+                    <SectionHeader title={t.settings.vaultTitle} desc={t.settings.vaultDesc} icon={HardDrive} />
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="relative group">
+                        <div className="absolute -inset-0.5 bg-gradient-to-br from-primary/20 to-transparent rounded-[24px] blur opacity-0 group-hover:opacity-100 transition duration-500" />
+                        <DataButton 
+                          icon={Download} 
+                          title={t.settings.exportData} 
+                          desc="Tüm geçmişinizi ve ayarlarınızı JSON formatında indirin."
+                          onClick={exportData} 
+                          className="bg-card relative"
+                        />
+                      </div>
+                      
+                      <label className="block cursor-pointer group relative">
+                        <div className="absolute -inset-0.5 bg-gradient-to-br from-primary/20 to-transparent rounded-[24px] blur opacity-0 group-hover:opacity-100 transition duration-500" />
+                        <DataButton 
+                          icon={Upload} 
+                          title={t.settings.importData} 
+                          desc="Daha önce yedeklediğiniz verileri sisteme geri yükleyin."
+                          onClick={() => {}} 
+                          className="bg-card relative"
+                        />
+                        <input type="file" accept=".json" className="hidden" onChange={importData} />
+                      </label>
+                    </div>
+
+                    <div className="p-6 rounded-[24px] bg-primary/[0.03] border border-primary/10 flex items-start gap-4">
+                      <div className="p-3 bg-primary/10 rounded-2xl">
+                        <Info className="size-5 text-primary" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-foreground">Gizlilik Notu</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Verileriniz tamamen yerel olarak tarayıcınızda (localStorage) saklanır. 
+                          Dışa aktarma işlemi bu verilerin bir kopyasını oluşturur, silme işlemi ise kalıcı olarak kaldırır.
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="pt-8 border-t border-border space-y-6">
-                    <SectionHeader title={t.settings.purgeTitle} desc={t.settings.purgeDesc} icon={Shield} color="text-destructive" />
+                  <div className="pt-10 border-t border-border/50 space-y-8">
+                    <SectionHeader 
+                      title={t.settings.purgeTitle} 
+                      desc={t.settings.purgeDesc} 
+                      icon={Shield} 
+                      color="text-destructive" 
+                    />
                     
-                    <div className="space-y-3">
+                    <div className="grid gap-3">
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <button className="w-full flex items-center justify-between p-5 rounded-2xl border border-destructive/10 bg-destructive/[0.02] hover:bg-destructive/[0.05] transition-all group">
-                            <div className="text-left">
-                              <p className="font-bold text-destructive text-sm">{t.settings.clearData}</p>
-                              <p className="text-[11px] text-destructive/40 font-medium">{t.settings.clearDataDesc}</p>
+                          <button className="w-full flex items-center justify-between p-6 rounded-[24px] border border-destructive/10 bg-destructive/[0.02] hover:bg-destructive/[0.04] transition-all group overflow-hidden relative">
+                            <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity translate-x-4 -translate-y-4">
+                              <Trash2 size={80} />
                             </div>
-                            <Trash2 className="size-4 text-destructive opacity-40 group-hover:opacity-100 transition-opacity" />
+                            <div className="flex items-center gap-5 relative z-10">
+                              <div className="p-3 bg-destructive/10 rounded-2xl group-hover:scale-110 transition-transform">
+                                <Trash2 className="size-5 text-destructive" />
+                              </div>
+                              <div className="text-left">
+                                <p className="font-bold text-destructive text-sm tracking-tight">{t.settings.clearData}</p>
+                                <p className="text-[11px] text-destructive/50 font-medium">{t.settings.clearDataDesc}</p>
+                              </div>
+                            </div>
+                            <Check className="size-4 text-destructive/20 group-hover:text-destructive transition-colors relative z-10" />
                           </button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-popover border-border">
+                        <AlertDialogContent className="bg-popover border-border rounded-[32px]">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-xl font-bold tracking-tight">{t.settings.clearDataTitle}</AlertDialogTitle>
-                            <AlertDialogDescription className="text-muted-foreground text-sm">{t.settings.clearDataDesc}</AlertDialogDescription>
+                            <AlertDialogTitle className="text-2xl font-bold tracking-tight">{t.settings.clearDataTitle}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-muted-foreground text-sm leading-relaxed italic">
+                              "{t.settings.clearDataDesc}"
+                            </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="rounded-xl">{t.common.cancel}</AlertDialogCancel>
-                            <AlertDialogAction onClick={clearAllData} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl">
+                          <AlertDialogFooter className="gap-3 pt-4">
+                            <AlertDialogCancel className="rounded-2xl border-border bg-muted/50">{t.common.cancel}</AlertDialogCancel>
+                            <AlertDialogAction onClick={clearAllData} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-2xl px-8">
                               {t.common.delete}
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -627,13 +666,21 @@ export default function SettingsPage() {
 
                       <button 
                         onClick={resetOnboarding}
-                        className="w-full flex items-center justify-between p-5 rounded-2xl border border-border bg-muted/10 hover:bg-muted/20 transition-all group"
+                        className="w-full flex items-center justify-between p-6 rounded-[24px] border border-border bg-muted/10 hover:bg-muted/20 transition-all group relative overflow-hidden"
                       >
-                        <div className="text-left">
-                          <p className="font-bold text-sm">{t.settings.resetOnboarding}</p>
-                          <p className="text-[11px] text-muted-foreground font-medium">{t.settings.resetOnboardingDesc}</p>
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity translate-x-4 -translate-y-4">
+                          <RefreshCw size={80} />
                         </div>
-                        <RefreshCw className="size-4 text-muted-foreground group-hover:rotate-180 transition-transform duration-500" />
+                        <div className="flex items-center gap-5 relative z-10">
+                          <div className="p-3 bg-muted/20 rounded-2xl group-hover:rotate-180 transition-transform duration-700">
+                            <RefreshCw className="size-5 text-muted-foreground" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-bold text-sm tracking-tight">{t.settings.resetOnboarding}</p>
+                            <p className="text-[11px] text-muted-foreground font-medium">{t.settings.resetOnboardingDesc}</p>
+                          </div>
+                        </div>
+                        <ArrowUpRight className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors relative z-10" />
                       </button>
                     </div>
                   </div>
@@ -731,16 +778,22 @@ function ToggleTile({ icon: Icon, title, desc, checked, onChange, disabled = fal
   )
 }
 
-function DataButton({ icon: Icon, title, onClick }: { icon: any, title: string, onClick: any }) {
+function DataButton({ icon: Icon, title, desc, onClick, className }: { icon: any, title: string, desc?: string, onClick: any, className?: string }) {
   return (
     <button 
       onClick={onClick}
-      className="w-full flex items-center gap-4 p-5 rounded-2xl border border-border bg-muted/10 hover:bg-muted/20 transition-all group"
+      className={cn(
+        "w-full flex items-start gap-5 p-6 rounded-[24px] border border-border bg-muted/10 hover:bg-muted/20 transition-all group text-left",
+        className
+      )}
     >
-      <div className="p-2.5 bg-muted/20 rounded-xl group-hover:scale-105 transition-transform">
-        <Icon className="size-4.5 text-muted-foreground" />
+      <div className="p-3 bg-muted/20 rounded-2xl group-hover:scale-110 group-hover:bg-primary/10 group-hover:text-primary transition-all shrink-0">
+        <Icon className="size-5 transition-colors" />
       </div>
-      <p className="font-bold text-sm">{title}</p>
+      <div className="space-y-1">
+        <p className="font-bold text-sm tracking-tight">{title}</p>
+        {desc && <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">{desc}</p>}
+      </div>
     </button>
   )
 }
