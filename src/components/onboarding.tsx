@@ -282,28 +282,38 @@ function InterfaceLangStep({ t }: { t: any }) {
 
 function InterfaceVisuals({ language, setLanguage }: { language: string, setLanguage: any }) {
   const langs = [
-    { code: "en", name: "English", flag: "🇬🇧", native: "English" },
+    { code: "en", name: "English", flag: "🇺🇸", native: "English" },
     { code: "tr", name: "Turkish", flag: "🇹🇷", native: "Türkçe" },
+    { code: "de", name: "German", flag: "🇩🇪", native: "Deutsch" },
+    { code: "fr", name: "French", flag: "🇫🇷", native: "Français" },
+    { code: "es", name: "Spanish", flag: "🇪🇸", native: "Español" },
   ]
   return (
-    <div className="col-span-2 grid grid-cols-2 gap-6">
+    <div className="col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
       {langs.map((l) => (
         <button
           key={l.code}
           onClick={() => setLanguage(l.code)}
           className={cn(
-            "p-10 rounded-[40px] border transition-all duration-500 flex flex-col items-center gap-6 group",
+            "p-8 rounded-[32px] border transition-all duration-500 flex flex-col items-center gap-4 group relative overflow-hidden",
             language === l.code 
-              ? "bg-white text-black border-white shadow-[0_0_60px_rgba(255,255,255,0.2)]" 
+              ? "bg-white text-black border-white shadow-[0_0_40px_rgba(255,255,255,0.15)]" 
               : "bg-white/5 border-white/10 text-white hover:bg-white/10"
           )}
         >
-          <span className="text-7xl group-hover:scale-110 transition-transform">{l.flag}</span>
-          <div className="text-center">
-            <h3 className="text-2xl font-black">{l.native}</h3>
-            <p className={cn("text-sm font-bold uppercase tracking-widest opacity-50", language === l.code && "opacity-100")}>{l.name}</p>
+          {language === l.code && (
+            <motion.div 
+              layoutId="active-lang-bg"
+              className="absolute inset-0 bg-white"
+              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+            />
+          )}
+          <span className="text-5xl group-hover:scale-110 transition-transform relative z-10">{l.flag}</span>
+          <div className="text-center relative z-10">
+            <h3 className="text-lg font-black leading-tight">{l.native}</h3>
+            <p className={cn("text-[10px] font-bold uppercase tracking-widest opacity-40", language === l.code && "text-black/60 opacity-100")}>{l.name}</p>
           </div>
-          {language === l.code && <Check className="size-6 mt-2" />}
+          {language === l.code && <Check className="size-4 absolute top-4 right-4 text-black z-10" />}
         </button>
       ))}
     </div>

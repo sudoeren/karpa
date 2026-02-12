@@ -395,10 +395,13 @@ export default function SettingsPage() {
 
                   <div className="space-y-4">
                     <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.systemLanguage}</Label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {[
                         { id: 'en', native: 'English', flag: '🇺🇸' },
-                        { id: 'tr', native: 'Türkçe', flag: '🇹🇷' }
+                        { id: 'tr', native: 'Türkçe', flag: '🇹🇷' },
+                        { id: 'de', native: 'Deutsch', flag: '🇩🇪' },
+                        { id: 'fr', native: 'Français', flag: '🇫🇷' },
+                        { id: 'es', native: 'Español', flag: '🇪🇸' }
                       ].map((l) => (
                         <button
                           key={l.id}
