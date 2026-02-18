@@ -229,6 +229,11 @@
   background-size: 200% 100%;
 }
 
+@keyframes shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }

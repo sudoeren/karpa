@@ -748,7 +748,7 @@ function TranslatorWorkspace() {
               <Button
                 onClick={handleCancelTranslation}
                 variant="destructive"
-                className="w-full h-14 rounded-2xl text-base font-bold gap-3 shadow-lg shadow-destructive/10"
+                className="w-full h-16 rounded-[24px] text-base font-bold gap-3 shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
                 size="lg"
               >
                 <X className="size-5" />
@@ -758,11 +758,28 @@ function TranslatorWorkspace() {
               <Button
                 onClick={handleTranslate}
                 disabled={mode === "text" ? !sourceText.trim() : !selectedFile}
-                className="w-full h-14 rounded-2xl text-base font-bold gap-3 shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all"
+                className={cn(
+                  "w-full h-16 rounded-[24px] font-black text-lg transition-all duration-500 flex items-center justify-between px-8 group",
+                  mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
+                    ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                    : "bg-foreground text-background hover:bg-primary hover:text-white shadow-2xl hover:shadow-primary/30"
+                )}
                 size="lg"
               >
-                <Wand2 className="size-5" />
-                {t.translator.translate}
+                <span className="tracking-tight">{t.translator.translate}</span>
+                <div className={cn(
+                  "size-10 rounded-full flex items-center justify-center transition-all duration-500",
+                  mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
+                    ? "bg-muted-foreground/10"
+                    : "bg-background/20 group-hover:bg-white group-hover:rotate-[360deg] shadow-lg"
+                )}>
+                  <Wand2 className={cn(
+                    "size-5 transition-colors duration-500",
+                    mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
+                      ? "text-muted-foreground"
+                      : "text-current group-hover:text-primary"
+                  )} />
+                </div>
               </Button>
             )}
           </div>
