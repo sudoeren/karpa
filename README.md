@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/logo.svg" alt="Localce" width="80" height="80" />
+  <img src="public/logo.png" alt="Localce" width="80" height="80" />
 </p>
 
 <h1 align="center">Localce</h1>

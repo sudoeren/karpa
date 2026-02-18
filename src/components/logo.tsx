@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 interface LogoProps {
@@ -9,35 +10,17 @@ interface LogoProps {
 
 export function Logo({ size = 32, className }: LogoProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={cn("shrink-0", className)}
+    <div 
+      className={cn("relative shrink-0 overflow-hidden rounded-lg", className)}
+      style={{ width: size, height: size }}
     >
-      {/* Outer rounded square */}
-      <rect
-        x="2"
-        y="2"
-        width="28"
-        height="28"
-        rx="8"
-        className="fill-foreground"
+      <Image
+        src="/logo.png"
+        alt="Localce Logo"
+        fill
+        className="object-contain"
+        priority
       />
-      
-      {/* Inner design - stylized "L" with translation arrows */}
-      <g className="fill-background">
-        {/* Main L shape */}
-        <path d="M9 8h4v12h6v4H9V8z" />
-        
-        {/* Translation arrow right */}
-        <path d="M20 10l4 3-4 3v-2h-3v-2h3v-2z" />
-        
-        {/* Small dot accent */}
-        <circle cx="23" cy="21" r="2" />
-      </g>
-    </svg>
+    </div>
   )
 }

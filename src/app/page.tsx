@@ -173,14 +173,14 @@ function TranslatorWorkspace() {
 
     setLoading(true)
     setProgress(0)
-    
+
     try {
       // Use preserveFormatting=true to keep original whitespace/indentation for files
       const chunks = splitIntoChunks(textToTranslate, 2000, true)
       setTotalChunks(chunks.length)
-      
+
       const translatedChunks: string[] = []
-      
+
       // Get settings from localStorage
       const savedModel = localStorage.getItem("llm-model") || localStorage.getItem("lm-studio-model")
       const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url")
@@ -190,34 +190,34 @@ function TranslatorWorkspace() {
 
       for (let i = 0; i < chunks.length; i++) {
         setCurrentChunk(i + 1)
-        
+
         // Skip API call for whitespace-only chunks to save time (though API handles it too)
         if (!chunks[i].trim()) {
-           translatedChunks.push(chunks[i]);
-           setProgress(Math.round(((i + 1) / chunks.length) * 100));
-           continue;
+          translatedChunks.push(chunks[i]);
+          setProgress(Math.round(((i + 1) / chunks.length) * 100));
+          continue;
         }
 
         const response = await fetch("/api/translate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-              text: chunks[i],
-              targetLanguage,
-              sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
-              tone: tone !== "standard" ? tone : undefined,
-              model: savedModel,
-              apiUrl: savedUrl,
-              temperature: savedTemp ? parseFloat(savedTemp) : undefined,
-              provider: savedProvider,
-              apiKey: savedApiKey || undefined,
-            }),
+            text: chunks[i],
+            targetLanguage,
+            sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
+            tone: tone !== "standard" ? tone : undefined,
+            model: savedModel,
+            apiUrl: savedUrl,
+            temperature: savedTemp ? parseFloat(savedTemp) : undefined,
+            provider: savedProvider,
+            apiKey: savedApiKey || undefined,
+          }),
           signal: abortControllerRef.current.signal,
         })
 
         const data = await response.json()
         if (!response.ok) throw new Error(data.error || "Failed")
-        
+
         translatedChunks.push(data.translation)
         setProgress(Math.round(((i + 1) / chunks.length) * 100))
       }
@@ -252,15 +252,15 @@ function TranslatorWorkspace() {
         if (Notification.permission === 'granted') {
           new Notification("Localce", {
             body: t.translator.fileTranslated,
-            icon: "/logo.svg"
+            icon: "/logo.png"
           })
         }
-        
+
         const soundEnabled = localStorage.getItem("localce-notification-sound") !== "false"
         if (soundEnabled) {
           const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3")
           audio.volume = 0.5
-          audio.play().catch(() => {})
+          audio.play().catch(() => { })
         }
       }
     } catch (err) {
@@ -338,7 +338,7 @@ function TranslatorWorkspace() {
     toast.success(t.common.download)
   }
 
-const copyToClipboard = async (text: string) => {
+  const copyToClipboard = async (text: string) => {
     if (!text) return
     await navigator.clipboard.writeText(text)
     setIsCopied(true)
@@ -367,7 +367,7 @@ const copyToClipboard = async (text: string) => {
   return (
     <div className="h-full flex flex-col items-center overflow-hidden">
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-6 relative w-full max-w-4xl shrink-0"
@@ -377,7 +377,7 @@ const copyToClipboard = async (text: string) => {
           <h1 className="text-xl font-bold">Localce</h1>
         </div>
         <p className="text-xs text-muted-foreground">{t.translator.title}</p>
-        
+
         <Button
           variant="ghost"
           size="sm"
@@ -627,8 +627,8 @@ const copyToClipboard = async (text: string) => {
                       onDrop={handleDrop}
                       className={cn(
                         "flex-1 border-2 border-dashed rounded-3xl p-12 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-4",
-                        isDragging 
-                          ? "border-primary bg-primary/5 scale-[0.99]" 
+                        isDragging
+                          ? "border-primary bg-primary/5 scale-[0.99]"
                           : "border-muted-foreground/20 hover:border-primary/50 hover:bg-muted/30"
                       )}
                     >
@@ -706,9 +706,9 @@ const copyToClipboard = async (text: string) => {
                               </p>
                               <p className="text-sm font-medium opacity-70">Ready for download</p>
                             </div>
-                            <Button 
-                              size="lg" 
-                              onClick={handleDownload} 
+                            <Button
+                              size="lg"
+                              onClick={handleDownload}
                               className="bg-green-600 hover:bg-green-500 rounded-xl px-8 font-bold shadow-lg shadow-green-500/20"
                             >
                               <Download className="size-4 mr-2" />
@@ -801,7 +801,7 @@ const copyToClipboard = async (text: string) => {
                     <X className="size-5" />
                   </Button>
                 </div>
-                
+
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                   {history.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center p-12 opacity-30">
