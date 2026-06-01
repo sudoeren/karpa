@@ -96,12 +96,14 @@ export async function POST(request: Request) {
         }
 
         case 'gemini': {
+          const headers: Record<string, string> = { 'Accept': 'application/json' }
+          if (apiKey) headers['x-goog-api-key'] = apiKey
           const response = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/models?key=' + (apiKey || ''),
+            'https://generativelanguage.googleapis.com/v1beta/models',
             {
               method: 'GET',
               signal: controller.signal,
-              headers: { 'Accept': 'application/json' },
+              headers,
             }
           )
           clearTimeout(timeoutId)

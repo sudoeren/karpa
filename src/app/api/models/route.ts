@@ -36,7 +36,7 @@ function validateUrl(url: string, provider: string): void {
 
 // Resolve the models-list URL for a provider. Built from hardcoded constants
 // or server-side env vars — the user-supplied url is never part of fetch.
-function resolveModelsUrl(provider: ProviderType, apiKey: string | undefined): string | null {
+function resolveModelsUrl(provider: ProviderType): string | null {
   const info = PROVIDERS[provider]
   if (!info.modelsEndpoint) return null
 
@@ -47,8 +47,7 @@ function resolveModelsUrl(provider: ProviderType, apiKey: string | undefined): s
     return null
   }
   if (provider === 'gemini') {
-    if (!apiKey) return null
-    return 'https://generativelanguage.googleapis.com/v1beta/models?key=' + apiKey
+    return 'https://generativelanguage.googleapis.com/v1beta/models'
   }
   if (provider === 'ollama') {
     return (process.env.OLLAMA_API_URL || 'http://localhost:11434') + info.modelsEndpoint
@@ -87,7 +86,7 @@ export async function POST(req: Request) {
     // Validate url for shape only — it is NOT used to build the fetch URL.
     validateUrl(url, provider)
 
-    const modelsUrl = resolveModelsUrl(provider, apiKey)
+    const modelsUrl = resolveModelsUrl(provider)
 
     if (!modelsUrl) {
       return NextResponse.json({
@@ -99,8 +98,12 @@ export async function POST(req: Request) {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     }
-    if (apiKey && (provider === 'openai' || provider === 'custom')) {
-      headers['Authorization'] = 'Bearer ' + apiKey
+    if (apiKey) {
+      if (provider === 'openai' || provider === 'custom') {
+        headers['Authorization'] = 'Bearer ' + apiKey
+      } else if (provider === 'gemini') {
+        headers['x-goog-api-key'] = apiKey
+      }
     }
 
     const response = await fetch(modelsUrl, {

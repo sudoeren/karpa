@@ -183,7 +183,8 @@ export function getHeaders(provider: ProviderType, apiKey?: string): Record<stri
       }
       break
     case 'gemini':
-      // API key goes in URL query param
+      // API key goes in x-goog-api-key header (keeps it out of the URL)
+      if (apiKey) headers['x-goog-api-key'] = apiKey
       break
     case 'custom':
       if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`

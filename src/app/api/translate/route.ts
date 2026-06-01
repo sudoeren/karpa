@@ -9,12 +9,11 @@ import {
 } from '@/lib/providers';
 
 // Resolve a fetch URL for a given provider. The result is constructed from
-// hardcoded constants or server-side env vars — the user-supplied apiUrl is
-// never part of the network destination.
+// hardcoded constants or server-side env vars — user input never appears in
+// the URL string itself.
 function resolveFetchUrl(
   provider: ProviderType,
-  modelName: string,
-  apiKey: string | undefined
+  modelName: string
 ): string {
   if (provider === 'openai') {
     return 'https://api.openai.com/v1/chat/completions';
@@ -23,8 +22,7 @@ function resolveFetchUrl(
     return 'https://api.anthropic.com/v1/messages';
   }
   if (provider === 'gemini') {
-    if (!apiKey) throw new Error('Gemini requires an API key.');
-    return 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent?key=' + apiKey;
+    return 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent';
   }
   if (provider === 'ollama') {
     return (process.env.OLLAMA_API_URL || 'http://localhost:11434') + '/v1/chat/completions';
@@ -102,7 +100,10 @@ Translate the following text now:`;
   const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   try {
-    const fetchUrl = resolveFetchUrl(provider, modelName, apiKey);
+    if (provider === 'gemini' && !apiKey) {
+      throw new Error('Gemini requires an API key.');
+    }
+    const fetchUrl = resolveFetchUrl(provider, modelName);
 
     const headers = getHeaders(provider, apiKey);
     const body = buildRequestBody(provider, modelName, messages, temperature);
