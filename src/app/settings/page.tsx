@@ -294,15 +294,32 @@ export default function SettingsPage() {
   ] as const
 
   return (
-    <div className="h-full flex items-center justify-center p-2 md:p-4">
+    <div className="h-full flex items-stretch md:items-center justify-center p-0 md:p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-5xl h-full md:h-[700px] bg-card border border-border rounded-2xl md:rounded-[32px] shadow-2xl overflow-hidden flex flex-col md:flex-row"
+        className="w-full max-w-5xl h-full md:h-[700px] bg-card md:border md:border-border md:rounded-[32px] shadow-2xl overflow-hidden flex flex-col md:flex-row"
       >
         {/* Mobile Tab Bar - horizontal scroll on mobile */}
-        <div className="md:hidden border-b border-border bg-muted/20 shrink-0 overflow-x-auto custom-scrollbar">
-          <nav className="flex items-center gap-1 p-2 min-w-max">
+        <div className="md:hidden border-b border-border bg-muted/20 shrink-0">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-primary/10 rounded-lg">
+                <Logo size={18} />
+              </div>
+              <span className="font-bold text-sm tracking-tight">{t.settings.title}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className={cn(
+                "size-1.5 rounded-full",
+                connectionStatus === 'success' ? "bg-emerald-500" : "bg-muted-foreground/30"
+              )} />
+              <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                {connectionStatus === 'success' ? t.settings.coreOnline : t.settings.coreOffline}
+              </span>
+            </div>
+          </div>
+          <nav className="flex items-center gap-1 p-2 overflow-x-auto custom-scrollbar">
             {sidebarItems.map((item) => {
               const isActive = activeTab === item.id
               return (
@@ -310,7 +327,7 @@ export default function SettingsPage() {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -385,10 +402,10 @@ export default function SettingsPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -5 }}
               transition={{ duration: 0.2 }}
-              className="flex-1 p-12 overflow-y-auto custom-scrollbar"
+              className="flex-1 p-4 md:p-12 overflow-y-auto custom-scrollbar"
             >
               {activeTab === 'appearance' && (
-                <div className="max-w-2xl space-y-10">
+                <div className="max-w-2xl space-y-6 md:space-y-10">
                   <SectionHeader title={t.settings.appearance} desc={t.settings.appearanceDesc} icon={LayoutGrid} />
                   
                   <div className="space-y-4">
@@ -447,7 +464,7 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'connection' && (
-                <div className="max-w-2xl space-y-8">
+                <div className="max-w-2xl space-y-5 md:space-y-8">
                   <SectionHeader title={t.settings.connection} desc={t.settings.connectionDesc} icon={Sliders} />
                   
                   <div className="space-y-6">
@@ -489,7 +506,7 @@ export default function SettingsPage() {
                     {/* API URL */}
                     <div className="space-y-3">
                       <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.engineUrl}</Label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <Input
                           value={apiUrl}
                           onChange={(e) => setApiUrl(e.target.value)}
@@ -498,12 +515,12 @@ export default function SettingsPage() {
                         />
                         <Button
                           variant="outline"
-                          className="h-12 px-6 rounded-xl border-border bg-muted/20"
+                          className="h-12 px-6 rounded-xl border-border bg-muted/20 shrink-0"
                           onClick={testConnection}
                           disabled={isTestingConnection}
                         >
-                          {isTestingConnection ? <Loader2 className="size-4 animate-spin mr-2" /> : <RefreshCw className="size-4 mr-2" />}
-                          {t.settings.testConnection}
+                          {isTestingConnection ? <Loader2 className="size-4 animate-spin sm:mr-2" /> : <RefreshCw className="size-4 sm:mr-2" />}
+                          <span className="hidden sm:inline">{t.settings.testConnection}</span>
                         </Button>
                       </div>
                     </div>
@@ -580,7 +597,7 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'notifications' && (
-                <div className="max-w-2xl space-y-6">
+                <div className="max-w-2xl space-y-4 md:space-y-6">
                   <SectionHeader title={t.settings.notifications} desc={t.settings.notificationsDesc} icon={Bell} />
                   
                   <div className="space-y-3">
@@ -604,7 +621,7 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'data' && (
-                <div className="max-w-2xl space-y-12">
+                <div className="max-w-2xl space-y-6 md:space-y-12">
                   <div className="space-y-6">
                     <SectionHeader title={t.settings.vaultTitle} desc={t.settings.vaultDesc} icon={HardDrive} />
                     
@@ -647,7 +664,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className="pt-10 border-t border-border/50 space-y-8">
+                  <div className="pt-6 md:pt-10 border-t border-border/50 space-y-5 md:space-y-8">
                     <SectionHeader 
                       title={t.settings.purgeTitle} 
                       desc={t.settings.purgeDesc} 
@@ -714,27 +731,27 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'about' && (
-                <div className="max-w-2xl mx-auto space-y-10">
+                <div className="max-w-2xl mx-auto space-y-6 md:space-y-10">
                   {/* Brand & Identity Header */}
-                  <div className="relative p-12 rounded-[48px] bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent border border-primary/5 overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-1000">
+                  <div className="relative p-6 md:p-12 rounded-2xl md:rounded-[48px] bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent border border-primary/5 overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-1000 hidden md:block">
                       <Logo size={240} />
                     </div>
-                    
-                    <div className="relative z-10 space-y-8">
-                      <div className="space-y-4">
-                        <h2 className="text-7xl font-black tracking-tighter leading-none text-foreground">Localce</h2>
-                        <p className="text-lg text-muted-foreground/80 font-medium leading-relaxed max-w-md">
+
+                    <div className="relative z-10 space-y-6 md:space-y-8">
+                      <div className="space-y-3 md:space-y-4">
+                        <h2 className="text-4xl md:text-7xl font-black tracking-tighter leading-none text-foreground">Localce</h2>
+                        <p className="text-sm md:text-lg text-muted-foreground/80 font-medium leading-relaxed max-w-md">
                           {t.about.description}
                         </p>
                       </div>
 
                       {/* Developer & Project Info - Unified Layout */}
-                      <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center gap-8 border-t border-border/40">
+                      <div className="pt-6 md:pt-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 md:gap-8 border-t border-border/40">
                         <Link href="https://erencakar.com" target="_blank" className="group/dev">
                           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2 group-hover/dev:text-primary transition-colors">{t.about.developer}</p>
                           <div className="flex items-center gap-3">
-                            <span className="text-2xl font-bold tracking-tight group-hover/dev:underline decoration-primary/30 underline-offset-8 transition-all">Eren Çakar</span>
+                            <span className="text-xl md:text-2xl font-bold tracking-tight group-hover/dev:underline decoration-primary/30 underline-offset-8 transition-all">Eren Çakar</span>
                             <ArrowUpRight className="size-4 text-muted-foreground/20 group-hover/dev:text-primary group-hover/dev:translate-x-0.5 group-hover/dev:-translate-y-0.5 transition-all" />
                           </div>
                         </Link>
@@ -744,7 +761,7 @@ export default function SettingsPage() {
                         <Link href="https://github.com/sudoeren/localce" target="_blank" className="group/code">
                           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2 group-hover/code:text-primary transition-colors">{t.about.sourceCode}</p>
                           <div className="flex items-center gap-3">
-                            <span className="text-2xl font-bold tracking-tight group-hover/code:underline decoration-primary/30 underline-offset-8 transition-all">{t.about.openSource}</span>
+                            <span className="text-xl md:text-2xl font-bold tracking-tight group-hover/code:underline decoration-primary/30 underline-offset-8 transition-all">{t.about.openSource}</span>
                             <GitFork className="size-5 text-muted-foreground/30 group-hover/code:text-foreground transition-colors" />
                           </div>
                         </Link>
@@ -775,11 +792,11 @@ export default function SettingsPage() {
 function SectionHeader({ title, desc, icon: Icon, color = "text-foreground" }: { title: string, desc: string, icon: any, color?: string }) {
   return (
     <div className="space-y-1">
-      <div className="flex items-center gap-3">
-        <Icon className={cn("size-5", color)} />
-        <h2 className={cn("text-2xl font-bold tracking-tight", color)}>{title}</h2>
+      <div className="flex items-center gap-2 md:gap-3">
+        <Icon className={cn("size-4 md:size-5", color)} />
+        <h2 className={cn("text-lg md:text-2xl font-bold tracking-tight", color)}>{title}</h2>
       </div>
-      <p className="text-sm text-muted-foreground font-medium ml-8 leading-relaxed">{desc}</p>
+      <p className="text-xs md:text-sm text-muted-foreground font-medium ml-6 md:ml-8 leading-relaxed">{desc}</p>
     </div>
   )
 }
