@@ -144,7 +144,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {isConnected === null ? "Checking..." : isConnected ? "Engine Ready" : "Disconnected"}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {isConnected === null ? "Please wait" : isConnected ? "v1.0.0" : "Check connection"}
+                   {isConnected === null ? "Please wait" : isConnected ? "v1.0.1" : "Check connection"}
                 </span>
               </div>
             </SidebarMenuButton>
