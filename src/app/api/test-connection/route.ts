@@ -4,6 +4,7 @@ import {
   PROVIDERS,
   getHeaders,
 } from '@/lib/providers'
+import { validateUrl, stripTrailingSlash } from '@/lib/url-validation'
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +23,8 @@ export async function POST(request: Request) {
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
-    const baseUrl = url.replace(/\/+$/, '')
+    const baseUrl = stripTrailingSlash(url)
+    validateUrl(baseUrl, provider)
 
     try {
       switch (provider) {
