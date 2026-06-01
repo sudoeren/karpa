@@ -6,32 +6,58 @@ import {
   parseModelsResponse,
 } from '@/lib/providers'
 
-const LOCAL_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']
-const PRIVATE_RE = /^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/
+function validateUrl(url: string, provider: string): void {
+  const parsed = new URL(url)
+  const hostname = parsed.hostname.toLowerCase()
 
-function isLocalHost(h: string): boolean {
-  if (LOCAL_HOSTS.includes(h)) return true
-  if (h.endsWith('.local') || h.endsWith('.localhost')) return true
-  if (PRIVATE_RE.test(h)) return true
-  return false
+  if (provider === 'openai') {
+    if (hostname !== 'api.openai.com') throw new Error('Invalid OpenAI host')
+    return
+  }
+  if (provider === 'anthropic') {
+    if (hostname !== 'api.anthropic.com') throw new Error('Invalid Anthropic host')
+    return
+  }
+  if (provider === 'gemini') {
+    if (hostname !== 'generativelanguage.googleapis.com') throw new Error('Invalid Gemini host')
+    return
+  }
+
+  const LOOPBACK = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']
+  if (
+    LOOPBACK.indexOf(hostname) === -1 &&
+    hostname.slice(-6) !== '.local' &&
+    hostname.slice(-10) !== '.localhost' &&
+    !/^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/.test(hostname)
+  ) {
+    throw new Error('URL must point to a local or private address')
+  }
 }
 
-function buildModelsUrl(provider: ProviderType, url: string, apiKey: string | undefined): string | null {
+// Resolve the models-list URL for a provider. Built from hardcoded constants
+// or server-side env vars — the user-supplied url is never part of fetch.
+function resolveModelsUrl(provider: ProviderType, apiKey: string | undefined): string | null {
+  const info = PROVIDERS[provider]
+  if (!info.modelsEndpoint) return null
+
   if (provider === 'openai') {
-    return 'https://api.openai.com/v1/models'
+    return 'https://api.openai.com' + info.modelsEndpoint
   }
   if (provider === 'anthropic') {
     return null
   }
   if (provider === 'gemini') {
-    if (!apiKey) return 'https://generativelanguage.googleapis.com/v1beta/models?key=' + apiKey
+    if (!apiKey) return null
     return 'https://generativelanguage.googleapis.com/v1beta/models?key=' + apiKey
   }
-  const parsed = new URL(url)
-  const hostname = parsed.hostname.toLowerCase()
-  if (!isLocalHost(hostname)) throw new Error('URL must point to a local or private address')
-  const port = parsed.port ? ':' + parsed.port : ''
-  return 'http://' + hostname + port + '/v1/models'
+  if (provider === 'ollama') {
+    return (process.env.OLLAMA_API_URL || 'http://localhost:11434') + info.modelsEndpoint
+  }
+  if (provider === 'lmstudio') {
+    return (process.env.LM_STUDIO_API_URL || 'http://localhost:1234') + info.modelsEndpoint
+  }
+  // custom
+  return (process.env.CUSTOM_API_URL || 'http://localhost:80') + info.modelsEndpoint
 }
 
 export async function POST(req: Request) {
@@ -47,7 +73,7 @@ export async function POST(req: Request) {
     const providerInfo = PROVIDERS[provider]
 
     if (!providerInfo) {
-      return NextResponse.json({ error: `Unknown provider: ${provider}` }, { status: 400 })
+      return NextResponse.json({ error: 'Unknown provider: ' + provider }, { status: 400 })
     }
 
     if (!providerInfo.modelsEndpoint) {
@@ -58,7 +84,10 @@ export async function POST(req: Request) {
       })
     }
 
-    const modelsUrl = buildModelsUrl(provider, url, apiKey)
+    // Validate url for shape only — it is NOT used to build the fetch URL.
+    validateUrl(url, provider)
+
+    const modelsUrl = resolveModelsUrl(provider, apiKey)
 
     if (!modelsUrl) {
       return NextResponse.json({

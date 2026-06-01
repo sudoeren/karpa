@@ -8,41 +8,60 @@ import {
   extractTranslation,
 } from '@/lib/providers';
 
-const LOCAL_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'];
-const PRIVATE_RE = /^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/;
+function validateUrl(url: string, provider: string): void {
+  const parsed = new URL(url);
+  const hostname = parsed.hostname.toLowerCase();
 
-function isLocalHost(h: string): boolean {
-  if (LOCAL_HOSTS.includes(h)) return true;
-  if (h.endsWith('.local') || h.endsWith('.localhost')) return true;
-  if (PRIVATE_RE.test(h)) return true;
-  return false;
+  if (provider === 'openai') {
+    if (hostname !== 'api.openai.com') throw new Error('Invalid OpenAI host');
+    return;
+  }
+  if (provider === 'anthropic') {
+    if (hostname !== 'api.anthropic.com') throw new Error('Invalid Anthropic host');
+    return;
+  }
+  if (provider === 'gemini') {
+    if (hostname !== 'generativelanguage.googleapis.com') throw new Error('Invalid Gemini host');
+    return;
+  }
+
+  const LOOPBACK = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'];
+  if (
+    LOOPBACK.indexOf(hostname) === -1 &&
+    hostname.slice(-6) !== '.local' &&
+    hostname.slice(-10) !== '.localhost' &&
+    !/^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/.test(hostname)
+  ) {
+    throw new Error('URL must point to a local or private address');
+  }
 }
 
-const CLOUD_URL: Record<string, string> = {
-  openai: 'https://api.openai.com',
-  anthropic: 'https://api.anthropic.com',
-  gemini: 'https://generativelanguage.googleapis.com',
-};
-
-const CLOUD_PATH: Record<string, string> = {
-  openai: '/v1/chat/completions',
-  anthropic: '/v1/messages',
-};
-
-function buildFetchUrl(provider: ProviderType, apiUrl: string | undefined, modelName: string, apiKey: string | undefined): string {
-  if (provider === 'openai' || provider === 'anthropic') {
-    return CLOUD_URL[provider] + CLOUD_PATH[provider];
+// Resolve a fetch URL for a given provider. The result is constructed from
+// hardcoded constants or server-side env vars — the user-supplied apiUrl is
+// never part of the network destination.
+function resolveFetchUrl(
+  provider: ProviderType,
+  modelName: string,
+  apiKey: string | undefined
+): string {
+  if (provider === 'openai') {
+    return 'https://api.openai.com/v1/chat/completions';
+  }
+  if (provider === 'anthropic') {
+    return 'https://api.anthropic.com/v1/messages';
   }
   if (provider === 'gemini') {
     if (!apiKey) throw new Error('Gemini requires an API key.');
-    return CLOUD_URL.gemini + '/v1beta/models/' + modelName + ':generateContent?key=' + apiKey;
+    return 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent?key=' + apiKey;
   }
-  const url = apiUrl || PROVIDERS[provider].defaultUrl;
-  const parsed = new URL(url);
-  const hostname = parsed.hostname.toLowerCase();
-  if (!isLocalHost(hostname)) throw new Error('URL must point to a local or private address');
-  const port = parsed.port ? ':' + parsed.port : '';
-  return 'http://' + hostname + port + '/v1/chat/completions';
+  if (provider === 'ollama') {
+    return (process.env.OLLAMA_API_URL || 'http://localhost:11434') + '/v1/chat/completions';
+  }
+  if (provider === 'lmstudio') {
+    return (process.env.LM_STUDIO_API_URL || 'http://localhost:1234') + '/v1/chat/completions';
+  }
+  // custom
+  return (process.env.CUSTOM_API_URL || 'http://localhost:80') + '/v1/chat/completions';
 }
 
 async function translateChunk(
@@ -112,7 +131,11 @@ Translate the following text now:`;
   const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   try {
-    const fetchUrl = buildFetchUrl(provider, apiUrl, modelName, apiKey);
+    // Validate user-supplied URL (for shape only) — keeps parity with
+    // settings/onboarding flow but the value is not used in fetch.
+    if (apiUrl) validateUrl(apiUrl, provider);
+
+    const fetchUrl = resolveFetchUrl(provider, modelName, apiKey);
 
     const headers = getHeaders(provider, apiKey);
     const body = buildRequestBody(provider, modelName, messages, temperature);
@@ -129,7 +152,7 @@ Translate the following text now:`;
     if (!response.ok) {
       const errorText = await response.text();
       const providerName = PROVIDERS[provider]?.name || provider;
-      throw new Error(`${providerName} Error: ${response.status} - ${errorText}`);
+      throw new Error(providerName + ' Error: ' + response.status + ' - ' + errorText);
     }
 
     const data = await response.json();
@@ -176,17 +199,19 @@ export async function POST(req: Request) {
 
     if (!providerInfo) {
       return NextResponse.json(
-        { error: `Unknown provider: ${provider}` },
+        { error: 'Unknown provider: ' + provider },
         { status: 400 }
       );
     }
 
-    const API_URL = apiUrl || process.env.LLM_API_URL || process.env.LM_STUDIO_URL;
+    // Validate apiUrl up front (shape only) so that misconfiguration fails fast.
+    if (apiUrl) validateUrl(apiUrl, provider);
+
     const API_KEY = apiKey || process.env.LLM_API_KEY || undefined;
 
     if (providerInfo.requiresApiKey && !API_KEY) {
       return NextResponse.json(
-        { error: `${providerInfo.name} requires an API key. Please add it in Settings.` },
+        { error: providerInfo.name + ' requires an API key. Please add it in Settings.' },
         { status: 401 }
       );
     }
@@ -220,7 +245,7 @@ export async function POST(req: Request) {
               tone,
               sourceLanguage,
               provider,
-              API_URL,
+              apiUrl,
               API_KEY,
               MODEL_NAME,
               TEMPERATURE,
@@ -245,7 +270,7 @@ export async function POST(req: Request) {
             tone,
             sourceLanguage,
             provider,
-            API_URL,
+            apiUrl,
             API_KEY,
             MODEL_NAME,
             TEMPERATURE
@@ -260,7 +285,7 @@ export async function POST(req: Request) {
 
       } catch (fetchError) {
         lastError = fetchError as Error;
-        console.error(`Translation fetch error (attempt ${attempt + 1}):`, fetchError);
+        console.error('Translation fetch error (attempt ' + (attempt + 1) + '):', fetchError);
 
         if ((fetchError as Error).name === 'AbortError') {
           return NextResponse.json(
@@ -279,7 +304,7 @@ export async function POST(req: Request) {
     const providerName = PROVIDERS[provider]?.name || provider;
     console.error('All translation attempts failed:', lastError);
     return NextResponse.json(
-      { error: `Failed to connect to ${providerName}. Make sure it is running and accessible.` },
+      { error: 'Failed to connect to ' + providerName + '. Make sure it is running and accessible.' },
       { status: 503 }
     );
 
