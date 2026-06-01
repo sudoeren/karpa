@@ -88,7 +88,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const savedProvider = localStorage.getItem("llm-provider") as ProviderType | null
     const savedUrl = localStorage.getItem("llm-api-url")
-    const savedKey = localStorage.getItem("llm-api-key")
+    const savedKey = sessionStorage.getItem("llm-api-key")
     const savedTemp = localStorage.getItem("llm-temperature")
     const savedModel = localStorage.getItem("llm-model")
     const savedNotifs = localStorage.getItem("localce-notifications")
@@ -175,8 +175,8 @@ export default function SettingsPage() {
     localStorage.setItem("llm-provider", selectedProvider)
     localStorage.setItem("llm-api-url", apiUrl)
     localStorage.setItem("llm-temperature", temperature.toString())
-    if (apiKey) localStorage.setItem("llm-api-key", apiKey)
-    else localStorage.removeItem("llm-api-key")
+    if (apiKey) sessionStorage.setItem("llm-api-key", apiKey)
+    else sessionStorage.removeItem("llm-api-key")
     if (selectedModel) localStorage.setItem("llm-model", selectedModel)
 
     // Also keep backward-compatible keys for sidebar/navbar connection checks
