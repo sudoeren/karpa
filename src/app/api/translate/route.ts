@@ -3,48 +3,55 @@ import { splitIntoChunks, cleanTranslation } from '@/lib/utils';
 import {
   type ProviderType,
   PROVIDERS,
-  getChatCompletionUrl,
   getHeaders,
   buildRequestBody,
-  getGeminiUrl,
   extractTranslation,
 } from '@/lib/providers';
 
-const PRIVATE_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'];
+const LOCAL_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'];
+const PRIVATE_RE = /^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/;
 
-function isPrivateIP(hostname: string): boolean {
-  return PRIVATE_HOSTS.includes(hostname) ||
-    hostname.endsWith('.local') ||
-    hostname.endsWith('.localhost') ||
-    /^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/.test(hostname);
+function isLocalHost(h: string): boolean {
+  if (LOCAL_HOSTS.includes(h)) return true;
+  if (h.endsWith('.local') || h.endsWith('.localhost')) return true;
+  if (PRIVATE_RE.test(h)) return true;
+  return false;
 }
 
-function resolveApiUrl(apiUrl: string | undefined, provider: ProviderType): string {
-  const info = PROVIDERS[provider];
+const CLOUD_URL: Record<string, string> = {
+  openai: 'https://api.openai.com',
+  anthropic: 'https://api.anthropic.com',
+  gemini: 'https://generativelanguage.googleapis.com',
+};
 
-  // Cloud providers use hardcoded URLs — no user input in the fetch destination
-  if (provider === 'openai' || provider === 'anthropic' || provider === 'gemini') {
-    return info.defaultUrl;
+const CLOUD_PATH: Record<string, string> = {
+  openai: '/v1/chat/completions',
+  anthropic: '/v1/messages',
+};
+
+function buildFetchUrl(provider: ProviderType, apiUrl: string | undefined, modelName: string, apiKey: string | undefined): string {
+  if (provider === 'openai' || provider === 'anthropic') {
+    return CLOUD_URL[provider] + CLOUD_PATH[provider];
   }
-
-  // Local providers: validate against known-safe hostnames
-  const url = apiUrl || process.env.LLM_API_URL || process.env.LM_STUDIO_URL || info.defaultUrl;
+  if (provider === 'gemini') {
+    if (!apiKey) throw new Error('Gemini requires an API key.');
+    return CLOUD_URL.gemini + '/v1beta/models/' + modelName + ':generateContent?key=' + apiKey;
+  }
+  const url = apiUrl || PROVIDERS[provider].defaultUrl;
   const parsed = new URL(url);
   const hostname = parsed.hostname.toLowerCase();
-  if (!isPrivateIP(hostname)) throw new Error('URL must point to a local or private address');
-
-  const port = parsed.port ? `:${parsed.port}` : '';
-  return `${parsed.protocol}//${hostname}${port}`;
+  if (!isLocalHost(hostname)) throw new Error('URL must point to a local or private address');
+  const port = parsed.port ? ':' + parsed.port : '';
+  return 'http://' + hostname + port + '/v1/chat/completions';
 }
 
-// Translate a single chunk
 async function translateChunk(
   text: string,
   targetLanguage: string,
   tone: string | undefined,
   sourceLanguage: string | undefined,
   provider: ProviderType,
-  apiUrl: string,
+  apiUrl: string | undefined,
   apiKey: string | undefined,
   modelName: string,
   temperature: number,
@@ -71,12 +78,12 @@ async function translateChunk(
     }
   }
 
-  const sourceContext = sourceLanguage && sourceLanguage !== "Auto Detect" 
-    ? `The source text is in ${sourceLanguage}. ` 
+  const sourceContext = sourceLanguage && sourceLanguage !== "Auto Detect"
+    ? `The source text is in ${sourceLanguage}. `
     : "";
 
-  const chunkContext = totalChunks && totalChunks > 1 
-    ? `This is part ${chunkIndex! + 1} of ${totalChunks} of a longer text. Maintain consistency with other parts.` 
+  const chunkContext = totalChunks && totalChunks > 1
+    ? `This is part ${chunkIndex! + 1} of ${totalChunks} of a longer text. Maintain consistency with other parts.`
     : "";
 
   const systemPrompt = `You are an expert translator. Your absolute priority is to translate the given text into ${targetLanguage.toUpperCase()}.
@@ -105,13 +112,7 @@ Translate the following text now:`;
   const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   try {
-    let fetchUrl: string;
-    if (provider === 'gemini') {
-      if (!apiKey) throw new Error('Gemini requires an API key.');
-      fetchUrl = getGeminiUrl(apiUrl, modelName, apiKey);
-    } else {
-      fetchUrl = getChatCompletionUrl(provider, apiUrl);
-    }
+    const fetchUrl = buildFetchUrl(provider, apiUrl, modelName, apiKey);
 
     const headers = getHeaders(provider, apiKey);
     const body = buildRequestBody(provider, modelName, messages, temperature);
@@ -132,15 +133,15 @@ Translate the following text now:`;
     }
 
     const data = await response.json();
-    
+
     let translation = extractTranslation(provider, data);
-    
+
     if (!translation) {
       throw new Error("No translation returned.");
     }
 
     translation = cleanTranslation(translation);
-    
+
     if (!translation) {
       throw new Error("Empty translation returned.");
     }
@@ -163,7 +164,7 @@ export async function POST(req: Request) {
     }
 
     if (!text.trim()) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         translation: text,
         model: 'skipped-whitespace',
         sourceDetected: 'auto'
@@ -180,8 +181,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const API_URL = resolveApiUrl(apiUrl, provider);
-
+    const API_URL = apiUrl || process.env.LLM_API_URL || process.env.LM_STUDIO_URL;
     const API_KEY = apiKey || process.env.LLM_API_KEY || undefined;
 
     if (providerInfo.requiresApiKey && !API_KEY) {
@@ -192,7 +192,7 @@ export async function POST(req: Request) {
     }
 
     const MODEL_NAME = model || process.env.LLM_MODEL || process.env.LM_STUDIO_MODEL || providerInfo.defaultModel;
-    
+
     if (!MODEL_NAME) {
       return NextResponse.json(
         { error: 'No model selected. Please select a model in Settings.' },
@@ -207,12 +207,12 @@ export async function POST(req: Request) {
 
     let lastError: Error | null = null;
     const maxRetries = 2;
-    
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         if (isLongText) {
           const translatedChunks: string[] = [];
-          
+
           for (let i = 0; i < chunks.length; i++) {
             const translatedChunk = await translateChunk(
               chunks[i],
@@ -232,7 +232,7 @@ export async function POST(req: Request) {
 
           const translation = translatedChunks.join('\n\n');
 
-          return NextResponse.json({ 
+          return NextResponse.json({
             translation,
             model: MODEL_NAME,
             sourceDetected: sourceLanguage === "Auto Detect" ? "auto" : sourceLanguage,
@@ -251,24 +251,24 @@ export async function POST(req: Request) {
             TEMPERATURE
           );
 
-          return NextResponse.json({ 
+          return NextResponse.json({
             translation,
             model: MODEL_NAME,
             sourceDetected: sourceLanguage === "Auto Detect" ? "auto" : sourceLanguage
           });
         }
-        
+
       } catch (fetchError) {
         lastError = fetchError as Error;
         console.error(`Translation fetch error (attempt ${attempt + 1}):`, fetchError);
-        
+
         if ((fetchError as Error).name === 'AbortError') {
           return NextResponse.json(
             { error: 'Translation request timed out. Please try again with shorter text.' },
             { status: 504 }
           );
         }
-        
+
         if (attempt < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
           continue;
