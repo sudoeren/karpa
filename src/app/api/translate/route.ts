@@ -8,34 +8,6 @@ import {
   extractTranslation,
 } from '@/lib/providers';
 
-function validateUrl(url: string, provider: string): void {
-  const parsed = new URL(url);
-  const hostname = parsed.hostname.toLowerCase();
-
-  if (provider === 'openai') {
-    if (hostname !== 'api.openai.com') throw new Error('Invalid OpenAI host');
-    return;
-  }
-  if (provider === 'anthropic') {
-    if (hostname !== 'api.anthropic.com') throw new Error('Invalid Anthropic host');
-    return;
-  }
-  if (provider === 'gemini') {
-    if (hostname !== 'generativelanguage.googleapis.com') throw new Error('Invalid Gemini host');
-    return;
-  }
-
-  const LOOPBACK = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'];
-  if (
-    LOOPBACK.indexOf(hostname) === -1 &&
-    hostname.slice(-6) !== '.local' &&
-    hostname.slice(-10) !== '.localhost' &&
-    !/^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/.test(hostname)
-  ) {
-    throw new Error('URL must point to a local or private address');
-  }
-}
-
 // Resolve a fetch URL for a given provider. The result is constructed from
 // hardcoded constants or server-side env vars — the user-supplied apiUrl is
 // never part of the network destination.
@@ -70,7 +42,6 @@ async function translateChunk(
   tone: string | undefined,
   sourceLanguage: string | undefined,
   provider: ProviderType,
-  apiUrl: string | undefined,
   apiKey: string | undefined,
   modelName: string,
   temperature: number,
@@ -131,10 +102,6 @@ Translate the following text now:`;
   const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   try {
-    // Validate user-supplied URL (for shape only) — keeps parity with
-    // settings/onboarding flow but the value is not used in fetch.
-    if (apiUrl) validateUrl(apiUrl, provider);
-
     const fetchUrl = resolveFetchUrl(provider, modelName, apiKey);
 
     const headers = getHeaders(provider, apiKey);
@@ -177,7 +144,7 @@ Translate the following text now:`;
 
 export async function POST(req: Request) {
   try {
-    const { text, targetLanguage, tone, sourceLanguage, model, apiUrl, temperature, provider: providerParam, apiKey } = await req.json();
+    const { text, targetLanguage, tone, sourceLanguage, model, temperature, provider: providerParam, apiKey } = await req.json();
 
     if (!text || !targetLanguage) {
       return NextResponse.json(
@@ -203,9 +170,6 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
-    // Validate apiUrl up front (shape only) so that misconfiguration fails fast.
-    if (apiUrl) validateUrl(apiUrl, provider);
 
     const API_KEY = apiKey || process.env.LLM_API_KEY || undefined;
 
@@ -245,7 +209,6 @@ export async function POST(req: Request) {
               tone,
               sourceLanguage,
               provider,
-              apiUrl,
               API_KEY,
               MODEL_NAME,
               TEMPERATURE,
@@ -270,7 +233,6 @@ export async function POST(req: Request) {
             tone,
             sourceLanguage,
             provider,
-            apiUrl,
             API_KEY,
             MODEL_NAME,
             TEMPERATURE
