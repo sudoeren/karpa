@@ -294,14 +294,38 @@ export default function SettingsPage() {
   ] as const
 
   return (
-    <div className="h-full flex items-center justify-center p-4">
-      <motion.div 
+    <div className="h-full flex items-center justify-center p-2 md:p-4">
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-5xl h-[700px] bg-card border border-border rounded-[32px] shadow-2xl overflow-hidden flex"
+        className="w-full max-w-5xl h-full md:h-[700px] bg-card border border-border rounded-2xl md:rounded-[32px] shadow-2xl overflow-hidden flex flex-col md:flex-row"
       >
-        {/* Sidebar */}
-        <div className="w-64 border-r border-border bg-muted/20 flex flex-col p-6 space-y-8">
+        {/* Mobile Tab Bar - horizontal scroll on mobile */}
+        <div className="md:hidden border-b border-border bg-muted/20 shrink-0 overflow-x-auto custom-scrollbar">
+          <nav className="flex items-center gap-1 p-2 min-w-max">
+            {sidebarItems.map((item) => {
+              const isActive = activeTab === item.id
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <item.icon className="size-3.5" />
+                  <span>{item.label}</span>
+                </button>
+              )
+            })}
+          </nav>
+        </div>
+
+        {/* Desktop Sidebar */}
+        <div className="hidden md:flex w-64 border-r border-border bg-muted/20 flex-col p-6 space-y-8">
           <div className="flex items-center gap-3 px-2">
             <div className="p-2 bg-primary/10 rounded-xl">
               <Logo size={24} />
@@ -353,7 +377,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-hidden flex flex-col bg-muted/[0.02]">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col bg-muted/[0.02]">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}

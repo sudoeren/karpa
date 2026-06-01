@@ -370,25 +370,25 @@ function TranslatorWorkspace() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-6 relative w-full max-w-4xl shrink-0"
+        className="text-center mb-4 md:mb-6 relative w-full max-w-4xl shrink-0"
       >
         <div className="flex items-center justify-center gap-3 mb-1">
-          <Logo size={32} />
-          <h1 className="text-xl font-bold">Localce</h1>
+          <Logo size={28} className="md:size-8" />
+          <h1 className="text-lg md:text-xl font-bold">Localce</h1>
         </div>
-        <p className="text-xs text-muted-foreground">{t.translator.title}</p>
+        <p className="text-xs text-muted-foreground hidden sm:block">{t.translator.title}</p>
 
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           className={cn(
-            "absolute right-0 top-1/2 -translate-y-1/2 rounded-full gap-2 h-9",
+            "absolute right-2 md:right-0 top-1/2 -translate-y-1/2 rounded-full size-9 md:h-9 md:w-auto md:px-4 md:gap-2",
             isHistoryOpen && "text-primary bg-primary/10"
           )}
           onClick={() => setIsHistoryOpen(true)}
         >
           <History className="size-4" />
-          <span className="hidden sm:inline text-xs">{t.history.title}</span>
+          <span className="hidden md:inline text-xs">{t.history.title}</span>
         </Button>
       </motion.div>
 
@@ -398,43 +398,56 @@ function TranslatorWorkspace() {
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-5xl flex-1 min-h-0"
       >
-        <div className="h-full bg-card/50 backdrop-blur-xl border rounded-[32px] overflow-hidden flex flex-col">
+        <div className="h-full bg-card/50 backdrop-blur-xl border rounded-2xl md:rounded-[32px] overflow-hidden flex flex-col">
           {/* Mode Toggle & Controls */}
-          <div className="flex flex-col md:flex-row items-center gap-4 p-4 border-b bg-muted/30 shrink-0 relative">
-            {/* Mode Toggle - Left on desktop */}
-            <div className="flex bg-muted rounded-xl p-1 md:absolute md:left-4 shrink-0">
-              <button
-                onClick={() => setMode("text")}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                  mode === "text"
-                    ? "bg-background shadow-sm text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Languages className="size-3.5" />
-                <span className="hidden xs:inline">{t.translator.textMode}</span>
-                <span className="xs:hidden">Text</span>
-              </button>
-              <button
-                onClick={() => setMode("file")}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                  mode === "file"
-                    ? "bg-background shadow-sm text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <FileUp className="size-3.5" />
-                <span className="hidden xs:inline">{t.translator.fileMode}</span>
-                <span className="xs:hidden">File</span>
-              </button>
+          <div className="flex flex-col gap-3 p-3 md:p-4 border-b bg-muted/30 shrink-0">
+            {/* Top Row: Mode Toggle + Tone */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex bg-muted rounded-xl p-1 shrink-0">
+                <button
+                  onClick={() => setMode("text")}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                    mode === "text"
+                      ? "bg-background shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Languages className="size-3.5" />
+                  <span>{t.translator.textMode}</span>
+                </button>
+                <button
+                  onClick={() => setMode("file")}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                    mode === "file"
+                      ? "bg-background shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <FileUp className="size-3.5" />
+                  <span>{t.translator.fileMode}</span>
+                </button>
+              </div>
+
+              <Select value={tone} onValueChange={setTone}>
+                <SelectTrigger className="w-auto min-w-[100px] h-9 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm px-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {tones.map(t2 => (
+                    <SelectItem key={t2.value} value={t2.value}>
+                      {t.translator[t2.labelKey]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Language Controls - Centered */}
-            <div className="flex flex-wrap items-center justify-center gap-2 w-full px-32">
+            {/* Language Controls - full width on mobile */}
+            <div className="flex items-center gap-2 w-full">
               <Select value={sourceLanguage} onValueChange={setSourceLanguage}>
-                <SelectTrigger className="w-[150px] sm:w-[180px] h-9 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm">
+                <SelectTrigger className="flex-1 min-w-0 h-10 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm px-3">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -453,7 +466,7 @@ function TranslatorWorkspace() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-9 rounded-xl shrink-0 hover:bg-background/50 transition-colors"
+                className="size-10 rounded-xl shrink-0 hover:bg-background/50 transition-colors"
                 onClick={swapLanguages}
                 disabled={sourceLanguage === "Auto Detect"}
               >
@@ -461,28 +474,12 @@ function TranslatorWorkspace() {
               </Button>
 
               <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                <SelectTrigger className="w-[120px] sm:w-[140px] h-9 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm">
+                <SelectTrigger className="flex-1 min-w-0 h-10 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm px-3">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {languages.map(l => (
                     <SelectItem key={l.code} value={l.name}>{l.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Tone Selection - Right on desktop */}
-            <div className="md:absolute md:right-4 shrink-0">
-              <Select value={tone} onValueChange={setTone}>
-                <SelectTrigger className="w-[110px] sm:w-[130px] h-9 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {tones.map(t2 => (
-                    <SelectItem key={t2.value} value={t2.value}>
-                      {t.translator[t2.labelKey]}
-                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -501,15 +498,15 @@ function TranslatorWorkspace() {
                   className="h-full grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x overflow-hidden"
                 >
                   {/* Source */}
-                  <div className="relative h-full flex flex-col">
+                  <div className="relative h-full flex flex-col min-h-0">
                     <Textarea
                       value={sourceText}
                       onChange={(e) => setSourceText(e.target.value)}
                       placeholder={t.translator.enterText}
-                      className="flex-1 resize-none border-none focus-visible:ring-0 rounded-none p-6 text-lg bg-transparent custom-scrollbar"
+                      className="flex-1 resize-none border-none focus-visible:ring-0 rounded-none p-4 md:p-6 text-base md:text-lg bg-transparent custom-scrollbar"
                       spellCheck={false}
                     />
-                    <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-4 bg-gradient-to-t from-card/90 to-transparent shrink-0">
+                    <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3 md:p-4 bg-gradient-to-t from-card/90 to-transparent shrink-0">
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                         {sourceText.length} {t.translator.characters}
                       </span>
@@ -541,7 +538,7 @@ function TranslatorWorkspace() {
                   </div>
 
                   {/* Target */}
-                  <div className="relative bg-muted/10 h-full flex flex-col">
+                  <div className="relative bg-muted/10 h-full flex flex-col min-h-0">
                     {loading && (
                       <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center p-6 text-center">
                         <div className="w-full max-w-xs space-y-4">
@@ -565,14 +562,14 @@ function TranslatorWorkspace() {
                         </div>
                       </div>
                     )}
-                    <div className="flex-1 p-6 h-full overflow-y-auto custom-scrollbar">
+                    <div className="flex-1 p-4 md:p-6 h-full overflow-y-auto custom-scrollbar">
                       {translatedText ? (
-                        <MarkdownViewer content={translatedText} className="text-lg leading-relaxed" />
+                        <MarkdownViewer content={translatedText} className="text-base md:text-lg leading-relaxed" />
                       ) : (
-                        <p className="text-muted-foreground italic">{t.translator.translationWillAppear}</p>
+                        <p className="text-muted-foreground italic text-sm md:text-base">{t.translator.translationWillAppear}</p>
                       )}
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-4 bg-gradient-to-t from-muted/40 to-transparent shrink-0">
+                    <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3 md:p-4 bg-gradient-to-t from-muted/40 to-transparent shrink-0">
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                         {translatedText.length} {t.translator.characters}
                       </span>
@@ -617,7 +614,7 @@ function TranslatorWorkspace() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="p-8 h-full flex flex-col"
+                  className="p-4 md:p-8 h-full flex flex-col"
                 >
                   {!selectedFile ? (
                     <div
@@ -626,23 +623,23 @@ function TranslatorWorkspace() {
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                       className={cn(
-                        "flex-1 border-2 border-dashed rounded-3xl p-12 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-4",
+                        "flex-1 border-2 border-dashed rounded-3xl p-6 md:p-12 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 md:gap-4",
                         isDragging
                           ? "border-primary bg-primary/5 scale-[0.99]"
                           : "border-muted-foreground/20 hover:border-primary/50 hover:bg-muted/30"
                       )}
                     >
-                      <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <div className="size-12 md:size-16 rounded-2xl bg-primary/10 flex items-center justify-center">
                         <Upload className={cn(
-                          "size-8 transition-colors",
+                          "size-6 md:size-8 transition-colors",
                           isDragging ? "text-primary" : "text-muted-foreground"
                         )} />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="font-bold text-lg">{t.translator.uploadFile}</h3>
-                        <p className="text-sm text-muted-foreground">{t.translator.dragDrop}</p>
+                        <h3 className="font-bold text-base md:text-lg">{t.translator.uploadFile}</h3>
+                        <p className="text-xs md:text-sm text-muted-foreground">{t.translator.dragDrop}</p>
                       </div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-4">{t.translator.supportedFormats}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-2 md:mt-4 px-2">{t.translator.supportedFormats}</p>
                       <input
                         type="file"
                         ref={fileInputRef}
@@ -652,14 +649,14 @@ function TranslatorWorkspace() {
                       />
                     </div>
                   ) : (
-                    <div className="space-y-6 flex-1 flex flex-col min-h-0">
-                      <div className="flex items-center justify-between p-5 bg-muted/50 rounded-2xl border">
-                        <div className="flex items-center gap-4">
-                          <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <FileUp className="size-6 text-primary" />
+                    <div className="space-y-4 md:space-y-6 flex-1 flex flex-col min-h-0">
+                      <div className="flex items-center justify-between p-3 md:p-5 bg-muted/50 rounded-2xl border gap-3">
+                        <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+                          <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <FileUp className="size-5 md:size-6 text-primary" />
                           </div>
-                          <div>
-                            <p className="font-bold text-sm">{selectedFile.name}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-sm truncate">{selectedFile.name}</p>
                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                               {fileContent.length} {t.translator.characters}
                             </p>
@@ -668,7 +665,7 @@ function TranslatorWorkspace() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-10 rounded-full hover:bg-destructive/10 hover:text-destructive"
+                          className="size-10 rounded-full hover:bg-destructive/10 hover:text-destructive shrink-0"
                           onClick={() => {
                             setSelectedFile(null)
                             setFileContent("")
@@ -743,12 +740,12 @@ function TranslatorWorkspace() {
           </div>
 
           {/* Translate Button */}
-          <div className="p-4 border-t bg-muted/20 shrink-0">
+          <div className="p-3 md:p-4 border-t bg-muted/20 shrink-0">
             {loading ? (
               <Button
                 onClick={handleCancelTranslation}
                 variant="destructive"
-                className="w-full h-16 rounded-[24px] text-base font-bold gap-3 shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full h-14 md:h-16 rounded-2xl md:rounded-[24px] text-base font-bold gap-3 shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
                 size="lg"
               >
                 <X className="size-5" />
@@ -759,7 +756,7 @@ function TranslatorWorkspace() {
                 onClick={handleTranslate}
                 disabled={mode === "text" ? !sourceText.trim() : !selectedFile}
                 className={cn(
-                  "w-full h-16 rounded-[24px] font-black text-lg transition-all duration-500 flex items-center justify-between px-8 group",
+                  "w-full h-14 md:h-16 rounded-2xl md:rounded-[24px] font-black text-base md:text-lg transition-all duration-500 flex items-center justify-between px-6 md:px-8 group",
                   mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
                     ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
                     : "bg-foreground text-background hover:bg-primary hover:text-white shadow-2xl hover:shadow-primary/30"
@@ -768,13 +765,13 @@ function TranslatorWorkspace() {
               >
                 <span className="tracking-tight">{t.translator.translate}</span>
                 <div className={cn(
-                  "size-10 rounded-full flex items-center justify-center transition-all duration-500",
+                  "size-9 md:size-10 rounded-full flex items-center justify-center transition-all duration-500",
                   mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
                     ? "bg-muted-foreground/10"
                     : "bg-background/20 group-hover:bg-white group-hover:rotate-[360deg] shadow-lg"
                 )}>
                   <Wand2 className={cn(
-                    "size-5 transition-colors duration-500",
+                    "size-4 md:size-5 transition-colors duration-500",
                     mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
                       ? "text-muted-foreground"
                       : "text-current group-hover:text-primary"

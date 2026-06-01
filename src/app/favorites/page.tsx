@@ -94,11 +94,11 @@ export default function FavoritesPage() {
   return (
     <div className="h-full flex flex-col max-w-6xl mx-auto w-full px-4 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 shrink-0">
-        <div className="flex items-center gap-3">
-          <Star className="size-6 text-yellow-500 fill-yellow-500" />
-          <h1 className="text-2xl font-bold tracking-tight">{t.favorites.title}</h1>
-          <Badge variant="secondary" className="rounded-md font-mono">{favorites.length}</Badge>
+      <div className="flex items-center justify-between mb-4 md:mb-6 shrink-0">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+          <Star className="size-5 md:size-6 text-yellow-500 fill-yellow-500 shrink-0" />
+          <h1 className="text-lg md:text-2xl font-bold tracking-tight truncate">{t.favorites.title}</h1>
+          <Badge variant="secondary" className="rounded-md font-mono shrink-0">{favorites.length}</Badge>
         </div>
 
         {favorites.length > 0 && (

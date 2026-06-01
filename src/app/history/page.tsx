@@ -173,11 +173,11 @@ export default function HistoryPage() {
   return (
     <div className="h-full flex flex-col max-w-6xl mx-auto w-full px-4 overflow-hidden">
       {/* Crisp Header */}
-      <div className="flex items-center justify-between mb-6 shrink-0">
-        <div className="flex items-center gap-3">
-          <History className="size-6 text-primary" />
-          <h1 className="text-2xl font-bold tracking-tight">{t.history.title}</h1>
-          <Badge variant="secondary" className="rounded-md font-mono">{history.length}</Badge>
+      <div className="flex items-center justify-between mb-4 md:mb-6 shrink-0">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+          <History className="size-5 md:size-6 text-primary shrink-0" />
+          <h1 className="text-lg md:text-2xl font-bold tracking-tight truncate">{t.history.title}</h1>
+          <Badge variant="secondary" className="rounded-md font-mono shrink-0">{history.length}</Badge>
         </div>
 
         {history.length > 0 && (
@@ -220,7 +220,7 @@ export default function HistoryPage() {
             </div>
             <div className="flex items-center gap-2">
               <Select value={filterSource} onValueChange={setFilterSource}>
-                <SelectTrigger className="h-10 w-[140px] rounded-lg bg-background">
+                <SelectTrigger className="h-10 flex-1 md:flex-none md:w-[140px] rounded-lg bg-background">
                   <SelectValue placeholder={t.history.allSources} />
                 </SelectTrigger>
                 <SelectContent>
@@ -230,9 +230,9 @@ export default function HistoryPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <ArrowRight className="size-4 text-muted-foreground shrink-0" />
+              <ArrowRight className="size-4 text-muted-foreground shrink-0 hidden md:block" />
               <Select value={filterTarget} onValueChange={setFilterTarget}>
-                <SelectTrigger className="h-10 w-[140px] rounded-lg bg-background">
+                <SelectTrigger className="h-10 flex-1 md:flex-none md:w-[140px] rounded-lg bg-background">
                   <SelectValue placeholder={t.history.allTargets} />
                 </SelectTrigger>
                 <SelectContent>
