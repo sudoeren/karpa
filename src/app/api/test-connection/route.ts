@@ -4,7 +4,37 @@ import {
   PROVIDERS,
   getHeaders,
 } from '@/lib/providers'
-import { validateUrl } from '@/lib/url-validation'
+
+const PRIVATE_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']
+
+const CLOUD_BASES: Record<string, string> = {
+  openai: 'https://api.openai.com',
+  anthropic: 'https://api.anthropic.com',
+  gemini: 'https://generativelanguage.googleapis.com',
+}
+
+function isPrivateIP(hostname: string): boolean {
+  return PRIVATE_HOSTS.includes(hostname) ||
+    hostname.endsWith('.local') ||
+    hostname.endsWith('.localhost') ||
+    /^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/.test(hostname)
+}
+
+function getBaseUrl(url: string, provider: string): string {
+  // Cloud providers use hardcoded URLs — no user input reaches fetch
+  if (provider === 'openai' || provider === 'anthropic' || provider === 'gemini') {
+    if (CLOUD_BASES[provider]) return CLOUD_BASES[provider]
+    throw new Error(`Unknown provider: ${provider}`)
+  }
+
+  // Local providers: validate hostname against known-safe list
+  const parsed = new URL(url)
+  const hostname = parsed.hostname.toLowerCase()
+  if (!isPrivateIP(hostname)) throw new Error('URL must point to a local or private address')
+
+  const port = parsed.port ? `:${parsed.port}` : ''
+  return `${parsed.protocol}//${hostname}${port}`
+}
 
 export async function POST(request: Request) {
   try {
@@ -21,16 +51,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Unknown provider: ${provider}` }, { status: 400 })
     }
 
+    const safeBase = getBaseUrl(url, provider)
+
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
-    const safeUrl = validateUrl(url, provider)
 
     try {
       switch (provider) {
         case 'anthropic': {
-          // Anthropic: test by calling messages endpoint with minimal payload
           const headers = getHeaders(provider, apiKey)
-          const response = await fetch(`${safeUrl}/v1/messages`, {
+          const response = await fetch(`${safeBase}/v1/messages`, {
             method: 'POST',
             headers,
             body: JSON.stringify({
@@ -42,7 +72,6 @@ export async function POST(request: Request) {
           })
           clearTimeout(timeoutId)
 
-          // Any response (even 400) means the server is reachable and API key works
           if (response.ok || response.status === 400 || response.status === 422) {
             return NextResponse.json({
               success: true,
@@ -65,9 +94,8 @@ export async function POST(request: Request) {
         }
 
         case 'gemini': {
-          // Gemini: test by listing models
           const response = await fetch(
-            `${safeUrl}/v1beta/models?key=${apiKey}`,
+            `${safeBase}/v1beta/models?key=${apiKey}`,
             {
               method: 'GET',
               signal: controller.signal,
@@ -99,8 +127,7 @@ export async function POST(request: Request) {
         }
 
         case 'ollama': {
-          // Ollama: test by hitting /api/tags
-          const response = await fetch(`${safeUrl}/api/tags`, {
+          const response = await fetch(`${safeBase}/api/tags`, {
             method: 'GET',
             signal: controller.signal,
             headers: { 'Accept': 'application/json' },
@@ -123,12 +150,10 @@ export async function POST(request: Request) {
         }
 
         default: {
-          // OpenAI-compatible: LM Studio, OpenAI, Custom
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`
 
-          // Try the models endpoint first
-          const response = await fetch(`${safeUrl}/v1/models`, {
+          const response = await fetch(`${safeBase}/v1/models`, {
             method: 'GET',
             signal: controller.signal,
             headers,
@@ -152,8 +177,7 @@ export async function POST(request: Request) {
             }, { status: 401 })
           }
           
-          // If models endpoint returns error, try health check
-          const healthResponse = await fetch(`${safeUrl}/v1/chat/completions`, {
+          const healthResponse = await fetch(`${safeBase}/v1/chat/completions`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -165,7 +189,6 @@ export async function POST(request: Request) {
             }),
           })
           
-          // Server is running even if it returns 400/422 (no model loaded)
           if (healthResponse.ok || healthResponse.status === 400 || healthResponse.status === 422) {
             return NextResponse.json({ 
               success: true, 

@@ -6,7 +6,34 @@ import {
   getModelsUrl,
   parseModelsResponse,
 } from '@/lib/providers'
-import { validateUrl } from '@/lib/url-validation'
+
+const PRIVATE_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']
+
+function isPrivateIP(hostname: string): boolean {
+  return PRIVATE_HOSTS.includes(hostname) ||
+    hostname.endsWith('.local') ||
+    hostname.endsWith('.localhost') ||
+    /^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/.test(hostname)
+}
+
+function validateAndGetBase(url: string, provider: string): string {
+  if (provider === 'openai' || provider === 'anthropic' || provider === 'gemini') {
+    const CLOUD_BASES: Record<string, string> = {
+      openai: 'https://api.openai.com',
+      anthropic: 'https://api.anthropic.com',
+      gemini: 'https://generativelanguage.googleapis.com',
+    }
+    if (CLOUD_BASES[provider]) return CLOUD_BASES[provider]
+    throw new Error(`Unknown provider: ${provider}`)
+  }
+
+  const parsed = new URL(url)
+  const hostname = parsed.hostname.toLowerCase()
+  if (!isPrivateIP(hostname)) throw new Error('URL must point to a local or private address')
+
+  const port = parsed.port ? `:${parsed.port}` : ''
+  return `${parsed.protocol}//${hostname}${port}`
+}
 
 export async function POST(req: Request) {
   try {
@@ -24,7 +51,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: `Unknown provider: ${provider}` }, { status: 400 })
     }
 
-    // For providers without a models endpoint, return known models
     if (!providerInfo.modelsEndpoint) {
       const knownModels = KNOWN_MODELS[provider] || []
       return NextResponse.json({
@@ -33,8 +59,8 @@ export async function POST(req: Request) {
       })
     }
 
-    const safeUrl = validateUrl(url, provider)
-    const modelsUrl = getModelsUrl(provider, safeUrl, apiKey)
+    const safeBase = validateAndGetBase(url, provider)
+    const modelsUrl = getModelsUrl(provider, safeBase, apiKey)
 
     if (!modelsUrl) {
       return NextResponse.json({
@@ -43,7 +69,6 @@ export async function POST(req: Request) {
       })
     }
 
-    // Build headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     }

@@ -9,7 +9,33 @@ import {
   getGeminiUrl,
   extractTranslation,
 } from '@/lib/providers';
-import { validateUrl } from '@/lib/url-validation';
+
+const PRIVATE_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'];
+
+function isPrivateIP(hostname: string): boolean {
+  return PRIVATE_HOSTS.includes(hostname) ||
+    hostname.endsWith('.local') ||
+    hostname.endsWith('.localhost') ||
+    /^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/.test(hostname);
+}
+
+function resolveApiUrl(apiUrl: string | undefined, provider: ProviderType): string {
+  const info = PROVIDERS[provider];
+
+  // Cloud providers use hardcoded URLs — no user input in the fetch destination
+  if (provider === 'openai' || provider === 'anthropic' || provider === 'gemini') {
+    return info.defaultUrl;
+  }
+
+  // Local providers: validate against known-safe hostnames
+  const url = apiUrl || process.env.LLM_API_URL || process.env.LM_STUDIO_URL || info.defaultUrl;
+  const parsed = new URL(url);
+  const hostname = parsed.hostname.toLowerCase();
+  if (!isPrivateIP(hostname)) throw new Error('URL must point to a local or private address');
+
+  const port = parsed.port ? `:${parsed.port}` : '';
+  return `${parsed.protocol}//${hostname}${port}`;
+}
 
 // Translate a single chunk
 async function translateChunk(
@@ -25,7 +51,6 @@ async function translateChunk(
   chunkIndex?: number,
   totalChunks?: number
 ): Promise<string> {
-  // Build tone instruction
   let toneInstruction = "";
   if (tone) {
     switch (tone) {
@@ -46,17 +71,14 @@ async function translateChunk(
     }
   }
 
-  // Build source language context
   const sourceContext = sourceLanguage && sourceLanguage !== "Auto Detect" 
     ? `The source text is in ${sourceLanguage}. ` 
     : "";
 
-  // Chunk context for multi-part translations
   const chunkContext = totalChunks && totalChunks > 1 
     ? `This is part ${chunkIndex! + 1} of ${totalChunks} of a longer text. Maintain consistency with other parts.` 
     : "";
 
-  // Improved system prompt for better translation quality
   const systemPrompt = `You are an expert translator. Your absolute priority is to translate the given text into ${targetLanguage.toUpperCase()}.
 
 RULES:
@@ -80,10 +102,9 @@ Translate the following text now:`;
   ];
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for long texts
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   try {
-    // Build URL based on provider
     let fetchUrl: string;
     if (provider === 'gemini') {
       if (!apiKey) throw new Error('Gemini requires an API key.');
@@ -141,7 +162,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // If text is only whitespace, return it as is (preserves formatting)
     if (!text.trim()) {
       return NextResponse.json({ 
         translation: text,
@@ -150,7 +170,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Determine provider
     const provider: ProviderType = providerParam || process.env.LLM_PROVIDER as ProviderType || 'lmstudio';
     const providerInfo = PROVIDERS[provider];
 
@@ -161,14 +180,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Determine URL
-    const rawUrl = apiUrl || process.env.LLM_API_URL || process.env.LM_STUDIO_URL || providerInfo.defaultUrl;
-    const API_URL = validateUrl(rawUrl, provider);
+    const API_URL = resolveApiUrl(apiUrl, provider);
 
-    // Determine API key
     const API_KEY = apiKey || process.env.LLM_API_KEY || undefined;
 
-    // Validate API key requirement
     if (providerInfo.requiresApiKey && !API_KEY) {
       return NextResponse.json(
         { error: `${providerInfo.name} requires an API key. Please add it in Settings.` },
@@ -187,18 +202,15 @@ export async function POST(req: Request) {
 
     const TEMPERATURE = temperature !== undefined ? parseFloat(temperature) : parseFloat(process.env.LLM_TEMPERATURE || process.env.LM_STUDIO_TEMPERATURE || '0.2');
 
-    // Split text into chunks for long translations
     const chunks = splitIntoChunks(text, 2000);
     const isLongText = chunks.length > 1;
 
-    // Retry logic for robustness
     let lastError: Error | null = null;
     const maxRetries = 2;
     
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         if (isLongText) {
-          // Translate chunks sequentially for consistency
           const translatedChunks: string[] = [];
           
           for (let i = 0; i < chunks.length; i++) {
@@ -218,7 +230,6 @@ export async function POST(req: Request) {
             translatedChunks.push(translatedChunk);
           }
 
-          // Join chunks with appropriate separators
           const translation = translatedChunks.join('\n\n');
 
           return NextResponse.json({ 
@@ -228,7 +239,6 @@ export async function POST(req: Request) {
             chunks: chunks.length
           });
         } else {
-          // Single chunk translation
           const translation = await translateChunk(
             text,
             targetLanguage,
@@ -266,7 +276,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // If we get here, all retries failed
     const providerName = PROVIDERS[provider]?.name || provider;
     console.error('All translation attempts failed:', lastError);
     return NextResponse.json(
