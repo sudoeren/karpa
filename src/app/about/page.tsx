@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/contexts/language-context"
 import { motion } from "framer-motion"
-import { Github, Globe, Heart, Code2, ArrowUpRight } from "lucide-react"
+import { GitFork, Globe, Heart, Code2, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
@@ -75,7 +75,7 @@ export default function AboutPage() {
                 </Button>
                 <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs group-hover:border-foreground/20 transition-colors" asChild>
                   <Link href="https://github.com/sudoeren" target="_blank">
-                    <Github className="size-3.5" />
+                    <GitFork className="size-3.5" />
                     {t.about.github}
                     <ArrowUpRight className="size-3 opacity-50" />
                   </Link>
@@ -89,7 +89,7 @@ export default function AboutPage() {
             <div className="flex flex-col h-full justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground/60 text-xs font-mono uppercase tracking-wider">
-                  <Github className="size-3" />
+                  <GitFork className="size-3" />
                   {t.about.openSource}
                 </div>
                 <h3 className="text-xl font-medium text-foreground">{t.about.publicRepo}</h3>
@@ -98,7 +98,7 @@ export default function AboutPage() {
               <div>
                 <Button className="w-full rounded-full gap-2 h-10 group-hover:bg-primary/90 transition-colors" asChild>
                   <Link href="https://github.com/sudoeren/localce" target="_blank">
-                    <Github className="size-4" />
+                    <GitFork className="size-4" />
                     {t.about.openSource}
                     <ArrowUpRight className="size-3.5 opacity-50" />
                   </Link>

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Sun, Moon, Monitor, Globe, 
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Github, Code2, ArrowUpRight, Bell, Volume2,
+  GitFork, Code2, ArrowUpRight, Bell, Volume2,
   Shield, Terminal, LayoutGrid, Sliders, HardDrive, Info, User, ExternalLink,
   Key, Server, Cloud, Eye, EyeOff
 } from "lucide-react"
@@ -722,7 +722,7 @@ export default function SettingsPage() {
                           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2 group-hover/code:text-primary transition-colors">{t.about.sourceCode}</p>
                           <div className="flex items-center gap-3">
                             <span className="text-2xl font-bold tracking-tight group-hover/code:underline decoration-primary/30 underline-offset-8 transition-all">{t.about.openSource}</span>
-                            <Github className="size-5 text-muted-foreground/30 group-hover/code:text-foreground transition-colors" />
+                            <GitFork className="size-5 text-muted-foreground/30 group-hover/code:text-foreground transition-colors" />
                           </div>
                         </Link>
                       </div>
