@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Community Discussions
+    url: https://github.com/sudoeren/localce/discussions
+    about: Ask questions, share ideas, or chat with other users.
+  - name: 🔒 Security Vulnerability
+    url: https://github.com/sudoeren/localce/security/advisories/new
+    about: Please report security issues privately via GitHub Security Advisories.
