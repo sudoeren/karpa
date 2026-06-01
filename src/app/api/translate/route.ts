@@ -9,6 +9,7 @@ import {
   getGeminiUrl,
   extractTranslation,
 } from '@/lib/providers';
+import { validateUrl } from '@/lib/url-validation';
 
 // Translate a single chunk
 async function translateChunk(
@@ -163,6 +164,7 @@ export async function POST(req: Request) {
     // Determine URL
     let API_URL = apiUrl || process.env.LLM_API_URL || process.env.LM_STUDIO_URL || providerInfo.defaultUrl;
     if (API_URL.endsWith('/')) API_URL = API_URL.slice(0, -1);
+    validateUrl(API_URL, provider);
 
     // Determine API key
     const API_KEY = apiKey || process.env.LLM_API_KEY || undefined;
