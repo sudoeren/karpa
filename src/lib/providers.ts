@@ -1,5 +1,7 @@
 // Provider types and configurations for multi-LLM support
 
+import { stripTrailingSlash } from '@/lib/url-validation'
+
 export type ProviderType = 
   | 'lmstudio' 
   | 'ollama' 
@@ -129,7 +131,7 @@ export function getDefaultConfig(provider: ProviderType): ProviderConfig {
 
 // Build chat completion URL for a provider
 export function getChatCompletionUrl(provider: ProviderType, baseUrl: string): string {
-  let url = baseUrl.replace(/\/+$/, '')
+  let url = stripTrailingSlash(baseUrl)
 
   switch (provider) {
     case 'lmstudio':
@@ -250,7 +252,7 @@ export function buildRequestBody(
 
 // Build the full URL for Gemini API calls
 export function getGeminiUrl(baseUrl: string, model: string, apiKey: string): string {
-  const url = baseUrl.replace(/\/+$/, '')
+  const url = stripTrailingSlash(baseUrl)
   return `${url}/v1beta/models/${model}:generateContent?key=${apiKey}`
 }
 
@@ -271,7 +273,7 @@ export function extractTranslation(provider: ProviderType, data: any): string | 
 
 // Get models list URL for a provider
 export function getModelsUrl(provider: ProviderType, baseUrl: string, apiKey?: string): string | null {
-  const url = baseUrl.replace(/\/+$/, '')
+  const url = stripTrailingSlash(baseUrl)
   const info = PROVIDERS[provider]
   
   if (!info.modelsEndpoint) return null
