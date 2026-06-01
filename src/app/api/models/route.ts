@@ -6,6 +6,7 @@ import {
   getModelsUrl,
   parseModelsResponse,
 } from '@/lib/providers'
+import { validateUrl, stripTrailingSlash } from '@/lib/url-validation'
 
 export async function POST(req: Request) {
   try {
@@ -32,7 +33,8 @@ export async function POST(req: Request) {
       })
     }
 
-    const baseUrl = url.replace(/\/+$/, '')
+    const baseUrl = stripTrailingSlash(url)
+    validateUrl(baseUrl, provider)
     const modelsUrl = getModelsUrl(provider, baseUrl, apiKey)
 
     if (!modelsUrl) {
