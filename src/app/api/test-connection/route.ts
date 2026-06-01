@@ -4,7 +4,7 @@ import {
   PROVIDERS,
   getHeaders,
 } from '@/lib/providers'
-import { validateUrl, stripTrailingSlash } from '@/lib/url-validation'
+import { validateUrl } from '@/lib/url-validation'
 
 export async function POST(request: Request) {
   try {
@@ -23,15 +23,14 @@ export async function POST(request: Request) {
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
-    const baseUrl = stripTrailingSlash(url)
-    validateUrl(baseUrl, provider)
+    const safeUrl = validateUrl(url, provider)
 
     try {
       switch (provider) {
         case 'anthropic': {
           // Anthropic: test by calling messages endpoint with minimal payload
           const headers = getHeaders(provider, apiKey)
-          const response = await fetch(`${baseUrl}/v1/messages`, {
+          const response = await fetch(`${safeUrl}/v1/messages`, {
             method: 'POST',
             headers,
             body: JSON.stringify({
@@ -68,7 +67,7 @@ export async function POST(request: Request) {
         case 'gemini': {
           // Gemini: test by listing models
           const response = await fetch(
-            `${baseUrl}/v1beta/models?key=${apiKey}`,
+            `${safeUrl}/v1beta/models?key=${apiKey}`,
             {
               method: 'GET',
               signal: controller.signal,
@@ -101,7 +100,7 @@ export async function POST(request: Request) {
 
         case 'ollama': {
           // Ollama: test by hitting /api/tags
-          const response = await fetch(`${baseUrl}/api/tags`, {
+          const response = await fetch(`${safeUrl}/api/tags`, {
             method: 'GET',
             signal: controller.signal,
             headers: { 'Accept': 'application/json' },
@@ -129,7 +128,7 @@ export async function POST(request: Request) {
           if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`
 
           // Try the models endpoint first
-          const response = await fetch(`${baseUrl}/v1/models`, {
+          const response = await fetch(`${safeUrl}/v1/models`, {
             method: 'GET',
             signal: controller.signal,
             headers,
@@ -154,7 +153,7 @@ export async function POST(request: Request) {
           }
           
           // If models endpoint returns error, try health check
-          const healthResponse = await fetch(`${baseUrl}/v1/chat/completions`, {
+          const healthResponse = await fetch(`${safeUrl}/v1/chat/completions`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

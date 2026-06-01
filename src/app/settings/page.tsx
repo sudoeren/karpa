@@ -175,8 +175,7 @@ export default function SettingsPage() {
     localStorage.setItem("llm-provider", selectedProvider)
     localStorage.setItem("llm-api-url", apiUrl)
     localStorage.setItem("llm-temperature", temperature.toString())
-    if (apiKey) sessionStorage.setItem("llm-api-key", apiKey)
-    else sessionStorage.removeItem("llm-api-key")
+    // apiKey intentionally not persisted to storage (kept in memory only)
     if (selectedModel) localStorage.setItem("llm-model", selectedModel)
 
     // Also keep backward-compatible keys for sidebar/navbar connection checks

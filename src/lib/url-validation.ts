@@ -36,9 +36,7 @@ function isPrivateIP(hostname: string): boolean {
 }
 
 function isHostnameAnIP(hostname: string): boolean {
-  // IPv4
   if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return true
-  // IPv6
   if (hostname.includes(':')) return true
   return false
 }
@@ -59,8 +57,6 @@ export function validateUrl(url: string, provider: string): string {
 
   if (provider === 'lmstudio' || provider === 'ollama' || provider === 'custom') {
     if (!isPrivateIP(hostname) && !hostname.endsWith('.local') && !hostname.endsWith('.localhost')) {
-      // For local/custom providers, allow private IPs and local hostnames
-      // Block public IPs to prevent SSRF to cloud metadata endpoints etc.
       if (isHostnameAnIP(hostname) && !isPrivateIP(hostname)) {
         throw new Error('URL must point to a local or private address')
       }
@@ -72,7 +68,9 @@ export function validateUrl(url: string, provider: string): string {
     }
   }
 
-  return url
+  const origin = parsed.origin
+  const pathname = parsed.pathname.replace(/\/+$/, '')
+  return pathname ? `${origin}${pathname}` : origin
 }
 
 export function stripTrailingSlash(s: string): string {

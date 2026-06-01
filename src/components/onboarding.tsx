@@ -58,7 +58,6 @@ export function Onboarding() {
         localStorage.setItem("llm-provider", selectedProvider)
         localStorage.setItem("llm-api-url", url)
         localStorage.setItem("lm-studio-url", url) // backward compat
-        if (apiKey) sessionStorage.setItem("llm-api-key", apiKey)
         toast.success(t.settings.connectionSuccess)
       } else {
         setConnectionStatus("error")

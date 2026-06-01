@@ -6,7 +6,7 @@ import {
   getModelsUrl,
   parseModelsResponse,
 } from '@/lib/providers'
-import { validateUrl, stripTrailingSlash } from '@/lib/url-validation'
+import { validateUrl } from '@/lib/url-validation'
 
 export async function POST(req: Request) {
   try {
@@ -33,9 +33,8 @@ export async function POST(req: Request) {
       })
     }
 
-    const baseUrl = stripTrailingSlash(url)
-    validateUrl(baseUrl, provider)
-    const modelsUrl = getModelsUrl(provider, baseUrl, apiKey)
+    const safeUrl = validateUrl(url, provider)
+    const modelsUrl = getModelsUrl(provider, safeUrl, apiKey)
 
     if (!modelsUrl) {
       return NextResponse.json({
