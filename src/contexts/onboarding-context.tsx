@@ -21,9 +21,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
-    const completed = localStorage.getItem('localce-onboarding-completed')
-    const savedNative = localStorage.getItem('localce-native-language')
-    const savedTarget = localStorage.getItem('localce-target-language')
+    const completed = localStorage.getItem('karpa-onboarding-completed')
+    const savedNative = localStorage.getItem('karpa-native-language')
+    const savedTarget = localStorage.getItem('karpa-target-language')
     
     setHasCompletedOnboarding(completed === 'true')
     if (savedNative) setNativeLanguage(savedNative)
@@ -32,23 +32,23 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
   const completeOnboarding = (nativeLang?: string, targetLang?: string) => {
     setHasCompletedOnboarding(true)
-    localStorage.setItem('localce-onboarding-completed', 'true')
+    localStorage.setItem('karpa-onboarding-completed', 'true')
     
     if (nativeLang) {
       setNativeLanguage(nativeLang)
-      localStorage.setItem('localce-native-language', nativeLang)
+      localStorage.setItem('karpa-native-language', nativeLang)
     }
     if (targetLang) {
       setTargetLanguage(targetLang)
-      localStorage.setItem('localce-target-language', targetLang)
+      localStorage.setItem('karpa-target-language', targetLang)
     }
   }
 
   const resetOnboarding = () => {
     setHasCompletedOnboarding(false)
-    localStorage.removeItem('localce-onboarding-completed')
-    localStorage.removeItem('localce-native-language')
-    localStorage.removeItem('localce-target-language')
+    localStorage.removeItem('karpa-onboarding-completed')
+    localStorage.removeItem('karpa-native-language')
+    localStorage.removeItem('karpa-target-language')
   }
 
   if (!mounted) {

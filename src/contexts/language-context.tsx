@@ -20,7 +20,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
-    const saved = localStorage.getItem('localce-language') as Language
+    const saved = localStorage.getItem('karpa-language') as Language
     if (saved && translations[saved]) {
       setLanguageState(saved)
     }
@@ -28,7 +28,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
-    localStorage.setItem('localce-language', lang)
+    localStorage.setItem('karpa-language', lang)
   }
 
   const t = translations[language] as TranslationType

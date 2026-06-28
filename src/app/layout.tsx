@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Localce | Yerel & Güvenli Yapay Zeka Çevirmeni",
+  title: "Karpa | Yerel & Güvenli Yapay Zeka Çevirmeni",
   description: "Gizlilik odaklı, yerel ve hızlı yapay zeka çevirisi. Verileriniz asla cihazınızdan çıkmaz. LM Studio, Ollama ve popüler bulut modellerini destekler.",
   keywords: ["çeviri", "yapay zeka", "yerel", "gizlilik", "translator", "AI", "local", "privacy", "LM Studio", "Ollama"],
   authors: [{ name: "Eren Cakar", url: "https://erencakar.com" }],
@@ -30,16 +30,16 @@ export const metadata: Metadata = {
     apple: "/logo.png",
   },
   openGraph: {
-    title: "Localce | AI Translator",
+    title: "Karpa | AI Translator",
     description: "Privacy-first AI translation that runs entirely on your browser and local machine.",
-    url: "https://localce.app",
-    siteName: "Localce",
+    url: "https://karpa.app",
+    siteName: "Karpa",
     images: [
       {
         url: "/logo.png",
         width: 512,
         height: 512,
-        alt: "Localce Logo",
+        alt: "Karpa Logo",
       },
     ],
     locale: "tr_TR",

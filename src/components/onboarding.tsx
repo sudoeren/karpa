@@ -123,7 +123,7 @@ export function Onboarding() {
                     <Logo size={48} />
                   </div>
                   <div>
-                    <h2 className="text-sm font-mono tracking-[0.3em] text-primary uppercase">LOCALCE AI</h2>
+                    <h2 className="text-sm font-mono tracking-[0.3em] text-primary uppercase">KARPA AI</h2>
                     <p className="text-xs text-white/40 font-medium">{t.onboarding.stepOf.replace('{current}', String(step + 1)).replace('{total}', '5')}</p>
                   </div>
                 </div>

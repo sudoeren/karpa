@@ -247,16 +247,16 @@ function TranslatorWorkspace() {
       setSourceLanguage("Auto Detect")
 
       // Notify user
-      const notificationsEnabled = localStorage.getItem("localce-notifications") === "true"
+      const notificationsEnabled = localStorage.getItem("karpa-notifications") === "true"
       if (notificationsEnabled && document.hidden) {
         if (Notification.permission === 'granted') {
-          new Notification("Localce", {
+          new Notification("Karpa", {
             body: t.translator.fileTranslated,
             icon: "/logo.png"
           })
         }
 
-        const soundEnabled = localStorage.getItem("localce-notification-sound") !== "false"
+        const soundEnabled = localStorage.getItem("karpa-notification-sound") !== "false"
         if (soundEnabled) {
           const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3")
           audio.volume = 0.5
@@ -374,7 +374,7 @@ function TranslatorWorkspace() {
       >
         <div className="flex items-center justify-center gap-3 mb-1">
           <Logo size={28} className="md:size-8" />
-          <h1 className="text-lg md:text-xl font-bold">Localce</h1>
+          <h1 className="text-lg md:text-xl font-bold">Karpa</h1>
         </div>
         <p className="text-xs text-muted-foreground hidden sm:block">{t.translator.title}</p>
 

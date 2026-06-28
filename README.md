@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="public/logo.png" alt="Localce" width="80" height="80" />
+  <img src="public/logo.png" alt="Karpa" width="80" height="80" />
 </p>
 
-<h1 align="center">Localce</h1>
+<h1 align="center">Karpa</h1>
 
 <p align="center">
   <strong>Privacy-first AI translation that runs entirely on your machine</strong>
@@ -25,16 +25,16 @@
 </p>
 
 <p align="center">
-  <img src="public/screenshot.png" alt="Localce Screenshot" width="100%" style="border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);" />
+  <img src="public/screenshot.png" alt="Karpa Screenshot" width="100%" style="border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);" />
 </p>
 
 ---
 
-## Why Localce?
+## Why Karpa?
 
-Traditional translation services send your text to remote servers. **Localce is different** — it uses LM Studio to run AI models locally on your computer. Your data never leaves your device.
+Traditional translation services send your text to remote servers. **Karpa is different** — it uses LM Studio to run AI models locally on your computer. Your data never leaves your device.
 
-| Feature           | Localce          | Cloud Services          |
+| Feature           | Karpa          | Cloud Services          |
 | ----------------- | ---------------- | ----------------------- |
 | Privacy           | ✅ 100% Local    | ❌ Data sent to servers |
 | Internet Required | ❌ Works offline | ✅ Always required      |
@@ -83,11 +83,11 @@ Listen to translations with built-in TTS support for multiple languages.
 2. **Translation Model** — Download a model (recommended: `HY-MT1.5-7B`)
 3. **Start Local Server** — Run LM Studio's local server on port `1234`
 
-### Run Localce
+### Run Karpa
 
 ```bash
 # Clone
-git clone https://github.com/sudoeren/localce.git && cd localce
+git clone https://github.com/sudoeren/karpa.git && cd karpa
 
 # Install
 npm install
@@ -105,8 +105,8 @@ Open **http://localhost:3000** and start translating!
 ### Option 1: Development
 
 ```bash
-git clone https://github.com/sudoeren/localce.git
-cd localce
+git clone https://github.com/sudoeren/karpa.git
+cd karpa
 npm install
 npm run dev
 ```
@@ -114,16 +114,16 @@ npm run dev
 ### Option 2: Docker
 
 ```bash
-git clone https://github.com/sudoeren/localce.git
-cd localce
+git clone https://github.com/sudoeren/karpa.git
+cd karpa
 docker-compose up -d
 ```
 
 ### Option 3: Docker Build
 
 ```bash
-docker build -t localce .
-docker run -p 3000:3000 --add-host=host.docker.internal:host-gateway localce
+docker build -t karpa .
+docker run -p 3000:3000 --add-host=host.docker.internal:host-gateway karpa
 ```
 
 ---
@@ -195,7 +195,7 @@ Navigate to **Settings** to configure:
 ## Project Structure
 
 ```
-localce/
+karpa/
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── page.tsx           # Main translator

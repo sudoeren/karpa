@@ -1,7 +1,7 @@
-# Contributing to Localce
+# Contributing to Karpa
 
-Thank you for your interest in contributing to Localce! 🎉
-Localce is a privacy-first, open-source translation app. Every contribution — code, docs, bug reports, ideas — helps keep it that way.
+Thank you for your interest in contributing to Karpa! 🎉
+Karpa is a privacy-first, open-source translation app. Every contribution — code, docs, bug reports, ideas — helps keep it that way.
 
 ## Code of Conduct
 
@@ -29,8 +29,8 @@ Be respectful, constructive, and inclusive. We're all here to build something us
 
 ```bash
 # Fork the repo on GitHub, then:
-git clone https://github.com/<your-username>/localce.git
-cd localce
+git clone https://github.com/<your-username>/karpa.git
+cd karpa
 npm install
 cp .env.local.example .env.local  # if it exists, otherwise see README
 npm run dev
@@ -92,7 +92,7 @@ Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`
 
 ## Privacy guidelines
 
-Localce's headline feature is that **nothing leaves your machine**. Any contribution that breaks this promise is almost certainly out of scope. Specifically:
+Karpa's headline feature is that **nothing leaves your machine**. Any contribution that breaks this promise is almost certainly out of scope. Specifically:
 
 - ❌ No third-party analytics, telemetry, or error reporting
 - ❌ No remote font/CDN loading that leaks user IPs

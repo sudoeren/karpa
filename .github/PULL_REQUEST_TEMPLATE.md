@@ -1,6 +1,6 @@
 ---
 name: Pull Request
-about: Propose a change to Localce
+about: Propose a change to Karpa
 title: ""
 labels: []
 ---
@@ -35,7 +35,7 @@ If applicable, add screenshots or screen recordings.
 
 ## Privacy checklist
 
-Localce is privacy-first. This PR:
+Karpa is privacy-first. This PR:
 
 - [ ] Does not introduce third-party network calls (besides user-configured `LM_STUDIO_URL`)
 - [ ] Does not add telemetry, analytics, or tracking

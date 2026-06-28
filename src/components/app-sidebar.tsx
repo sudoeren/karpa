@@ -75,7 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Logo size={20} className="text-white" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold text-base">Localce</span>
+                  <span className="font-semibold text-base">Karpa</span>
                   <span className="text-xs text-muted-foreground">AI Translator</span>
                 </div>
               </Link>

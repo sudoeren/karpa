@@ -29,7 +29,7 @@ If applicable, add screenshots or screen recordings to help explain the problem.
 
 ## Environment
 
-- **Localce version**: (e.g. v0.1.0, commit hash, or `main`)
+- **Karpa version**: (e.g. v0.1.0, commit hash, or `main`)
 - **OS**: (e.g. Windows 11, macOS 15, Ubuntu 24.04)
 - **Browser** (if web-related): (e.g. Chrome 130, Firefox 132)
 - **Node.js version** (if running from source): (output of `node -v`)

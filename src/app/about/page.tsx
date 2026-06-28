@@ -44,7 +44,7 @@ export default function AboutPage() {
 
           <div className="space-y-3 md:space-y-4 max-w-lg">
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
-              Localce
+              Karpa
             </h1>
             <p className="text-sm md:text-lg text-muted-foreground leading-relaxed">
               {t.about.description}
@@ -97,7 +97,7 @@ export default function AboutPage() {
 
               <div>
                 <Button className="w-full rounded-full gap-2 h-10 group-hover:bg-primary/90 transition-colors" asChild>
-                  <Link href="https://github.com/sudoeren/localce" target="_blank">
+                  <Link href="https://github.com/sudoeren/karpa" target="_blank">
                     <GitFork className="size-4" />
                     {t.about.openSource}
                     <ArrowUpRight className="size-3.5 opacity-50" />

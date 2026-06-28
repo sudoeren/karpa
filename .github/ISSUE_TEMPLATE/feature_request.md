@@ -24,7 +24,7 @@ Who benefits from this feature, and in what scenario? (e.g. translators, develop
 
 ## Privacy implications
 
-Localce is privacy-first. Does this feature:
+Karpa is privacy-first. Does this feature:
 - [ ] Run entirely on the user's machine
 - [ ] Not require sending data to any third party
 - [ ] Not require telemetry or analytics

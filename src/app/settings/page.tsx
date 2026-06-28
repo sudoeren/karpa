@@ -91,8 +91,8 @@ export default function SettingsPage() {
     const savedKey = sessionStorage.getItem("llm-api-key")
     const savedTemp = localStorage.getItem("llm-temperature")
     const savedModel = localStorage.getItem("llm-model")
-    const savedNotifs = localStorage.getItem("localce-notifications")
-    const savedNotifSound = localStorage.getItem("localce-notification-sound")
+    const savedNotifs = localStorage.getItem("karpa-notifications")
+    const savedNotifSound = localStorage.getItem("karpa-notification-sound")
 
     // Migration from old lm-studio keys
     if (!savedProvider) {
@@ -152,23 +152,23 @@ export default function SettingsPage() {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
           setNotificationsEnabled(true)
-          localStorage.setItem("localce-notifications", "true")
+          localStorage.setItem("karpa-notifications", "true")
           toast.success(t.settings.notifications)
         } else {
           setNotificationsEnabled(false)
-          localStorage.setItem("localce-notifications", "false")
+          localStorage.setItem("karpa-notifications", "false")
           toast.error("Notification permission denied")
         }
       })
     } else {
       setNotificationsEnabled(checked)
-      localStorage.setItem("localce-notifications", String(checked))
+      localStorage.setItem("karpa-notifications", String(checked))
     }
   }
 
   const handleNotificationSoundChange = (checked: boolean) => {
     setNotificationSound(checked)
-    localStorage.setItem("localce-notification-sound", String(checked))
+    localStorage.setItem("karpa-notification-sound", String(checked))
   }
 
   const saveSettings = () => {
@@ -205,7 +205,7 @@ export default function SettingsPage() {
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `localce-backup-${new Date().toISOString().split('T')[0]}.json`
+    a.download = `karpa-backup-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     window.URL.revokeObjectURL(url)
     toast.success(t.settings.exportData)
@@ -740,7 +740,7 @@ export default function SettingsPage() {
 
                     <div className="relative z-10 space-y-6 md:space-y-8">
                       <div className="space-y-3 md:space-y-4">
-                        <h2 className="text-4xl md:text-7xl font-black tracking-tighter leading-none text-foreground">Localce</h2>
+                        <h2 className="text-4xl md:text-7xl font-black tracking-tighter leading-none text-foreground">Karpa</h2>
                         <p className="text-sm md:text-lg text-muted-foreground/80 font-medium leading-relaxed max-w-md">
                           {t.about.description}
                         </p>
@@ -758,7 +758,7 @@ export default function SettingsPage() {
 
                         <div className="hidden sm:block w-px h-10 bg-border/40" />
 
-                        <Link href="https://github.com/sudoeren/localce" target="_blank" className="group/code">
+                        <Link href="https://github.com/sudoeren/karpa" target="_blank" className="group/code">
                           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2 group-hover/code:text-primary transition-colors">{t.about.sourceCode}</p>
                           <div className="flex items-center gap-3">
                             <span className="text-xl md:text-2xl font-bold tracking-tight group-hover/code:underline decoration-primary/30 underline-offset-8 transition-all">{t.about.openSource}</span>

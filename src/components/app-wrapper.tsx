@@ -8,7 +8,7 @@ export function AppWrapper({ children }: { children: ReactNode }) {
   const { hasCompletedOnboarding } = useOnboarding()
 
   useEffect(() => {
-    const savedAmoled = localStorage.getItem("localce-amoled")
+    const savedAmoled = localStorage.getItem("karpa-amoled")
     if (savedAmoled === "true") {
       document.documentElement.classList.add("amoled")
     }

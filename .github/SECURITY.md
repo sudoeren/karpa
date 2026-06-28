@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-The following versions of Localce receive security updates:
+The following versions of Karpa receive security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -12,7 +12,7 @@ The following versions of Localce receive security updates:
 
 ## Reporting a Vulnerability
 
-Localce is a **privacy-first** project. If you discover a security vulnerability, please report it **privately** so we can address it before public disclosure.
+Karpa is a **privacy-first** project. If you discover a security vulnerability, please report it **privately** so we can address it before public disclosure.
 
 **Please do NOT open a public GitHub issue for security vulnerabilities.**
 
@@ -44,9 +44,9 @@ We follow [coordinated disclosure](https://en.wikipedia.org/wiki/Coordinated_vul
 
 ## Security Design Notes
 
-Localce is designed with the following security principles:
+Karpa is designed with the following security principles:
 
-- **Local-only execution** — All translations happen on your machine via LM Studio. No text is ever sent to remote servers owned by Localce.
+- **Local-only execution** — All translations happen on your machine via LM Studio. No text is ever sent to remote servers owned by Karpa.
 - **No telemetry** — Next.js telemetry is explicitly disabled in the Docker image (`NEXT_TELEMETRY_DISABLED=1`).
 - **Non-root container** — The Docker image runs as a dedicated unprivileged `nextjs` user.
 - **Outbound network** — The only outbound request the app makes is to the user-configured `LM_STUDIO_URL` (default: `http://localhost:1234`).
@@ -69,4 +69,4 @@ Out of scope:
 - Issues requiring physical access to the user's machine
 - Denial of service against the user's own machine
 
-Thank you for helping keep Localce and its users safe.
+Thank you for helping keep Karpa and its users safe.

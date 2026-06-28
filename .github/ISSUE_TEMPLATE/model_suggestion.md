@@ -25,11 +25,11 @@ assignees: []
 
 ## Why should this be the default / supported?
 
-Explain why this model/language is a good fit for Localce's privacy-first, local-only philosophy.
+Explain why this model/language is a good fit for Karpa's privacy-first, local-only philosophy.
 
 ## Tested locally?
 
-- [ ] I have tested this model with Localce
+- [ ] I have tested this model with Karpa
 - [ ] Translation quality is acceptable
 - [ ] Performance is acceptable on consumer hardware
 

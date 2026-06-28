@@ -16,7 +16,7 @@ export function Logo({ size = 32, className }: LogoProps) {
     >
       <Image
         src="/logo.png"
-        alt="Localce Logo"
+        alt="Karpa Logo"
         fill
         className="object-contain"
         priority
