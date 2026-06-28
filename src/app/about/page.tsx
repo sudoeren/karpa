@@ -111,7 +111,7 @@ export default function AboutPage() {
         {/* Footer */}
         <motion.div variants={item} className="flex flex-col items-center justify-center gap-3 md:gap-4 pt-6 md:pt-8 border-t border-border/40">
            <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground font-medium flex-wrap justify-center">
-             <span>v1.0.1</span>
+             <span>v1.1.1</span>
              <span className="w-1 h-1 rounded-full bg-border" />
              <span className="flex items-center gap-1.5">
                {t.about.madeWith} <Heart className="size-3.5 text-red-500 fill-red-500 animate-pulse" /> {t.about.inTurkey}

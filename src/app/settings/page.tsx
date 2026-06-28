@@ -774,7 +774,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-3 px-4 py-1.5 rounded-2xl bg-muted/30 border border-border/50">
                       <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t.about.version}</span>
                       <div className="w-px h-3 bg-border" />
-                      <span className="text-xs font-bold font-mono">1.0.1</span>
+                      <span className="text-xs font-bold font-mono">1.1.1</span>
                     </div>
                   </div>
                 </div>
