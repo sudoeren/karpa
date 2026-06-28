@@ -24,10 +24,10 @@ Traditional translation services send your text to remote servers. **Karpa is di
 
 | Feature           | Karpa          | Cloud Services          |
 | ----------------- | ---------------- | ----------------------- |
-| Privacy           | 100% Local    | Data sent to servers |
-| Internet Required | Works offline | Always required      |
-| Cost              | Free forever  | Usually paid         |
-| Speed             | Instant       | Network latency      |
+| Privacy           | ✅ 100% Local    | ❌ Data sent to servers |
+| Internet Required | ❌ Works offline | ✅ Always required      |
+| Cost              | ✅ Free forever  | ❌ Usually paid         |
+| Speed             | ✅ Instant       | ❌ Network latency      |
 
 ---
 
