@@ -24,10 +24,6 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
 </p>
 
-<p align="center">
-  <img src="public/screenshot.png" alt="Karpa Screenshot" width="100%" style="border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);" />
-</p>
-
 ---
 
 ## Why Karpa?
