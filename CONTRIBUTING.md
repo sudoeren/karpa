@@ -29,7 +29,7 @@ Be respectful, constructive, and inclusive. We're all here to build something us
 
 ```bash
 # Fork the repo on GitHub, then:
-git clone https://github.com/<your-username>/karpa.git
+git clone https://github.com/sudoeren/karpa.git
 cd karpa
 npm install
 cp .env.local.example .env.local  # if it exists, otherwise see README
@@ -40,14 +40,14 @@ Open <http://localhost:3000>.
 
 ### Useful scripts
 
-| Command           | What it does                          |
-| ----------------- | ------------------------------------- |
-| `npm run dev`     | Start the dev server with HMR         |
-| `npm run build`   | Production build (`next build`)       |
-| `npm run start`   | Run the production build              |
-| `npm run lint`    | Run ESLint (must pass for CI)         |
-| `npm test`        | Run unit tests once with Vitest       |
-| `npm run test:watch` | Run Vitest in watch mode          |
+| Command              | What it does                    |
+| -------------------- | ------------------------------- |
+| `npm run dev`        | Start the dev server with HMR   |
+| `npm run build`      | Production build (`next build`) |
+| `npm run start`      | Run the production build        |
+| `npm run lint`       | Run ESLint (must pass for CI)   |
+| `npm test`           | Run unit tests once with Vitest |
+| `npm run test:watch` | Run Vitest in watch mode        |
 
 ## Pull Request workflow
 
