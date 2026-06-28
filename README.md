@@ -33,33 +33,15 @@ Traditional translation services send your text to remote servers. **Karpa is di
 
 ## Features
 
-### Complete Privacy
-
-All translations happen locally using LM Studio. No data is ever sent to external servers.
-
-### Multi-Language Support
-
-Translate between 12+ languages including English, Turkish, Spanish, French, German, Italian, Portuguese, Russian, Japanese, Chinese, Korean, and Arabic.
-
-### Text & File Translation
-
-Translate plain text or upload files (`.txt`, `.md`, `.json`, `.csv`, `.srt`, and more).
-
-### Translation Tones
-
-Choose from Standard, Formal, Casual, or Technical tones to match your context.
-
-### History & Favorites
-
-Automatically save your translation history and star your favorite translations.
-
-### Beautiful UI
-
-Modern, responsive design with dark mode support and smooth animations.
-
-### Text-to-Speech
-
-Listen to translations with built-in TTS support for multiple languages.
+| Feature | Description |
+|---|---|
+| **Complete Privacy** | All translations happen locally using LM Studio. No data is ever sent to external servers. |
+| **Multi-Language Support** | Translate between 12+ languages including English, Turkish, Spanish, French, German, Italian, Portuguese, Russian, Japanese, Chinese, Korean, and Arabic. |
+| **Text & File Translation** | Translate plain text or upload files (`.txt`, `.md`, `.json`, `.csv`, `.srt`, and more). |
+| **Translation Tones** | Choose from Standard, Formal, Casual, or Technical tones to match your context. |
+| **History & Favorites** | Automatically save your translation history and star your favorite translations. |
+| **Beautiful UI** | Modern, responsive design with dark mode support and smooth animations. |
+| **Text-to-Speech** | Listen to translations with built-in TTS support for multiple languages. |
 
 ---
 
