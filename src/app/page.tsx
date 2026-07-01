@@ -211,6 +211,7 @@ function TranslatorWorkspace() {
             temperature: savedTemp ? parseFloat(savedTemp) : undefined,
             provider: savedProvider,
             apiKey: savedApiKey || undefined,
+            preserveFormatting: true,
           }),
           signal: abortControllerRef.current.signal,
         })

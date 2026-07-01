@@ -55,4 +55,15 @@ describe('splitIntoChunks', () => {
       const chunks = splitIntoChunks(text, 50);
       expect(chunks).toEqual([part1, part2]);
   });
+
+  it('should preserve single newlines when preserveFormatting=true', () => {
+    const line1 = "a".repeat(30);
+    const line2 = "b".repeat(30);
+    const line3 = "c".repeat(30);
+    const text = line1 + "\n" + line2 + "\n" + line3;
+    // Max chunk size forces a split between line2 and line3; the \n must
+    // still be present at the boundary so the joined output matches the input.
+    const chunks = splitIntoChunks(text, 70, true);
+    expect(chunks.join("")).toBe(text);
+  });
 });
