@@ -273,10 +273,10 @@ export function extractTranslation(provider: ProviderType, data: any): string | 
 }
 
 // Get models list URL for a provider
-export function getModelsUrl(provider: ProviderType, baseUrl: string, apiKey?: string): string | null {
+export function getModelsUrl(provider: ProviderType, baseUrl: string): string | null {
   const url = stripTrailingSlash(baseUrl)
   const info = PROVIDERS[provider]
-  
+
   if (!info.modelsEndpoint) return null
 
   switch (provider) {
