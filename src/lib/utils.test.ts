@@ -32,6 +32,16 @@ describe('cleanTranslation', () => {
   it('should return original text if no cleaning needed', () => {
     expect(cleanTranslation("Hello world")).toBe("Hello world");
   });
+
+  it('should strip Turkish and Spanish prefixes', () => {
+    expect(cleanTranslation("İşte çeviri: Merhaba dünya")).toBe("Merhaba dünya");
+    expect(cleanTranslation("Aquí está la traducción: Hola mundo")).toBe("Hola mundo");
+  });
+
+  it('should strip French and German prefixes', () => {
+    expect(cleanTranslation("Voici la traduction: Bonjour le monde")).toBe("Bonjour le monde");
+    expect(cleanTranslation("Hier ist die Übersetzung: Hallo Welt")).toBe("Hallo Welt");
+  });
 });
 
 describe('splitIntoChunks', () => {

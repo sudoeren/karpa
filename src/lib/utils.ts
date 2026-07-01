@@ -69,26 +69,74 @@ export function splitIntoChunks(text: string, maxChunkSize: number = 2000, prese
 
 export function cleanTranslation(text: string): string {
   if (!text) return text;
-  
+
   let cleaned = text;
-  
-  // Remove common prefixes that LLMs add
+
+  // Remove common prefixes that LLMs add. The patterns are case-insensitive
+  // and tolerant of optional trailing punctuation/whitespace so they catch
+  // the common variants ("Here is the translation:", "İşte çeviri:", etc.).
   const prefixPatterns = [
-    /^(Here'?s?\s+(the\s+)?translation:?\s*)/i,
+    // English
+    /^(Here(?:\s*(?:'s|is|are))?\s*(?:the\s+|a\s+)?translation:?\s*)/i,
     /^(Translation:?\s*)/i,
     /^(Translated\s+text:?\s*)/i,
     /^(The\s+translation\s+(is|would\s+be):?\s*)/i,
     /^(In\s+\w+:?\s*)/i,
-    /^(Sure[,!]?\s*(here'?s?\s+(the\s+)?translation)?:?\s*)/i,
+    /^(Sure[,!]?\s*(here(?:\s*(?:'s|is|are))?\s*(?:the\s+|a\s+)?translation)?:?\s*)/i,
     /^(Of\s+course[,!]?\s*)/i,
     /^(Certainly[,!]?\s*)/i,
-    /^Here is the translation:?\s*/i // Specific fix for the failing test case
+    /^(Absolutely[,!]?\s*)/i,
+    // Turkish
+    /^(İşte\s+çeviri[:\s]*)/i,
+    /^(Çeviri[:\s]*)/i,
+    /^(Çevrilmiş\s+metin[:\s]*)/i,
+    /^(Tabii[,!]?\s*)/i,
+    /^(Elbette[,!]?\s*)/i,
+    // Spanish
+    /^(Aquí\s+(está|es)\s+la\s+traducción[:\s]*)/i,
+    /^(Traducción[:\s]*)/i,
+    /^(Por\s+supuesto[,!]?\s*)/i,
+    /^(Claro[,!]?\s*)/i,
+    // French
+    /^(Voici\s+la\s+traduction[:\s]*)/i,
+    /^(Traduction[:\s]*)/i,
+    /^(Bien\s+sûr[,!]?\s*)/i,
+    /^(Certainement[,!]?\s*)/i,
+    // German
+    /^(Hier\s+ist\s+die\s+Übersetzung[:\s]*)/i,
+    /^(Übersetzung[:\s]*)/i,
+    /^(Übersetzter\s+Text[:\s]*)/i,
+    /^(Natürlich[,!]?\s*)/i,
+    // Italian
+    /^(Ecco\s+la\s+traduzione[:\s]*)/i,
+    /^(Traduzione[:\s]*)/i,
+    /^(Certamente[,!]?\s*)/i,
+    // Portuguese
+    /^(Aqui\s+está\s+a\s+tradução[:\s]*)/i,
+    /^(Tradução[:\s]*)/i,
+    // Russian
+    /^(Вот\s+перевод[:\s]*)/iu,
+    /^(Перевод[:\s]*)/iu,
+    /^(Переведённый\s+текст[:\s]*)/iu,
+    // Japanese
+    /^(こちらが翻訳(です|になります)?[:\s]*)/,
+    /^(翻訳(です|結果)?[:\s]*)/,
+    // Chinese
+    /^(这是翻译(结果|如下)?[:\s]*)/,
+    /^(以下是?翻译[:\s]*)/,
+    /^(翻译(如下|结果)?[:\s]*)/,
+    // Korean
+    /^(다음은\s*번역(입니다|결과)?[:\s]*)/,
+    /^(번역[:\s]*)/,
+    // Arabic
+    /^(ها\s*هو\s*الترجمة[:\s]*)/u,
+    /^(الترجمة[:\s]*)/u,
   ];
-  
+
   for (const pattern of prefixPatterns) {
     cleaned = cleaned.replace(pattern, '');
   }
-  
+
   // Remove common suffixes
   const suffixPatterns = [
     /(\n+Note:.*$)/i,
@@ -96,20 +144,23 @@ export function cleanTranslation(text: string): string {
     /(\n+I'?ve?\s+translated.*$)/i,
     /(\n+Let\s+me\s+know.*$)/i,
     /(\n+Hope\s+this\s+helps.*$)/i,
+    /(\n+Not[:\s].*$)/i,
+    /(\n+Nota[:\s].*$)/i,
+    /(\n+Notiz[:\s].*$)/i,
   ];
-  
+
   for (const pattern of suffixPatterns) {
     cleaned = cleaned.replace(pattern, '');
   }
-  
+
   // Remove markdown code blocks if present
   cleaned = cleaned.replace(/^```[\w]*\n?/gm, '').replace(/\n?```$/gm, '');
-  
+
   // Remove quotes if the entire text is quoted
-  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || 
+  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) ||
       (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
     cleaned = cleaned.slice(1, -1);
   }
-  
+
   return cleaned.trim();
 }
