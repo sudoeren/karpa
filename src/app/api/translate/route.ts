@@ -6,32 +6,24 @@ import {
   getHeaders,
   buildRequestBody,
   extractTranslation,
+  getChatCompletionUrl,
+  getGeminiUrl,
 } from '@/lib/providers';
+import { validateProviderUrl } from '@/lib/url-validation';
 
-// Resolve a fetch URL for a given provider. The result is constructed from
-// hardcoded constants or server-side env vars — user input never appears in
-// the URL string itself.
+// Build the chat-completion URL from a validated user-supplied base URL.
+// Falls back to the provider's default base URL when the client didn't send
+// one (e.g. when the user only configured the model).
 function resolveFetchUrl(
   provider: ProviderType,
-  modelName: string
+  baseUrl: string,
+  modelName: string,
+  apiKey: string | undefined
 ): string {
-  if (provider === 'openai') {
-    return 'https://api.openai.com/v1/chat/completions';
-  }
-  if (provider === 'anthropic') {
-    return 'https://api.anthropic.com/v1/messages';
-  }
   if (provider === 'gemini') {
-    return 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent';
+    return getGeminiUrl(baseUrl, modelName, apiKey || '')
   }
-  if (provider === 'ollama') {
-    return (process.env.OLLAMA_API_URL || 'http://localhost:11434') + '/v1/chat/completions';
-  }
-  if (provider === 'lmstudio') {
-    return (process.env.LM_STUDIO_API_URL || 'http://localhost:1234') + '/v1/chat/completions';
-  }
-  // custom
-  return (process.env.CUSTOM_API_URL || 'http://localhost:80') + '/v1/chat/completions';
+  return getChatCompletionUrl(provider, baseUrl)
 }
 
 async function translateChunk(
@@ -43,6 +35,7 @@ async function translateChunk(
   apiKey: string | undefined,
   modelName: string,
   temperature: number,
+  baseUrl: string,
   chunkIndex?: number,
   totalChunks?: number
 ): Promise<string> {
@@ -103,7 +96,7 @@ Translate the following text now:`;
     if (provider === 'gemini' && !apiKey) {
       throw new Error('Gemini requires an API key.');
     }
-    const fetchUrl = resolveFetchUrl(provider, modelName);
+    const fetchUrl = resolveFetchUrl(provider, baseUrl, modelName, apiKey);
 
     const headers = getHeaders(provider, apiKey);
     const body = buildRequestBody(provider, modelName, messages, temperature);
@@ -145,7 +138,7 @@ Translate the following text now:`;
 
 export async function POST(req: Request) {
   try {
-    const { text, targetLanguage, tone, sourceLanguage, model, temperature, provider: providerParam, apiKey } = await req.json();
+    const { text, targetLanguage, tone, sourceLanguage, model, temperature, provider: providerParam, apiKey, url: urlParam, preserveFormatting } = await req.json();
 
     if (!text || !targetLanguage) {
       return NextResponse.json(
@@ -192,7 +185,24 @@ export async function POST(req: Request) {
 
     const TEMPERATURE = temperature !== undefined ? parseFloat(temperature) : parseFloat(process.env.LLM_TEMPERATURE || process.env.LM_STUDIO_TEMPERATURE || '0.2');
 
-    const chunks = splitIntoChunks(text, 2000);
+    // Resolve base URL: client-supplied (validated below) > server env > provider default
+    const envBaseUrl =
+      provider === 'ollama' ? process.env.OLLAMA_API_URL
+      : provider === 'lmstudio' ? process.env.LM_STUDIO_API_URL
+      : provider === 'custom' ? process.env.CUSTOM_API_URL
+      : undefined
+    const baseUrl = (typeof urlParam === 'string' && urlParam.trim()) ? urlParam.trim() : (envBaseUrl || providerInfo.defaultUrl)
+
+    try {
+      validateProviderUrl(baseUrl, provider)
+    } catch (validationError) {
+      return NextResponse.json(
+        { error: (validationError as Error).message },
+        { status: 400 }
+      )
+    }
+
+    const chunks = splitIntoChunks(text, 2000, preserveFormatting === true);
     const isLongText = chunks.length > 1;
 
     let lastError: Error | null = null;
@@ -213,6 +223,7 @@ export async function POST(req: Request) {
               API_KEY,
               MODEL_NAME,
               TEMPERATURE,
+              baseUrl,
               i,
               chunks.length
             );
@@ -236,7 +247,8 @@ export async function POST(req: Request) {
             provider,
             API_KEY,
             MODEL_NAME,
-            TEMPERATURE
+            TEMPERATURE,
+            baseUrl
           );
 
           return NextResponse.json({

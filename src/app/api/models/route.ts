@@ -4,60 +4,9 @@ import {
   PROVIDERS,
   KNOWN_MODELS,
   parseModelsResponse,
+  getModelsUrl,
 } from '@/lib/providers'
-
-function validateUrl(url: string, provider: string): void {
-  const parsed = new URL(url)
-  const hostname = parsed.hostname.toLowerCase()
-
-  if (provider === 'openai') {
-    if (hostname !== 'api.openai.com') throw new Error('Invalid OpenAI host')
-    return
-  }
-  if (provider === 'anthropic') {
-    if (hostname !== 'api.anthropic.com') throw new Error('Invalid Anthropic host')
-    return
-  }
-  if (provider === 'gemini') {
-    if (hostname !== 'generativelanguage.googleapis.com') throw new Error('Invalid Gemini host')
-    return
-  }
-
-  const LOOPBACK = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']
-  if (
-    LOOPBACK.indexOf(hostname) === -1 &&
-    hostname.slice(-6) !== '.local' &&
-    hostname.slice(-10) !== '.localhost' &&
-    !/^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/.test(hostname)
-  ) {
-    throw new Error('URL must point to a local or private address')
-  }
-}
-
-// Resolve the models-list URL for a provider. Built from hardcoded constants
-// or server-side env vars — the user-supplied url is never part of fetch.
-function resolveModelsUrl(provider: ProviderType): string | null {
-  const info = PROVIDERS[provider]
-  if (!info.modelsEndpoint) return null
-
-  if (provider === 'openai') {
-    return 'https://api.openai.com' + info.modelsEndpoint
-  }
-  if (provider === 'anthropic') {
-    return null
-  }
-  if (provider === 'gemini') {
-    return 'https://generativelanguage.googleapis.com/v1beta/models'
-  }
-  if (provider === 'ollama') {
-    return (process.env.OLLAMA_API_URL || 'http://localhost:11434') + info.modelsEndpoint
-  }
-  if (provider === 'lmstudio') {
-    return (process.env.LM_STUDIO_API_URL || 'http://localhost:1234') + info.modelsEndpoint
-  }
-  // custom
-  return (process.env.CUSTOM_API_URL || 'http://localhost:80') + info.modelsEndpoint
-}
+import { validateProviderUrl, stripTrailingSlash } from '@/lib/url-validation'
 
 export async function POST(req: Request) {
   try {
@@ -83,10 +32,19 @@ export async function POST(req: Request) {
       })
     }
 
-    // Validate url for shape only — it is NOT used to build the fetch URL.
-    validateUrl(url, provider)
+    // Validate that the user-supplied base URL is safe to fetch. After this
+    // succeeds, the URL is provably on an allowed host and is used to build
+    // the outbound fetch URL — that's the whole point of the validation.
+    try {
+      validateProviderUrl(url, provider)
+    } catch (validationError) {
+      return NextResponse.json(
+        { success: false, error: (validationError as Error).message },
+        { status: 400 }
+      )
+    }
 
-    const modelsUrl = resolveModelsUrl(provider)
+    const modelsUrl = getModelsUrl(provider, stripTrailingSlash(url))
 
     if (!modelsUrl) {
       return NextResponse.json({

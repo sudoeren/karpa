@@ -3,36 +3,10 @@ import {
   type ProviderType,
   PROVIDERS,
   getHeaders,
+  getChatCompletionUrl,
+  getModelsUrl,
 } from '@/lib/providers'
-
-function validateUrl(url: string, provider: string): void {
-  const parsed = new URL(url)
-  const hostname = parsed.hostname.toLowerCase()
-
-  if (provider === 'openai') {
-    if (hostname !== 'api.openai.com') throw new Error('Invalid OpenAI host')
-    return
-  }
-  if (provider === 'anthropic') {
-    if (hostname !== 'api.anthropic.com') throw new Error('Invalid Anthropic host')
-    return
-  }
-  if (provider === 'gemini') {
-    if (hostname !== 'generativelanguage.googleapis.com') throw new Error('Invalid Gemini host')
-    return
-  }
-
-  // Local providers: must be a loopback or private address
-  const LOOPBACK = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']
-  if (
-    LOOPBACK.indexOf(hostname) === -1 &&
-    hostname.slice(-6) !== '.local' &&
-    hostname.slice(-10) !== '.localhost' &&
-    !/^(10\.|127\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)/.test(hostname)
-  ) {
-    throw new Error('URL must point to a local or private address')
-  }
-}
+import { validateProviderUrl, stripTrailingSlash } from '@/lib/url-validation'
 
 export async function POST(request: Request) {
   try {
@@ -49,10 +23,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Unknown provider: ${provider}` }, { status: 400 })
     }
 
-    // Validate the URL to make sure it points to an allowed host.
-    // The URL is NOT used directly in fetch — only the provider's hardcoded
-    // defaultUrl is, so CodeQL's SSRF taint flow is broken here.
-    validateUrl(url, provider)
+    // Validate that the user-supplied base URL is safe to fetch. After this
+    // succeeds, the URL is provably on an allowed host and is used to build
+    // the outbound fetch URL — that's the whole point of the validation.
+    try {
+      validateProviderUrl(url, provider)
+    } catch (validationError) {
+      return NextResponse.json(
+        { success: false, error: (validationError as Error).message },
+        { status: 400 }
+      )
+    }
+
+    const baseUrl = stripTrailingSlash(url)
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
@@ -61,7 +44,7 @@ export async function POST(request: Request) {
       switch (provider) {
         case 'openai': {
           const headers = getHeaders(provider, apiKey)
-          const response = await fetch('https://api.openai.com/v1/models', {
+          const response = await fetch(getModelsUrl(provider, baseUrl) || 'https://api.openai.com/v1/models', {
             method: 'GET',
             signal: controller.signal,
             headers,
@@ -77,7 +60,7 @@ export async function POST(request: Request) {
 
         case 'anthropic': {
           const headers = getHeaders(provider, apiKey)
-          const response = await fetch('https://api.anthropic.com/v1/messages', {
+          const response = await fetch(baseUrl + '/v1/messages', {
             method: 'POST',
             headers,
             body: JSON.stringify({
@@ -99,7 +82,7 @@ export async function POST(request: Request) {
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['x-goog-api-key'] = apiKey
           const response = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/models',
+            baseUrl + '/v1beta/models',
             {
               method: 'GET',
               signal: controller.signal,
@@ -116,7 +99,7 @@ export async function POST(request: Request) {
         }
 
         case 'ollama': {
-          const response = await fetch('http://localhost:11434/api/tags', {
+          const response = await fetch(baseUrl + '/api/tags', {
             method: 'GET',
             signal: controller.signal,
             headers: { 'Accept': 'application/json' },
@@ -133,7 +116,7 @@ export async function POST(request: Request) {
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey
 
-          const response = await fetch('http://localhost:1234/v1/models', {
+          const response = await fetch(baseUrl + '/v1/models', {
             method: 'GET',
             signal: controller.signal,
             headers,
@@ -157,7 +140,7 @@ export async function POST(request: Request) {
             }, { status: 401 })
           }
 
-          const healthResponse = await fetch('http://localhost:1234/v1/chat/completions', {
+          const healthResponse = await fetch(getChatCompletionUrl(provider, baseUrl), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -184,15 +167,10 @@ export async function POST(request: Request) {
         }
 
         case 'custom': {
-          // Custom provider: read the upstream base from a server-side env var
-          // (CUSTOM_API_URL). The user-supplied url is validated above for shape
-          // only; it is NOT used in the fetch destination — this keeps the
-          // CodeQL SSRF taint flow from reaching the network call.
-          const customBase = (process.env.CUSTOM_API_URL || 'http://localhost:80')
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey
 
-          const response = await fetch(customBase + '/v1/models', {
+          const response = await fetch(baseUrl + '/v1/models', {
             method: 'GET',
             signal: controller.signal,
             headers,
@@ -216,7 +194,7 @@ export async function POST(request: Request) {
             }, { status: 401 })
           }
 
-          const healthResponse = await fetch(customBase + '/v1/chat/completions', {
+          const healthResponse = await fetch(getChatCompletionUrl(provider, baseUrl), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
