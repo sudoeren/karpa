@@ -24,7 +24,7 @@ Use one of the following channels (in order of preference):
    Go to the **Security** tab of this repository → **"Report a vulnerability"** → fill in the form.
 
 2. **Email**
-   Send details to the maintainer listed in [`CODEOWNERS`](./CODEOWNERS) or the repository owner profile.
+   Send details to **hey@erencakar.com**.
 
 ### What to include
 
