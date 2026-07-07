@@ -249,7 +249,7 @@ function TranslatorWorkspace() {
 
       // Notify user
       const notificationsEnabled = localStorage.getItem("karpa-notifications") === "true"
-      if (notificationsEnabled && document.hidden) {
+      if (notificationsEnabled) {
         if (Notification.permission === 'granted') {
           new Notification("Karpa", {
             body: t.translator.fileTranslated,
@@ -259,10 +259,25 @@ function TranslatorWorkspace() {
 
         const soundEnabled = localStorage.getItem("karpa-notification-sound") !== "false"
         if (soundEnabled) {
-          const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3")
-          audio.volume = 0.5
-          audio.play().catch(() => { })
+          try {
+            const ctx = new AudioContext()
+            const osc = ctx.createOscillator()
+            const gain = ctx.createGain()
+            osc.connect(gain)
+            gain.connect(ctx.destination)
+            osc.frequency.value = 880
+            osc.type = "sine"
+            gain.gain.setValueAtTime(0.3, ctx.currentTime)
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3)
+            osc.start(ctx.currentTime)
+            osc.stop(ctx.currentTime + 0.3)
+          } catch {}
         }
+      } else if (document.hidden && Notification.permission === 'granted') {
+        new Notification("Karpa", {
+          body: t.translator.fileTranslated,
+          icon: "/logo.png"
+        })
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') {
