@@ -901,7 +901,7 @@ function TranslatorWorkspace() {
                               <Trash className="size-3" />
                             </button>
                           </div>
-                          <p className="text-xs font-medium mt-2 line-clamp-1">{item.sourceText}</p>
+                          <p className="text-xs font-medium mt-2 line-clamp-1">{item.mode === 'file' && item.fileName ? item.fileName : item.sourceText}</p>
                           <p className="text-[11px] text-muted-foreground/60 mt-0.5 line-clamp-1">{item.translatedText}</p>
                         </div>
                       ))}

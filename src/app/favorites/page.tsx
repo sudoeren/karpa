@@ -252,7 +252,7 @@ export default function FavoritesPage() {
                           </div>
                         )}
                         <div className="text-lg leading-relaxed text-foreground/70 break-words">
-                          {selectedItem.sourceText}
+                          {selectedItem.mode === 'file' && selectedItem.fileName ? selectedItem.fileName : selectedItem.sourceText}
                         </div>
                       </div>
 
@@ -317,7 +317,7 @@ export default function FavoritesPage() {
                           <span className="font-medium">{selectedItem.fileName}</span>
                         </div>
                       )}
-                      <p className="text-lg text-foreground/60 leading-relaxed">{selectedItem.sourceText}</p>
+                      <p className="text-lg text-foreground/60 leading-relaxed">{selectedItem.mode === 'file' && selectedItem.fileName ? selectedItem.fileName : selectedItem.sourceText}</p>
                     </div>
                     <div className="space-y-2">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-yellow-600">{t.history.target}</p>
