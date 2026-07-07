@@ -445,21 +445,21 @@ function TranslatorWorkspace() {
               </Select>
             </div>
 
-            {/* Language Controls - full width on mobile */}
-            <div className="flex items-center gap-2 w-full">
+            {/* Language Controls */}
+            <div className="flex items-center gap-1.5 w-full">
               <Select value={sourceLanguage} onValueChange={setSourceLanguage}>
-                <SelectTrigger className="flex-1 min-w-0 h-10 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm px-3">
+                <SelectTrigger className="flex-1 min-w-0 h-9 rounded-lg bg-muted/50 text-xs font-medium border border-border/50 px-3 data-[state=open]:bg-muted/80 data-[state=open]:border-border transition-all duration-200">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Auto Detect">
+                <SelectContent className="min-w-[var(--radix-select-trigger-width)]">
+                  <SelectItem value="Auto Detect" className="text-xs">
                     <span className="flex items-center gap-2">
                       <Sparkle className="size-3" />
                       {t.translator.autoDetect}
                     </span>
                   </SelectItem>
                   {languages.map(l => (
-                    <SelectItem key={l.code} value={l.name}>{l.name}</SelectItem>
+                    <SelectItem key={l.code} value={l.name} className="text-xs">{l.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -467,20 +467,20 @@ function TranslatorWorkspace() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-10 rounded-xl shrink-0 hover:bg-background/50 transition-colors"
+                className="size-9 rounded-lg shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
                 onClick={swapLanguages}
                 disabled={sourceLanguage === "Auto Detect"}
               >
-                <ArrowsLeftRight className="size-4" />
+                <ArrowsLeftRight className="size-3.5" />
               </Button>
 
               <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                <SelectTrigger className="flex-1 min-w-0 h-10 rounded-xl bg-background/50 text-xs font-semibold border-transparent shadow-sm px-3">
+                <SelectTrigger className="flex-1 min-w-0 h-9 rounded-lg bg-muted/50 text-xs font-medium border border-border/50 px-3 data-[state=open]:bg-muted/80 data-[state=open]:border-border transition-all duration-200">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-[var(--radix-select-trigger-width)]">
                   {languages.map(l => (
-                    <SelectItem key={l.code} value={l.name}>{l.name}</SelectItem>
+                    <SelectItem key={l.code} value={l.name} className="text-xs">{l.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
