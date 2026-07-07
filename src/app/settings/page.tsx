@@ -716,11 +716,7 @@ export default function SettingsPage() {
                     </Link>
                   </div>
 
-                  <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border w-fit">
-                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t.about.version}</span>
-                    <span className="w-px h-3 bg-border" />
-                    <span className="text-xs font-mono font-medium">1.1.1</span>
-                  </div>
+
                 </div>
               )}
             </motion.div>
