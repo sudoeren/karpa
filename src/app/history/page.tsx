@@ -159,9 +159,9 @@ export default function HistoryPage() {
 
   const getGroupLabel = (key: string) => {
     switch(key) {
-      case 'today': return language === 'tr' ? 'Bugün' : 'Today'
-      case 'yesterday': return language === 'tr' ? 'Dün' : 'Yesterday'
-      case 'older': return language === 'tr' ? 'Geçmiş' : 'Older'
+      case 'today': return t.history.today
+      case 'yesterday': return t.history.yesterday
+      case 'older': return t.history.older
       default: return key
     }
   }

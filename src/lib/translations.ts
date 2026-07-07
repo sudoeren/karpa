@@ -149,6 +149,10 @@ export const translations = {
       allTargets: "All Targets",
       source: "Source",
       target: "Target",
+      viewFull: "View Full History",
+      today: "Today",
+      yesterday: "Yesterday",
+      older: "Older",
     },
     
     // Favorites
@@ -254,6 +258,16 @@ export const translations = {
       connectionError: "Connection error",
       invalidFile: "Invalid file type",
       textRequired: "Text is required",
+    },
+    
+    // Keyboard Shortcuts
+    keyboard: {
+      title: "Keyboard Shortcuts",
+      desc: "Use these shortcuts to navigate the app faster.",
+      translate: "Translate",
+      settings: "Settings",
+      theme: "Toggle Theme",
+      shortcuts: "Show Shortcuts",
     },
   },
   
@@ -407,6 +421,10 @@ export const translations = {
       allTargets: "Tüm Hedefler",
       source: "Kaynak",
       target: "Hedef",
+      viewFull: "Tüm Geçmişi Gör",
+      today: "Bugün",
+      yesterday: "Dün",
+      older: "Geçmiş",
     },
     
     // Favorites
@@ -512,6 +530,16 @@ export const translations = {
       connectionError: "Bağlantı hatası",
       invalidFile: "Geçersiz dosya türü",
       textRequired: "Metin gerekli",
+    },
+    
+    // Keyboard Shortcuts
+    keyboard: {
+      title: "Klavye Kısayolları",
+      desc: "Uygulamayı daha hızlı kullanmak için bu kısayolları kullanın.",
+      translate: "Çevir",
+      settings: "Ayarlar",
+      theme: "Temayı Değiştir",
+      shortcuts: "Kısayolları Göster",
     },
   },
   de: {
@@ -651,6 +679,10 @@ export const translations = {
       allTargets: "Alle Ziele",
       source: "Quelle",
       target: "Ziel",
+      viewFull: "Vollständigen Verlauf anzeigen",
+      today: "Heute",
+      yesterday: "Gestern",
+      older: "Älter",
     },
     favorites: {
       title: "Favoriten",
@@ -743,6 +775,16 @@ export const translations = {
       connectionError: "Verbindungsfehler",
       invalidFile: "Ungültiger Dateityp",
       textRequired: "Text erforderlich",
+    },
+    
+    // Keyboard Shortcuts
+    keyboard: {
+      title: "Tastaturkürzel",
+      desc: "Nutzen Sie diese Kürzel, um die App schneller zu bedienen.",
+      translate: "Übersetzen",
+      settings: "Einstellungen",
+      theme: "Design wechseln",
+      shortcuts: "Kürzel anzeigen",
     },
   },
   fr: {
@@ -882,6 +924,10 @@ export const translations = {
       allTargets: "Toutes les cibles",
       source: "Source",
       target: "Cible",
+      viewFull: "Voir tout l'historique",
+      today: "Aujourd'hui",
+      yesterday: "Hier",
+      older: "Plus ancien",
     },
     favorites: {
       title: "Favoris",
@@ -974,6 +1020,16 @@ export const translations = {
       connectionError: "Erreur de connexion",
       invalidFile: "Type de fichier invalide",
       textRequired: "Texte requis",
+    },
+    
+    // Keyboard Shortcuts
+    keyboard: {
+      title: "Raccourcis clavier",
+      desc: "Utilisez ces raccourcis pour naviguer plus rapidement.",
+      translate: "Traduire",
+      settings: "Paramètres",
+      theme: "Changer de thème",
+      shortcuts: "Afficher les raccourcis",
     },
   },
   es: {
@@ -1113,6 +1169,10 @@ export const translations = {
       allTargets: "Todos los destinos",
       source: "Origen",
       target: "Destino",
+      viewFull: "Ver historial completo",
+      today: "Hoy",
+      yesterday: "Ayer",
+      older: "Más antiguo",
     },
     favorites: {
       title: "Favoritos",
@@ -1205,6 +1265,16 @@ export const translations = {
       connectionError: "Error de conexión",
       invalidFile: "Tipo de archivo no válido",
       textRequired: "Texto requerido",
+    },
+    
+    // Keyboard Shortcuts
+    keyboard: {
+      title: "Atajos de teclado",
+      desc: "Usa estos atajos para navegar más rápido.",
+      translate: "Traducir",
+      settings: "Ajustes",
+      theme: "Cambiar tema",
+      shortcuts: "Mostrar atajos",
     },
   },
 } as const;

@@ -890,7 +890,7 @@ function TranslatorWorkspace() {
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border/40 bg-card/30 hover:bg-muted/40 hover:border-border/60 transition-all group cursor-pointer text-xs font-medium text-muted-foreground/60 hover:text-foreground"
                   >
                     <ArrowSquareOut className="size-3.5" />
-                    {language === 'tr' ? 'Tüm Geçmişi Gör' : 'View Full History'}
+                    {t.history.viewFull}
                   </button>
                 </div>
               </div>

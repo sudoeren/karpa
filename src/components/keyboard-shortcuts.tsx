@@ -17,7 +17,7 @@ export function KeyboardShortcuts() {
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const { setTheme, theme } = useTheme()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -42,10 +42,10 @@ export function KeyboardShortcuts() {
   }, [router, setTheme, theme])
 
   const shortcuts = [
-    { key: "Ctrl + Enter", action: language === 'tr' ? "Çevir" : "Translate" },
-    { key: "Ctrl + ,", action: language === 'tr' ? "Ayarlar" : "Settings" },
-    { key: "Ctrl + D", action: language === 'tr' ? "Temayı Değiştir" : "Toggle Theme" },
-    { key: "Ctrl + ?", action: language === 'tr' ? "Kısayolları Göster" : "Show Shortcuts" },
+    { key: "Ctrl + Enter", action: t.keyboard.translate },
+    { key: "Ctrl + ,", action: t.keyboard.settings },
+    { key: "Ctrl + D", action: t.keyboard.theme },
+    { key: "Ctrl + ?", action: t.keyboard.shortcuts },
   ]
 
   return (
@@ -54,10 +54,10 @@ export function KeyboardShortcuts() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Keyboard className="size-5" />
-            {language === 'tr' ? "Klavye Kısayolları" : "Keyboard Shortcuts"}
+            {t.keyboard.title}
           </DialogTitle>
           <DialogDescription>
-            {language === 'tr' ? "Uygulamayı daha hızlı kullanmak için bu kısayolları kullanın." : "Use these shortcuts to navigate the app faster."}
+            {t.keyboard.desc}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
