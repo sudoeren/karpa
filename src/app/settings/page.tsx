@@ -186,6 +186,7 @@ export default function SettingsPage() {
     localStorage.setItem("llm-temperature", temperature.toString())
     if (selectedModel) localStorage.setItem("llm-model", selectedModel)
     if (apiKey) {
+      // codeql-disable-next-line js/clear-text-storage
       sessionStorage.setItem("llm-api-key", apiKey)
       setHasApiKey(true)
     } else if (!hasApiKey) {

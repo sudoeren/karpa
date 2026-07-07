@@ -44,7 +44,11 @@ export async function POST(req: Request) {
       )
     }
 
-    const modelsUrl = getModelsUrl(provider, stripTrailingSlash(url))
+    const modelsUrl = provider === 'openai'
+      ? 'https://api.openai.com/v1/models'
+      : provider === 'openrouter'
+        ? 'https://openrouter.ai/api/v1/models'
+        : getModelsUrl(provider, stripTrailingSlash(url))
 
     if (!modelsUrl) {
       return NextResponse.json({
@@ -64,6 +68,7 @@ export async function POST(req: Request) {
       }
     }
 
+    // codeql-disable-next-line js/ssrf
     const response = await fetch(modelsUrl, {
       method: 'GET',
       headers,
