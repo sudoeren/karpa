@@ -80,6 +80,7 @@ function TranslatorWorkspace() {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
   const tts = useTTS()
 
   useEffect(() => {
@@ -260,7 +261,10 @@ function TranslatorWorkspace() {
         const soundEnabled = localStorage.getItem("karpa-notification-sound") !== "false"
         if (soundEnabled) {
           try {
-            const ctx = new AudioContext()
+            if (!audioContextRef.current) {
+              audioContextRef.current = new AudioContext()
+            }
+            const ctx = audioContextRef.current
             const osc = ctx.createOscillator()
             const gain = ctx.createGain()
             osc.connect(gain)
