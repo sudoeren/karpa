@@ -35,6 +35,8 @@ type TranslationItem = {
   timestamp: number
   tone?: string
   isFavorite?: boolean
+  mode?: 'text' | 'file'
+  fileName?: string
 }
 
 export default function HistoryPage() {

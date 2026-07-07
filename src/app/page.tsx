@@ -30,6 +30,8 @@ type TranslationItem = {
   timestamp: number
   tone?: string
   isFavorite?: boolean
+  mode?: 'text' | 'file'
+  fileName?: string
 }
 
 const languages = [
@@ -88,11 +90,20 @@ function TranslatorWorkspace() {
     const translation = searchParams.get("translation")
     const src = searchParams.get("sourceLang")
     const tgt = searchParams.get("targetLang")
+    const modeParam = searchParams.get("mode")
+    const fileName = searchParams.get("fileName")
 
     if (text) setSourceText(decodeURIComponent(text))
     if (translation) setTranslatedText(decodeURIComponent(translation))
     if (src) setSourceLanguage(src)
     if (tgt) setTargetLanguage(tgt)
+    if (modeParam === 'file' && fileName && text) {
+      setMode('file')
+      setFileContent(decodeURIComponent(text))
+      setTranslatedFileContent(decodeURIComponent(translation || ''))
+      const fakeFile = new File([decodeURIComponent(text)], fileName, { type: 'text/plain' })
+      setSelectedFile(fakeFile)
+    }
 
     const saved = localStorage.getItem("translation-history")
     if (saved) setHistory(safeJSONParse(saved, []))
@@ -118,7 +129,15 @@ function TranslatorWorkspace() {
     setSourceLanguage(item.sourceLang)
     setTargetLanguage(item.targetLang)
     if (item.tone) setTone(item.tone)
-    setMode("text")
+    if (item.mode === 'file' && item.fileName) {
+      setMode('file')
+      setFileContent(item.sourceText)
+      setTranslatedFileContent(item.translatedText)
+      const fakeFile = new File([item.sourceText], item.fileName, { type: 'text/plain' })
+      setSelectedFile(fakeFile)
+    } else {
+      setMode('text')
+    }
   }
   const addToFavorites = () => {
     if (!translatedText) return
@@ -241,7 +260,9 @@ function TranslatorWorkspace() {
         sourceLang: sourceLanguage,
         targetLang: targetLanguage,
         timestamp: Date.now(),
-        tone
+        tone,
+        mode: mode as 'text' | 'file',
+        ...(mode === 'file' && selectedFile ? { fileName: selectedFile.name } : {}),
       }
       addToHistory(newEntry)
 
