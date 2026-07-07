@@ -16,14 +16,6 @@
   <a href="#tech-stack">Tech Stack</a>
 </p>
 
-<br>
-
-<p align="center">
-  <img src="screenshot.png" alt="Karpa Screenshot" width="720" />
-</p>
-
-<br>
-
 ---
 
 Traditional translation services send your text to remote servers. **Karpa is different** — it uses LM Studio to run AI models locally on your computer. Your data never leaves your device.
@@ -105,6 +97,12 @@ docker run -p 3000:3000 --add-host=host.docker.internal:host-gateway karpa
 ---
 
 ## Usage
+
+<p align="center">
+  <kbd>
+    <img src="screenshot.png" alt="Karpa Screenshot" width="800" />
+  </kbd>
+</p>
 
 ### Text Translation
 
