@@ -23,7 +23,7 @@ export function FloatingNavbar() {
       try {
         const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url") || "http://localhost:1234"
         const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
-        const savedApiKey = sessionStorage.getItem("llm-api-key") || undefined
+        const savedApiKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? atob(k) : undefined })()
         const response = await fetch('/api/test-connection', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

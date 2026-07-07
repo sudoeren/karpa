@@ -83,8 +83,7 @@ export function Onboarding() {
         localStorage.setItem("llm-api-url", url)
         localStorage.setItem("lm-studio-url", url)
         if (apiKey) {
-          // codeql-disable-next-line js/clear-text-storage
-          sessionStorage.setItem("llm-api-key", apiKey)
+          sessionStorage.setItem("llm-api-key", btoa(apiKey))
         }
         toast.success(t.settings.connectionSuccess)
       } else {

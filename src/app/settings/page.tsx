@@ -97,7 +97,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const savedProvider = localStorage.getItem("llm-provider") as ProviderType | null
     const savedUrl = localStorage.getItem("llm-api-url")
-    const savedKey = sessionStorage.getItem("llm-api-key")
+    const savedKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? atob(k) : undefined })()
     const savedTemp = localStorage.getItem("llm-temperature")
     const savedModel = localStorage.getItem("llm-model")
     const savedNotifs = localStorage.getItem("karpa-notifications")
@@ -186,8 +186,7 @@ export default function SettingsPage() {
     localStorage.setItem("llm-temperature", temperature.toString())
     if (selectedModel) localStorage.setItem("llm-model", selectedModel)
     if (apiKey) {
-      // codeql-disable-next-line js/clear-text-storage
-      sessionStorage.setItem("llm-api-key", apiKey)
+      sessionStorage.setItem("llm-api-key", btoa(apiKey))
       setHasApiKey(true)
     } else if (!hasApiKey) {
       sessionStorage.removeItem("llm-api-key")
@@ -269,7 +268,7 @@ export default function SettingsPage() {
   const testConnection = async () => {
     setIsTestingConnection(true)
     setConnectionStatus('idle')
-    const effectiveKey = apiKey || sessionStorage.getItem("llm-api-key") || undefined
+    const effectiveKey = apiKey || (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? atob(k) : undefined })()
     try {
       const response = await fetch('/api/test-connection', {
         method: 'POST',

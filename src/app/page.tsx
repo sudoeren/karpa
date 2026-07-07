@@ -186,7 +186,7 @@ function TranslatorWorkspace() {
       const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url")
       const savedTemp = localStorage.getItem("llm-temperature") || localStorage.getItem("lm-studio-temperature")
       const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
-      const savedApiKey = sessionStorage.getItem("llm-api-key")
+      const savedApiKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? atob(k) : undefined })()
 
       for (let i = 0; i < chunks.length; i++) {
         setCurrentChunk(i + 1)
