@@ -38,7 +38,7 @@ import {
 import { useLanguage } from "@/contexts/language-context"
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
-import { cn, decodeApiKey, safeJSONParse } from "@/lib/utils"
+import { cn, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
 import { useOnboarding } from "@/contexts/onboarding-context"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
@@ -110,10 +110,10 @@ export default function SettingsPage() {
       const oldModel = localStorage.getItem("lm-studio-model")
       const oldTemp = localStorage.getItem("lm-studio-temperature")
       if (oldUrl) {
-        localStorage.setItem("llm-provider", "lmstudio")
-        localStorage.setItem("llm-api-url", oldUrl)
-        if (oldModel) localStorage.setItem("llm-model", oldModel)
-        if (oldTemp) localStorage.setItem("llm-temperature", oldTemp)
+        safeSetItem("llm-provider", "lmstudio")
+        safeSetItem("llm-api-url", oldUrl)
+        if (oldModel) safeSetItem("llm-model", oldModel)
+        if (oldTemp) safeSetItem("llm-temperature", oldTemp)
         setSelectedProvider("lmstudio")
         setApiUrl(oldUrl)
         if (oldModel) setSelectedModel(oldModel)
@@ -187,30 +187,30 @@ export default function SettingsPage() {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
           setNotificationsEnabled(true)
-          localStorage.setItem("karpa-notifications", "true")
+          safeSetItem("karpa-notifications", "true")
           toast.success(t.settings.notifications)
         } else {
           setNotificationsEnabled(false)
-          localStorage.setItem("karpa-notifications", "false")
+          safeSetItem("karpa-notifications", "false")
           toast.error(t.settings.notificationDenied)
         }
       })
     } else {
       setNotificationsEnabled(checked)
-      localStorage.setItem("karpa-notifications", String(checked))
+      safeSetItem("karpa-notifications", String(checked))
     }
   }
 
   const handleNotificationSoundChange = (checked: boolean) => {
     setNotificationSound(checked)
-    localStorage.setItem("karpa-notification-sound", String(checked))
+    safeSetItem("karpa-notification-sound", String(checked))
   }
 
   const saveSettings = () => {
-    localStorage.setItem("llm-provider", selectedProvider)
-    localStorage.setItem("llm-api-url", apiUrl)
-    localStorage.setItem("llm-temperature", temperature.toString())
-    if (selectedModel) localStorage.setItem("llm-model", selectedModel)
+    safeSetItem("llm-provider", selectedProvider)
+    safeSetItem("llm-api-url", apiUrl)
+    safeSetItem("llm-temperature", temperature.toString())
+    if (selectedModel) safeSetItem("llm-model", selectedModel)
     if (apiKey) {
       sessionStorage.setItem("llm-api-key", btoa(apiKey))
       setHasApiKey(true)
@@ -218,9 +218,9 @@ export default function SettingsPage() {
       sessionStorage.removeItem("llm-api-key")
     }
 
-    localStorage.setItem("lm-studio-url", apiUrl)
-    if (selectedModel) localStorage.setItem("lm-studio-model", selectedModel)
-    localStorage.setItem("lm-studio-temperature", temperature.toString())
+    safeSetItem("lm-studio-url", apiUrl)
+    if (selectedModel) safeSetItem("lm-studio-model", selectedModel)
+    safeSetItem("lm-studio-temperature", temperature.toString())
 
     toast.success(t.settings.saved)
   }
@@ -259,8 +259,8 @@ export default function SettingsPage() {
         const result = event.target?.result
         if (typeof result !== 'string') throw new Error('Invalid file')
         const data = JSON.parse(result)
-        if (data.history) localStorage.setItem("translation-history", JSON.stringify(data.history))
-        if (data.favorites) localStorage.setItem("translation-favorites", JSON.stringify(data.favorites))
+        if (data.history) safeSetItem("translation-history", JSON.stringify(data.history))
+        if (data.favorites) safeSetItem("translation-favorites", JSON.stringify(data.favorites))
         if (data.settings) {
           if (data.settings.provider) {
             setSelectedProvider(data.settings.provider)

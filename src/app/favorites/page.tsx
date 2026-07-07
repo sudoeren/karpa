@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
-import { cn, safeJSONParse } from "@/lib/utils"
+import { cn, safeJSONParse, safeSetItem } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -50,7 +50,7 @@ export default function FavoritesPage() {
   const removeFavorite = (id: string) => {
     const newFavorites = favorites.filter(item => item.id !== id)
     setFavorites(newFavorites)
-    localStorage.setItem("translation-favorites", JSON.stringify(newFavorites))
+    safeSetItem("translation-favorites", JSON.stringify(newFavorites))
     if (selectedId === id) setSelectedId(null)
     toast.info(t.favorites.removed)
   }

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { translations, Language } from '@/lib/translations'
+import { safeSetItem } from '@/lib/utils'
 
 type TranslationType = typeof translations['en']
 
@@ -28,7 +29,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
-    localStorage.setItem('karpa-language', lang)
+    safeSetItem('karpa-language', lang)
   }
 
   const t = translations[language] as TranslationType

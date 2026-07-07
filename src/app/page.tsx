@@ -10,7 +10,7 @@ import {
   ArrowsLeftRight, Spinner, Copy, Check, SpeakerHigh, SpeakerX, X, Star,
   Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Calendar, Trash, ArrowRight, ArrowSquareOut
 } from "@phosphor-icons/react"
-import { cn, splitIntoChunks, decodeApiKey, safeJSONParse } from "@/lib/utils"
+import { cn, splitIntoChunks, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "@/components/logo"
@@ -101,14 +101,14 @@ function TranslatorWorkspace() {
     const savedH = localStorage.getItem("translation-history")
     let historyData: TranslationItem[] = safeJSONParse(savedH, [])
     historyData = [item, ...historyData].slice(0, 100)
-    localStorage.setItem("translation-history", JSON.stringify(historyData))
+    safeSetItem("translation-history", JSON.stringify(historyData))
     setHistory(historyData)
   }
 
   const deleteHistoryItem = (id: string) => {
     const newHistory = history.filter(item => item.id !== id)
     setHistory(newHistory)
-    localStorage.setItem("translation-history", JSON.stringify(newHistory))
+    safeSetItem("translation-history", JSON.stringify(newHistory))
   }
 
   const restoreHistoryItem = (item: TranslationItem) => {
@@ -137,7 +137,7 @@ function TranslatorWorkspace() {
 
     if (!favorites.some(f => f.translatedText === item.translatedText)) {
       favorites = [item, ...favorites]
-      localStorage.setItem("translation-favorites", JSON.stringify(favorites))
+      safeSetItem("translation-favorites", JSON.stringify(favorites))
       toast.success(t.favorites.added)
     } else {
       toast.info(t.favorites.alreadyExists)

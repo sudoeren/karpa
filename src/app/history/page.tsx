@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
-import { cn, safeJSONParse } from "@/lib/utils"
+import { cn, safeJSONParse, safeSetItem } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -84,7 +84,7 @@ export default function HistoryPage() {
   const deleteItem = (id: string) => {
     const newHistory = history.filter(item => item.id !== id)
     setHistory(newHistory)
-    localStorage.setItem("translation-history", JSON.stringify(newHistory))
+    safeSetItem("translation-history", JSON.stringify(newHistory))
     if (selectedId === id) setSelectedId(null)
     toast.info(t.history.deleted)
   }
@@ -102,7 +102,7 @@ export default function HistoryPage() {
     }
     
     setFavorites(newFavorites)
-    localStorage.setItem("translation-favorites", JSON.stringify(newFavorites))
+    safeSetItem("translation-favorites", JSON.stringify(newFavorites))
   }
 
   const isFavorite = (item: TranslationItem) => {

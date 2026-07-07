@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { safeSetItem } from '@/lib/utils'
 
 type OnboardingContextType = {
   hasCompletedOnboarding: boolean
@@ -32,15 +33,15 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
   const completeOnboarding = (nativeLang?: string, targetLang?: string) => {
     setHasCompletedOnboarding(true)
-    localStorage.setItem('karpa-onboarding-completed', 'true')
+    safeSetItem('karpa-onboarding-completed', 'true')
     
     if (nativeLang) {
       setNativeLanguage(nativeLang)
-      localStorage.setItem('karpa-native-language', nativeLang)
+      safeSetItem('karpa-native-language', nativeLang)
     }
     if (targetLang) {
       setTargetLanguage(targetLang)
-      localStorage.setItem('karpa-target-language', targetLang)
+      safeSetItem('karpa-target-language', targetLang)
     }
   }
 

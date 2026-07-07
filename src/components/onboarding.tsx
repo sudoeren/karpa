@@ -12,7 +12,7 @@ import {
   CaretRight, Check, Network, Key, Eye, EyeSlash, Link,
   ArrowsClockwise, Lightning, WarningCircle, ComputerTower, Terminal, Cloud
 } from "@phosphor-icons/react"
-import { cn } from "@/lib/utils"
+import { cn, safeSetItem } from "@/lib/utils"
 import { toast } from "sonner"
 import { type ProviderType, PROVIDERS } from "@/lib/providers"
 
@@ -79,9 +79,9 @@ export function Onboarding() {
       const data = await response.json()
       if (data.success) {
         setConnectionStatus("success")
-        localStorage.setItem("llm-provider", selectedProvider)
-        localStorage.setItem("llm-api-url", url)
-        localStorage.setItem("lm-studio-url", url)
+        safeSetItem("llm-provider", selectedProvider)
+        safeSetItem("llm-api-url", url)
+        safeSetItem("lm-studio-url", url)
         if (apiKey) {
           sessionStorage.setItem("llm-api-key", btoa(apiKey))
         }
