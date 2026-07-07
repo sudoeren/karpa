@@ -188,9 +188,8 @@ export default function SettingsPage() {
     if (apiKey) {
       sessionStorage.setItem("llm-api-key", apiKey)
       setHasApiKey(true)
-    } else {
+    } else if (!hasApiKey) {
       sessionStorage.removeItem("llm-api-key")
-      setHasApiKey(false)
     }
 
     localStorage.setItem("lm-studio-url", apiUrl)
@@ -533,7 +532,6 @@ export default function SettingsPage() {
                             onClick={() => {
                               setHasApiKey(false)
                               setApiKey("")
-                              sessionStorage.removeItem("llm-api-key")
                             }}
                           >
                             Change
