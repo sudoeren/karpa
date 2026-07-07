@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   MagnifyingGlass, Trash, ArrowRight, ClockCounterClockwise, Copy,
-  ArrowSquareOut, X, Funnel, Calendar, Star, Sparkle
+  ArrowSquareOut, X, Funnel, Calendar, Star, Sparkle, FileArrowUp
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -121,7 +121,8 @@ export default function HistoryPage() {
       text: item.sourceText,
       translation: item.translatedText,
       sourceLang: item.sourceLang,
-      targetLang: item.targetLang
+      targetLang: item.targetLang,
+      ...(item.mode === 'file' && item.fileName ? { mode: 'file', fileName: item.fileName } : {}),
     })
     router.push(`/?${params.toString()}`)
   }
@@ -282,6 +283,7 @@ export default function HistoryPage() {
                         >
                           <div className="flex items-center justify-between mb-1.5">
                             <div className="flex items-center gap-1.5">
+                              {item.mode === 'file' && <FileArrowUp className="size-3 text-muted-foreground/50 shrink-0" />}
                               <span className="text-[10px] font-bold text-muted-foreground">
                                 {item.sourceLang === "Auto Detect" ? "AUTO" : item.sourceLang.slice(0, 2).toUpperCase()}
                               </span>
@@ -295,10 +297,11 @@ export default function HistoryPage() {
                             </span>
                           </div>
                           <p className={cn(
-                            "text-sm line-clamp-2",
+                            "text-sm",
+                            item.mode === 'file' ? "line-clamp-1 font-medium text-muted-foreground" : "line-clamp-2",
                             selectedId === item.id ? "font-semibold text-foreground" : "text-foreground/80"
                           )}>
-                            {item.sourceText}
+                            {item.mode === 'file' && item.fileName ? item.fileName : item.sourceText}
                           </p>
                         </div>
                       ))}
@@ -361,6 +364,12 @@ export default function HistoryPage() {
                     <div className="p-8 space-y-8">
                       <div className="space-y-3">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t.history.source}</label>
+                        {selectedItem.mode === 'file' && selectedItem.fileName && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                            <FileArrowUp className="size-3.5" />
+                            <span className="font-medium">{selectedItem.fileName}</span>
+                          </div>
+                        )}
                         <div className="text-lg leading-relaxed text-foreground/70 break-words">
                           {selectedItem.sourceText}
                         </div>
@@ -421,6 +430,12 @@ export default function HistoryPage() {
                   <div className="flex-1 overflow-y-auto p-6 space-y-8">
                     <div className="space-y-2">
                       <Badge variant="outline">{selectedItem.sourceLang} → {selectedItem.targetLang}</Badge>
+                      {selectedItem.mode === 'file' && selectedItem.fileName && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <FileArrowUp className="size-3.5" />
+                          <span className="font-medium">{selectedItem.fileName}</span>
+                        </div>
+                      )}
                       <p className="text-lg text-foreground/60 leading-relaxed">{selectedItem.sourceText}</p>
                     </div>
                     <div className="space-y-2">
