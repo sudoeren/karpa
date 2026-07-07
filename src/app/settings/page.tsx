@@ -737,9 +737,9 @@ export default function SettingsPage() {
                           {t.about.description}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground/50">
-                        <span className="text-[10px] font-medium uppercase tracking-wider">Version</span>
-                        <span className="font-mono text-foreground/60">{version}</span>
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border/50">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Version</span>
+                        <span className="text-xs font-mono font-bold text-foreground">v{version}</span>
                       </div>
                     </div>
 
