@@ -33,7 +33,7 @@ phone-home.
 ## Commands
 Package manager is npm. No Makefile / task runner.
 
-- `npm run dev` — `next dev` on :3000.
+- `npm run dev` — `next dev -p 7250` on :7250.
 - `npm run build` — `next build`. Produces standalone output (see
   `next.config.ts`) used by the Dockerfile.
 - `npm run start` — run the production build.

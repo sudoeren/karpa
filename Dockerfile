@@ -40,10 +40,10 @@ RUN chown -R nextjs:nodejs /app
 USER nextjs
 
 # Expose port
-EXPOSE 3000
+EXPOSE 7250
 
 # Set environment variables
-ENV PORT=3000
+ENV PORT=7250
 ENV HOSTNAME="0.0.0.0"
 
 # LM Studio connection (can be overridden at runtime)

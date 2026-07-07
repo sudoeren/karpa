@@ -62,7 +62,7 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:3000** and start translating!
+Open **http://localhost:7250** and start translating!
 
 ---
 
@@ -89,7 +89,7 @@ docker-compose up -d
 
 ```bash
 docker build -t karpa .
-docker run -p 3000:3000 --add-host=host.docker.internal:host-gateway karpa
+docker run -p 7250:7250 --add-host=host.docker.internal:host-gateway karpa
 ```
 
 ---
