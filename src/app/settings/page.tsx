@@ -138,6 +138,31 @@ export default function SettingsPage() {
     if (savedNotifSound) setNotificationSound(savedNotifSound !== 'false')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-detect connection on mount and when provider/url changes
+  useEffect(() => {
+    const savedUrl = localStorage.getItem("llm-api-url")
+    const savedProvider = localStorage.getItem("llm-provider") as ProviderType | null
+    const url = savedUrl || apiUrl
+    const provider = savedProvider || selectedProvider
+
+    const checkConnection = async () => {
+      try {
+        const savedKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
+        const response = await fetch('/api/test-connection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, provider, apiKey: savedKey }),
+        })
+        const data = await response.json()
+        setConnectionStatus(data.success ? 'success' : 'error')
+      } catch {
+        setConnectionStatus('error')
+      }
+    }
+
+    checkConnection()
+  }, [selectedProvider, apiUrl]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleProviderChange = (provider: ProviderType) => {
     setSelectedProvider(provider)
     const info = PROVIDERS[provider]
