@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       'Content-Type': 'application/json',
     }
     if (apiKey) {
-      if (provider === 'openai' || provider === 'custom') {
+      if (provider === 'openai' || provider === 'openrouter' || provider === 'custom') {
         headers['Authorization'] = 'Bearer ' + apiKey
       } else if (provider === 'gemini') {
         headers['x-goog-api-key'] = apiKey

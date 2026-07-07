@@ -13,6 +13,7 @@ const CANONICAL_CLOUD_HOSTS: Record<string, string> = {
   openai: 'api.openai.com',
   anthropic: 'api.anthropic.com',
   gemini: 'generativelanguage.googleapis.com',
+  openrouter: 'openrouter.ai',
 }
 
 export type ProviderKey = keyof typeof CANONICAL_CLOUD_HOSTS | 'lmstudio' | 'ollama' | 'custom'

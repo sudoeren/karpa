@@ -166,6 +166,22 @@ export async function POST(request: Request) {
           }, { status: 502 })
         }
 
+        case 'openrouter': {
+          const headers = getHeaders(provider, apiKey)
+          const response = await fetch(getModelsUrl(provider, baseUrl) || 'https://openrouter.ai/api/v1/models', {
+            method: 'GET',
+            signal: controller.signal,
+            headers: { ...headers, 'Accept': 'application/json' },
+          })
+          clearTimeout(timeoutId)
+          if (response.ok) {
+            const data = await response.json()
+            return NextResponse.json({ success: true, models: data?.data?.length || 0, message: 'Connected to OpenRouter' })
+          }
+          if (response.status === 401) return NextResponse.json({ success: false, error: 'Invalid API key.' }, { status: 401 })
+          return NextResponse.json({ success: false, error: 'OpenRouter returned ' + response.status }, { status: 502 })
+        }
+
         case 'custom': {
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey

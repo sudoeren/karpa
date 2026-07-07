@@ -42,6 +42,7 @@ const providerList: { key: ProviderType; icon: any; label: string }[] = [
   { key: 'openai', icon: Cloud, label: 'OpenAI' },
   { key: 'anthropic', icon: Cloud, label: 'Anthropic' },
   { key: 'gemini', icon: Cloud, label: 'Gemini' },
+  { key: 'openrouter', icon: Cloud, label: 'OpenRouter' },
   { key: 'custom', icon: ComputerTower, label: 'Custom' },
 ]
 
