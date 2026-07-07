@@ -256,7 +256,9 @@ export default function SettingsPage() {
     const reader = new FileReader()
     reader.onload = (event) => {
       try {
-        const data = JSON.parse(event.target?.result as string)
+        const result = event.target?.result
+        if (typeof result !== 'string') throw new Error('Invalid file')
+        const data = JSON.parse(result)
         if (data.history) localStorage.setItem("translation-history", JSON.stringify(data.history))
         if (data.favorites) localStorage.setItem("translation-favorites", JSON.stringify(data.favorites))
         if (data.settings) {

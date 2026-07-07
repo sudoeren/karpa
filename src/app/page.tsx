@@ -308,8 +308,9 @@ function TranslatorWorkspace() {
 
     const reader = new FileReader()
     reader.onload = (event) => {
-      const content = event.target?.result as string
-      setFileContent(content)
+      const result = event.target?.result
+      if (typeof result !== 'string') return
+      setFileContent(result)
       setSelectedFile(file)
       setTranslatedFileContent("")
     }
