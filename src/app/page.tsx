@@ -152,7 +152,9 @@ function TranslatorWorkspace() {
       targetLang: targetLanguage,
       timestamp: Date.now(),
       tone,
-      isFavorite: true
+      isFavorite: true,
+      mode: mode as 'text' | 'file',
+      ...(mode === 'file' && selectedFile ? { fileName: selectedFile.name } : {}),
     }
 
     if (!favorites.some(f => f.translatedText === item.translatedText)) {
