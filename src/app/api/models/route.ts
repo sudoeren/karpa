@@ -6,7 +6,7 @@ import {
   parseModelsResponse,
   getModelsUrl,
 } from '@/lib/providers'
-import { validateProviderUrl, stripTrailingSlash } from '@/lib/url-validation'
+import { validateProviderUrl } from '@/lib/url-validation'
 
 export async function POST(req: Request) {
   try {
@@ -35,8 +35,9 @@ export async function POST(req: Request) {
     // Validate that the user-supplied base URL is safe to fetch. After this
     // succeeds, the URL is provably on an allowed host and is used to build
     // the outbound fetch URL — that's the whole point of the validation.
+    let validatedUrl: string
     try {
-      validateProviderUrl(url, provider)
+      validatedUrl = validateProviderUrl(url, provider)
     } catch (validationError) {
       return NextResponse.json(
         { success: false, error: (validationError as Error).message },
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
       ? 'https://api.openai.com/v1/models'
       : provider === 'openrouter'
         ? 'https://openrouter.ai/api/v1/models'
-        : getModelsUrl(provider, stripTrailingSlash(url))
+        : getModelsUrl(provider, validatedUrl)
 
     if (!modelsUrl) {
       return NextResponse.json({
@@ -68,7 +69,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // codeql-disable-next-line js/ssrf
     const response = await fetch(modelsUrl, {
       method: 'GET',
       headers,

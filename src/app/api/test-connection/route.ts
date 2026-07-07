@@ -4,8 +4,9 @@ import {
   PROVIDERS,
   getHeaders,
   getChatCompletionUrl,
+  getModelsUrl,
 } from '@/lib/providers'
-import { validateProviderUrl, stripTrailingSlash } from '@/lib/url-validation'
+import { validateProviderUrl } from '@/lib/url-validation'
 
 export async function POST(request: Request) {
   try {
@@ -25,16 +26,15 @@ export async function POST(request: Request) {
     // Validate that the user-supplied base URL is safe to fetch. After this
     // succeeds, the URL is provably on an allowed host and is used to build
     // the outbound fetch URL — that's the whole point of the validation.
+    let baseUrl: string
     try {
-      validateProviderUrl(url, provider)
+      baseUrl = validateProviderUrl(url, provider)
     } catch (validationError) {
       return NextResponse.json(
         { success: false, error: (validationError as Error).message },
         { status: 400 }
       )
     }
-
-    const baseUrl = stripTrailingSlash(url)
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
@@ -98,8 +98,7 @@ export async function POST(request: Request) {
         }
 
         case 'ollama': {
-          // codeql-disable-next-line js/ssrf
-          const response = await fetch(baseUrl + '/api/tags', {
+          const response = await fetch(getModelsUrl(provider, baseUrl)!, {
             method: 'GET',
             signal: controller.signal,
             headers: { 'Accept': 'application/json' },
@@ -116,8 +115,7 @@ export async function POST(request: Request) {
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey
 
-          // codeql-disable-next-line js/ssrf
-          const response = await fetch(baseUrl + '/v1/models', {
+          const response = await fetch(getModelsUrl(provider, baseUrl)!, {
             method: 'GET',
             signal: controller.signal,
             headers,
@@ -141,7 +139,6 @@ export async function POST(request: Request) {
             }, { status: 401 })
           }
 
-          // codeql-disable-next-line js/ssrf
           const healthResponse = await fetch(getChatCompletionUrl(provider, baseUrl), {
             method: 'POST',
             headers: {
@@ -188,8 +185,7 @@ export async function POST(request: Request) {
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey
 
-          // codeql-disable-next-line js/ssrf
-          const response = await fetch(baseUrl + '/v1/models', {
+          const response = await fetch(getModelsUrl(provider, baseUrl)!, {
             method: 'GET',
             signal: controller.signal,
             headers,
@@ -213,7 +209,6 @@ export async function POST(request: Request) {
             }, { status: 401 })
           }
 
-          // codeql-disable-next-line js/ssrf
           const healthResponse = await fetch(getChatCompletionUrl(provider, baseUrl), {
             method: 'POST',
             headers: {

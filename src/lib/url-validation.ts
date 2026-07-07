@@ -29,7 +29,7 @@ export type ProviderKey = keyof typeof CANONICAL_CLOUD_HOSTS | 'lmstudio' | 'oll
  * the outbound fetch: SSRF protection requires the host to be provably
  * allowed, and CodeQL accepts a validated URL as a clean source.
  */
-export function validateProviderUrl(url: string, provider: string): void {
+export function validateProviderUrl(url: string, provider: string): string {
   if (!url || !url.trim()) {
     throw new Error(`${provider} URL is required. Please enter a valid URL in Settings.`)
   }
@@ -41,7 +41,7 @@ export function validateProviderUrl(url: string, provider: string): void {
     if (hostname !== canonical) {
       throw new Error(`Invalid ${provider} host: ${hostname}`)
     }
-    return
+    return stripTrailingSlash(url)
   }
 
   if (
@@ -52,4 +52,5 @@ export function validateProviderUrl(url: string, provider: string): void {
   ) {
     throw new Error('URL must point to a local or private address')
   }
+  return stripTrailingSlash(url)
 }
