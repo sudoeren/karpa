@@ -16,9 +16,15 @@
   <a href="#tech-stack">Tech Stack</a>
 </p>
 
----
+<br>
 
-## Why Karpa?
+<p align="center">
+  <img src="screenshot.png" alt="Karpa Screenshot" width="720" />
+</p>
+
+<br>
+
+---
 
 Traditional translation services send your text to remote servers. **Karpa is different** — it uses LM Studio to run AI models locally on your computer. Your data never leaves your device.
 
