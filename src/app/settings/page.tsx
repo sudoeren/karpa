@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command"
 import {
   Sun, Moon, Monitor, Globe,
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner, Lightning,
   Bell, SpeakerHigh, Info, User, ArrowSquareOut,
   Key, ComputerTower, Cloud, Eye, EyeSlash, SquaresFour, Sliders,
-  X, HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass
+  HardDrive, ShieldCheck, ArrowUpRight, GitFork
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -57,7 +57,6 @@ export default function SettingsPage() {
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [models, setModels] = useState<Model[]>([])
-  const [modelSearch, setModelSearch] = useState("")
   const [selectedModel, setSelectedModel] = useState<string>("")
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [notificationSound, setNotificationSound] = useState(true)
@@ -135,7 +134,6 @@ export default function SettingsPage() {
     setApiUrl(info.defaultUrl)
     setApiKey("")
     setModels([])
-    setModelSearch("")
     setSelectedModel(info.defaultModel)
     setConnectionStatus('idle')
 
@@ -530,50 +528,49 @@ export default function SettingsPage() {
 
                   <div className="space-y-3">
                     <Label className="text-xs text-muted-foreground">{t.settings.activeModel}</Label>
-                    <div className="bg-muted/30 border border-border rounded-xl p-3 space-y-2">
-                      {models.length > 0 ? (
-                        <>
-                          <div className="relative">
-                            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-                            <Input
-                              value={modelSearch}
-                              onChange={(e) => setModelSearch(e.target.value)}
-                              className="h-9 pl-9 pr-9 rounded-lg bg-background border-border/80 text-xs"
-                              placeholder="Search models..."
-                            />
-                            {modelSearch && (
-                              <button
-                                onClick={() => setModelSearch("")}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 size-5 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    {models.length > 0 ? (
+                      <Command key={selectedProvider} className="rounded-xl border bg-popover">
+                        <CommandInput placeholder="Search models..." />
+                        <CommandList className="max-h-60">
+                          <CommandEmpty className="py-4 text-xs text-muted-foreground">
+                            No models found
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {models.map((m) => (
+                              <CommandItem
+                                key={m.id}
+                                value={m.id}
+                                onSelect={() => setSelectedModel(m.id)}
+                                className="cursor-pointer text-xs"
                               >
-                                <X className="size-3" />
-                              </button>
-                            )}
+                                <Check
+                                  className={cn(
+                                    "size-3.5 shrink-0",
+                                    selectedModel === m.id ? "opacity-100 text-primary" : "opacity-0"
+                                  )}
+                                />
+                                <span className="truncate">{m.id}</span>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                        {selectedModel && (
+                          <div className="border-t px-3 py-1.5 flex items-center justify-between">
+                            <span className="text-[10px] text-muted-foreground/50">{models.length} models</span>
+                            <span className="text-[10px] font-mono text-primary/60 truncate max-w-[180px]">{selectedModel}</span>
                           </div>
-                          <Select value={selectedModel} onValueChange={setSelectedModel}>
-                            <SelectTrigger className="h-9 rounded-lg bg-background border-border/80 px-3 text-xs">
-                              <SelectValue placeholder={t.settings.selectModel} />
-                            </SelectTrigger>
-                            <SelectContent className="bg-popover border-border max-h-64 overflow-y-auto">
-                              {models.filter(m => !modelSearch || m.id.toLowerCase().includes(modelSearch.toLowerCase())).map((m) => (
-                                <SelectItem key={m.id} value={m.id} className="text-xs">{m.id}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <div className="flex items-center justify-between px-1 text-[10px] text-muted-foreground/50">
-                            <span>{models.filter(m => !modelSearch || m.id.toLowerCase().includes(modelSearch.toLowerCase())).length} / {models.length} models</span>
-                            {selectedModel && <span className="font-mono text-primary/60 truncate max-w-[200px]">{selectedModel}</span>}
-                          </div>
-                        </>
-                      ) : (
+                        )}
+                      </Command>
+                    ) : (
+                      <div className="bg-muted/30 border border-border rounded-xl p-3">
                         <Input
                           value={selectedModel}
                           onChange={(e) => setSelectedModel(e.target.value)}
                           className="h-9 px-3 rounded-lg bg-background border-border/80 font-mono text-xs"
                           placeholder={providerInfo.defaultModel || t.settings.enterModelName}
                         />
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-3 pt-2">
