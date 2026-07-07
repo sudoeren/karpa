@@ -7,6 +7,7 @@ import { useOnboarding } from "@/contexts/onboarding-context"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Logo } from "@/components/logo"
 import {
   ChevronRight, Check, Network, Key, Eye, EyeOff, Link2,
   RefreshCw, Zap, AlertCircle, Server, Terminal, Cloud
@@ -116,7 +117,7 @@ export function Onboarding() {
   return (
     <div className="fixed inset-0 z-50 bg-background text-foreground overflow-hidden flex flex-col">
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-6 z-10">
-        <span className="text-base font-semibold tracking-tight">Karpa</span>
+        <Logo size={28} />
         <ModeToggle />
       </div>
 
@@ -214,7 +215,10 @@ export function Onboarding() {
 function WelcomeStep({ t }: { t: any }) {
   return (
     <div className="text-center py-12">
-      <h1 className="text-6xl md:text-7xl font-extralight tracking-tight mb-4">
+      <div className="flex justify-center mb-6">
+        <Logo size={64} />
+      </div>
+      <h1 className="text-5xl md:text-6xl font-light tracking-tight mb-4">
         Karpa
       </h1>
       <p className="text-base text-muted-foreground max-w-xs mx-auto leading-relaxed">
