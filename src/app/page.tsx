@@ -10,7 +10,7 @@ import {
   ArrowsLeftRight, Spinner, Copy, Check, SpeakerHigh, SpeakerX, X, Star,
   Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Calendar, Trash, ArrowRight, ArrowSquareOut
 } from "@phosphor-icons/react"
-import { cn } from "@/lib/utils"
+import { cn, splitIntoChunks, decodeApiKey } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "@/components/logo"
@@ -20,7 +20,6 @@ import { useOnboarding } from "@/contexts/onboarding-context"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { splitIntoChunks } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -186,7 +185,8 @@ function TranslatorWorkspace() {
       const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url")
       const savedTemp = localStorage.getItem("llm-temperature") || localStorage.getItem("lm-studio-temperature")
       const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
-      const savedApiKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? atob(k) : undefined })()
+      const savedApiKey = sessionStorage.getItem("llm-api-key")
+      const finalApiKey = savedApiKey ? decodeApiKey(savedApiKey) : undefined
 
       for (let i = 0; i < chunks.length; i++) {
         setCurrentChunk(i + 1)
@@ -210,7 +210,7 @@ function TranslatorWorkspace() {
             apiUrl: savedUrl,
             temperature: savedTemp ? parseFloat(savedTemp) : undefined,
             provider: savedProvider,
-            apiKey: savedApiKey || undefined,
+            apiKey: finalApiKey,
             preserveFormatting: true,
           }),
           signal: abortControllerRef.current.signal,

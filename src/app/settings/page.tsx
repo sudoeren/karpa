@@ -38,11 +38,12 @@ import {
 import { useLanguage } from "@/contexts/language-context"
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { cn, decodeApiKey } from "@/lib/utils"
 import { useOnboarding } from "@/contexts/onboarding-context"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
 import { type ProviderType, PROVIDERS, KNOWN_MODELS } from "@/lib/providers"
+import { version } from '../../../package.json'
 
 type Model = {
   id: string
@@ -97,7 +98,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const savedProvider = localStorage.getItem("llm-provider") as ProviderType | null
     const savedUrl = localStorage.getItem("llm-api-url")
-    const savedKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? atob(k) : undefined })()
+    const savedKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
     const savedTemp = localStorage.getItem("llm-temperature")
     const savedModel = localStorage.getItem("llm-model")
     const savedNotifs = localStorage.getItem("karpa-notifications")
@@ -268,7 +269,7 @@ export default function SettingsPage() {
   const testConnection = async () => {
     setIsTestingConnection(true)
     setConnectionStatus('idle')
-    const effectiveKey = apiKey || (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? atob(k) : undefined })()
+    const effectiveKey = apiKey || (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
     try {
       const response = await fetch('/api/test-connection', {
         method: 'POST',
@@ -728,15 +729,19 @@ export default function SettingsPage() {
 
               {activeTab === 'about' && (
                 <div className="max-w-2xl space-y-8">
-                  <div className="space-y-4">
-                    <Logo size={48} />
-                    <div className="space-y-2">
-                      <h2 className="text-4xl font-light tracking-tight">Karpa</h2>
-                      <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-                        {t.about.description}
-                      </p>
+                    <div className="space-y-4">
+                      <Logo size={48} />
+                      <div className="space-y-2">
+                        <h2 className="text-4xl font-light tracking-tight">Karpa</h2>
+                        <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                          {t.about.description}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground/50">
+                        <span className="text-[10px] font-medium uppercase tracking-wider">Version</span>
+                        <span className="font-mono text-foreground/60">{version}</span>
+                      </div>
                     </div>
-                  </div>
 
                   <div className="pt-6 border-t border-border flex flex-col sm:flex-row gap-6">
                     <Link href="https://erencakar.com" target="_blank" className="group flex items-center gap-3">

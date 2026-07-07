@@ -67,6 +67,10 @@ export function splitIntoChunks(text: string, maxChunkSize: number = 2000, prese
   return chunks;
 }
 
+export function decodeApiKey(key: string): string {
+  try { return atob(key) } catch { return key }
+}
+
 export function cleanTranslation(text: string): string {
   if (!text) return text;
 
