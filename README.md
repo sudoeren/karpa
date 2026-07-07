@@ -16,8 +16,6 @@
   <a href="#tech-stack">Tech Stack</a>
 </p>
 
----
-
 <p align="center">
   <img src="screenshot.png" alt="Karpa" width="800" />
 </p>
