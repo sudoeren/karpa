@@ -12,7 +12,7 @@ import {
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner, Lightning,
   Bell, SpeakerHigh, Info, User, ArrowSquareOut,
   Key, ComputerTower, Cloud, Eye, EyeSlash, SquaresFour, Sliders,
-  HardDrive, ShieldCheck, ArrowUpRight, GitFork
+  HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -57,6 +57,7 @@ export default function SettingsPage() {
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [models, setModels] = useState<Model[]>([])
+  const [showSearch, setShowSearch] = useState(false)
   const [selectedModel, setSelectedModel] = useState<string>("")
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [notificationSound, setNotificationSound] = useState(true)
@@ -134,6 +135,7 @@ export default function SettingsPage() {
     setApiUrl(info.defaultUrl)
     setApiKey("")
     setModels([])
+    setShowSearch(false)
     setSelectedModel(info.defaultModel)
     setConnectionStatus('idle')
 
@@ -529,38 +531,66 @@ export default function SettingsPage() {
                   <div className="space-y-3">
                     <Label className="text-xs text-muted-foreground">{t.settings.activeModel}</Label>
                     {models.length > 0 ? (
-                      <Command key={selectedProvider} className="rounded-xl border bg-popover">
-                        <CommandInput placeholder="Search models..." />
-                        <CommandList className="max-h-60">
-                          <CommandEmpty className="py-4 text-xs text-muted-foreground">
-                            No models found
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {models.map((m) => (
-                              <CommandItem
-                                key={m.id}
-                                value={m.id}
-                                onSelect={() => setSelectedModel(m.id)}
-                                className="cursor-pointer text-xs"
-                              >
-                                <Check
-                                  className={cn(
-                                    "size-3.5 shrink-0",
-                                    selectedModel === m.id ? "opacity-100 text-primary" : "opacity-0"
-                                  )}
-                                />
-                                <span className="truncate">{m.id}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                        {selectedModel && (
-                          <div className="border-t px-3 py-1.5 flex items-center justify-between">
-                            <span className="text-[10px] text-muted-foreground/50">{models.length} models</span>
-                            <span className="text-[10px] font-mono text-primary/60 truncate max-w-[180px]">{selectedModel}</span>
-                          </div>
-                        )}
-                      </Command>
+                      <div className="relative">
+                        <Command key={selectedProvider} className="rounded-xl border bg-popover">
+                          {showSearch ? (
+                            <CommandInput
+                              placeholder="Search models..."
+                              autoFocus
+                              onBlur={(e) => {
+                                if (!e.currentTarget.value) {
+                                  setShowSearch(false)
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Escape' && !(e.target as HTMLInputElement).value) {
+                                  setShowSearch(false)
+                                }
+                              }}
+                            />
+                          ) : (
+                            <button
+                              onClick={() => setShowSearch(true)}
+                              className="flex items-center gap-2 px-3 h-9 w-full text-xs text-muted-foreground/60 hover:text-foreground transition-colors"
+                            >
+                              <MagnifyingGlass className="size-3.5 shrink-0" />
+                              <span>Search models...</span>
+                            </button>
+                          )}
+                          <CommandList className="max-h-60">
+                            <CommandEmpty className="py-4 text-xs text-muted-foreground">
+                              No models found
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {models.map((m) => (
+                                <CommandItem
+                                  key={m.id}
+                                  value={m.id}
+                                  onSelect={() => {
+                                    setSelectedModel(m.id)
+                                    setShowSearch(false)
+                                  }}
+                                  className="cursor-pointer text-xs"
+                                >
+                                  <Check
+                                    className={cn(
+                                      "size-3.5 shrink-0",
+                                      selectedModel === m.id ? "opacity-100 text-primary" : "opacity-0"
+                                    )}
+                                  />
+                                  <span className="truncate">{m.id}</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                          {selectedModel && (
+                            <div className="border-t px-3 py-1.5 flex items-center justify-between">
+                              <span className="text-[10px] text-muted-foreground/50">{models.length} models</span>
+                              <span className="text-[10px] font-mono text-primary/60 truncate max-w-[180px]">{selectedModel}</span>
+                            </div>
+                          )}
+                        </Command>
+                      </div>
                     ) : (
                       <div className="bg-muted/30 border border-border rounded-xl p-3">
                         <Input
