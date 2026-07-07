@@ -1,17 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion"
-import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { useLanguage } from "@/contexts/language-context"
 import { useOnboarding } from "@/contexts/onboarding-context"
-import { Logo } from "@/components/logo"
-import { 
-  Languages, Shield, Zap, ArrowRight, Check, Globe, Sparkles, RefreshCw, AlertCircle, 
-  Link2, Terminal, Cpu, Database, Network, Server, Cloud, Key, Eye, EyeOff
+import { ModeToggle } from "@/components/mode-toggle"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  ChevronRight, Check, Network, Key, Eye, EyeOff, Link2,
+  RefreshCw, Zap, AlertCircle, Server, Terminal, Cloud
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { type ProviderType, PROVIDERS } from "@/lib/providers"
 
@@ -27,24 +27,47 @@ const translationLanguages = [
   { code: "ko", name: "Korean", flag: "🇰🇷" },
 ]
 
+const interfaceLanguages = [
+  { code: "en", name: "English", flag: "🇺🇸", native: "English" },
+  { code: "tr", name: "Turkish", flag: "🇹🇷", native: "Türkçe" },
+  { code: "de", name: "German", flag: "🇩🇪", native: "Deutsch" },
+  { code: "fr", name: "French", flag: "🇫🇷", native: "Français" },
+  { code: "es", name: "Spanish", flag: "🇪🇸", native: "Español" },
+]
+
+const providerList: { key: ProviderType; icon: any; label: string }[] = [
+  { key: 'lmstudio', icon: Terminal, label: 'LM Studio' },
+  { key: 'ollama', icon: Server, label: 'Ollama' },
+  { key: 'openai', icon: Cloud, label: 'OpenAI' },
+  { key: 'anthropic', icon: Cloud, label: 'Anthropic' },
+  { key: 'gemini', icon: Cloud, label: 'Gemini' },
+  { key: 'custom', icon: Server, label: 'Custom' },
+]
+
+const stepVariants = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -12 },
+}
+
 export function Onboarding() {
   const [step, setStep] = useState(0)
   const { t, language, setLanguage } = useLanguage()
   const { completeOnboarding } = useOnboarding()
   const [nativeLang, setNativeLang] = useState("Turkish")
   const [targetLang, setTargetLang] = useState("English")
-  
   const [selectedProvider, setSelectedProvider] = useState<ProviderType>("lmstudio")
   const [apiUrl, setApiUrl] = useState("http://localhost:1234")
   const [apiKey, setApiKey] = useState("")
   const [connectionStatus, setConnectionStatus] = useState<"idle" | "testing" | "success" | "error">("idle")
+  const [showApiKey, setShowApiKey] = useState(false)
 
   const testConnection = async () => {
     setConnectionStatus("testing")
     try {
       let url = apiUrl.trim()
       if (url.endsWith('/')) url = url.slice(0, -1)
-      
+
       const response = await fetch('/api/test-connection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,16 +77,15 @@ export function Onboarding() {
       const data = await response.json()
       if (data.success) {
         setConnectionStatus("success")
-        // Save to localStorage
         localStorage.setItem("llm-provider", selectedProvider)
         localStorage.setItem("llm-api-url", url)
-        localStorage.setItem("lm-studio-url", url) // backward compat
+        localStorage.setItem("lm-studio-url", url)
         toast.success(t.settings.connectionSuccess)
       } else {
         setConnectionStatus("error")
         toast.error(data.error || t.settings.connectionFailed)
       }
-    } catch (error) {
+    } catch {
       setConnectionStatus("error")
       toast.error(t.settings.connectionFailed)
     }
@@ -79,11 +101,11 @@ export function Onboarding() {
 
   const nextStep = () => {
     if (step === 2 && connectionStatus !== "success") {
-       toast.info(t.onboarding.continuingWithout, {
-         description: t.onboarding.ensureEngineRunning
-       })
+      toast.info(t.onboarding.continuingWithout, {
+        description: t.onboarding.ensureEngineRunning
+      })
     }
-    if (step < 4) setStep(step + 1)
+    if (step < 3) setStep(step + 1)
     else completeOnboarding(nativeLang, targetLang)
   }
 
@@ -92,452 +114,372 @@ export function Onboarding() {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black text-white overflow-hidden flex flex-col font-sans">
-      {/* Background Ambience */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#1a1a1a_0%,#000_100%)]" />
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-violet-600/10 rounded-full blur-[120px] animate-pulse delay-700" />
+    <div className="fixed inset-0 z-50 bg-background text-foreground overflow-hidden flex flex-col">
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-6 z-10">
+        <span className="text-base font-semibold tracking-tight">Karpa</span>
+        <ModeToggle />
       </div>
 
-      {/* Main Content Area */}
-      <div className="relative flex-1 flex items-center justify-center p-6 md:p-12">
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={step}
-            initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
-            transition={{ type: "spring", duration: 0.6, bounce: 0.2 }}
-            className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6"
-          >
-            {/* Left Content / Header Section */}
-            <div className="lg:col-span-5 flex flex-col justify-center space-y-8">
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md">
-                    <Logo size={48} />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-mono tracking-[0.3em] text-primary uppercase">KARPA AI</h2>
-                    <p className="text-xs text-white/40 font-medium">{t.onboarding.stepOf.replace('{current}', String(step + 1)).replace('{total}', '5')}</p>
-                  </div>
-                </div>
-
-                {step === 0 && <WelcomeStep t={t} />}
-                {step === 1 && <InterfaceLangStep t={t} />}
-                {step === 2 && <ConnectionStep t={t} connectionStatus={connectionStatus} />}
-                {step === 3 && <LanguageSetupStep t={t} type="native" />}
-                {step === 4 && <LanguageSetupStep t={t} type="target" />}
-              </motion.div>
-
-              {/* Navigation Buttons */}
-              <motion.div 
-                className="flex items-center gap-4 pt-8"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                {step > 0 && (
-                  <button 
-                    onClick={prevStep}
-                    className="h-14 px-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all font-bold text-sm"
-                  >
-                    {t.common.back}
-                  </button>
-                )}
-                <button 
-                  onClick={nextStep}
-                  className="h-14 flex-1 flex items-center justify-center gap-3 rounded-2xl bg-white text-black hover:bg-white/90 transition-all font-black text-sm uppercase tracking-widest shadow-[0_0_40px_rgba(255,255,255,0.1)] group"
-                >
-                  {step === 4 ? t.onboarding.letsGo : step === 0 ? t.onboarding.getStarted : t.common.next}
-                  <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </motion.div>
-              
-              {step < 4 && (
-                <button 
-                  onClick={() => completeOnboarding(nativeLang, targetLang)}
-                  className="text-white/30 hover:text-white/60 text-[10px] uppercase tracking-widest font-bold self-start pl-4"
-                >
-                  {t.common.skip}
-                </button>
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-xl mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              {step === 0 && <WelcomeStep t={t} />}
+              {step === 1 && <InterfaceStep t={t} language={language} setLanguage={setLanguage} />}
+              {step === 2 && (
+                <EngineStep
+                  t={t}
+                  selectedProvider={selectedProvider}
+                  onProviderSelect={handleProviderSelect}
+                  apiUrl={apiUrl}
+                  setApiUrl={setApiUrl}
+                  apiKey={apiKey}
+                  setApiKey={setApiKey}
+                  showApiKey={showApiKey}
+                  setShowApiKey={setShowApiKey}
+                  testConnection={testConnection}
+                  connectionStatus={connectionStatus}
+                />
               )}
-            </div>
-
-            {/* Right Interactive / Visual Section */}
-            <div className="lg:col-span-7 hidden lg:flex items-center justify-center">
-              <div className="w-full grid grid-cols-2 gap-4">
-                {step === 0 && <WelcomeVisuals t={t} />}
-                {step === 1 && <InterfaceVisuals language={language} setLanguage={setLanguage} />}
-                {step === 2 && (
-                  <ConnectionVisuals 
-                    selectedProvider={selectedProvider}
-                    onProviderSelect={handleProviderSelect}
-                    apiUrl={apiUrl} 
-                    setApiUrl={setApiUrl} 
-                    apiKey={apiKey}
-                    setApiKey={setApiKey}
-                    testConnection={testConnection} 
-                    status={connectionStatus}
-                    t={t}
-                  />
-                )}
-                {(step === 3 || step === 4) && (
-                  <LanguageVisuals 
-                    selected={step === 3 ? nativeLang : targetLang} 
-                    setSelected={step === 3 ? setNativeLang : setTargetLang} 
-                  />
-                )}
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+              {step === 3 && (
+                <LanguagesStep
+                  t={t}
+                  nativeLang={nativeLang}
+                  setNativeLang={setNativeLang}
+                  targetLang={targetLang}
+                  setTargetLang={setTargetLang}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
-      
-      {/* Progress Line */}
-      <div className="h-1 w-full bg-white/5 relative">
-        <motion.div 
-          className="absolute top-0 left-0 h-full bg-primary shadow-[0_0_20px_rgba(var(--primary),0.8)]"
-          initial={{ width: "0%" }}
-          animate={{ width: `${((step + 1) / 5) * 100}%` }}
-          transition={{ duration: 0.5, ease: "circOut" }}
-        />
+
+      <div className="p-6 pt-0">
+        <div className="max-w-xl mx-auto">
+          <div className="flex justify-center gap-1.5 mb-5">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-300",
+                  i === step
+                    ? "w-6 bg-primary"
+                    : i < step
+                      ? "w-1.5 bg-primary/40"
+                      : "w-1.5 bg-muted-foreground/20"
+                )}
+              />
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3">
+            {step > 0 ? (
+              <button
+                onClick={prevStep}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+              >
+                {t.common.back}
+              </button>
+            ) : (
+              <div />
+            )}
+            {step < 3 && (
+              <button
+                onClick={() => completeOnboarding(nativeLang, targetLang)}
+                className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+              >
+                {t.common.skip}
+              </button>
+            )}
+            <div className="flex-1" />
+            <Button onClick={nextStep} className="rounded-xl">
+              {step === 3 ? t.onboarding.letsGo : step === 0 ? t.onboarding.getStarted : t.common.next}
+              <ChevronRight className="size-4 ml-1" />
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
-/* SUB-COMPONENTS FOR STEPS */
-
 function WelcomeStep({ t }: { t: any }) {
   return (
-    <div className="space-y-4">
-      <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9]">
-        {t.onboarding.welcome.split(' ').map((word: string, i: number) => (
-          <motion.span 
-            key={i} 
-            className="block"
-            initial={{ y: 40, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 + (i * 0.1) }}
-          >
-            {word}
-          </motion.span>
-        ))}
+    <div className="text-center py-12">
+      <h1 className="text-6xl md:text-7xl font-extralight tracking-tight mb-4">
+        Karpa
       </h1>
-      <p className="text-xl text-white/50 max-w-md leading-relaxed">
+      <p className="text-base text-muted-foreground max-w-xs mx-auto leading-relaxed">
         {t.onboarding.welcomeDesc}
       </p>
     </div>
   )
 }
 
-function WelcomeVisuals({ t }: { t: any }) {
-  const cards = [
-    { icon: Shield, title: t.onboarding.local, desc: t.onboarding.privateSecure, color: "text-emerald-500" },
-    { icon: Zap, title: t.onboarding.aiPowered, desc: t.onboarding.multipleProviders, color: "text-amber-500" },
-    { icon: Globe, title: t.onboarding.multiLang, desc: t.onboarding.worldClassModels, color: "text-blue-500" },
-    { icon: Sparkles, title: t.onboarding.modernUI, desc: t.onboarding.designedForSpeed, color: "text-violet-500" },
-  ]
-  
+function InterfaceStep({ t, language, setLanguage }: { t: any; language: string; setLanguage: any }) {
   return (
-    <>
-      {cards.map((card, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 + (i * 0.1) }}
-          className="p-8 rounded-[32px] bg-white/5 border border-white/10 flex flex-col justify-between aspect-square group hover:bg-white/10 transition-colors cursor-default"
-        >
-          <card.icon className={cn("size-10", card.color)} />
-          <div>
-            <h3 className="text-lg font-bold mb-1">{card.title}</h3>
-            <p className="text-xs text-white/40 font-medium uppercase tracking-wider">{card.desc}</p>
-          </div>
-        </motion.div>
-      ))}
-    </>
-  )
-}
-
-function InterfaceLangStep({ t }: { t: any }) {
-  return (
-    <div className="space-y-4">
-      <h1 className="text-5xl font-black tracking-tight leading-tight">
+    <div>
+      <h2 className="text-2xl font-semibold tracking-tight mb-1.5">
         {t.onboarding.step3Title}
-      </h1>
-      <p className="text-lg text-white/50 max-w-md">
+      </h2>
+      <p className="text-sm text-muted-foreground mb-8">
         {t.onboarding.step3Desc}
       </p>
-    </div>
-  )
-}
-
-function InterfaceVisuals({ language, setLanguage }: { language: string, setLanguage: any }) {
-  const langs = [
-    { code: "en", name: "English", flag: "🇺🇸", native: "English" },
-    { code: "tr", name: "Turkish", flag: "🇹🇷", native: "Türkçe" },
-    { code: "de", name: "German", flag: "🇩🇪", native: "Deutsch" },
-    { code: "fr", name: "French", flag: "🇫🇷", native: "Français" },
-    { code: "es", name: "Spanish", flag: "🇪🇸", native: "Español" },
-  ]
-  return (
-    <div className="col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
-      {langs.map((l) => (
-        <button
-          key={l.code}
-          onClick={() => setLanguage(l.code)}
-          className={cn(
-            "p-8 rounded-[32px] border transition-all duration-500 flex flex-col items-center gap-4 group relative overflow-hidden",
-            language === l.code 
-              ? "bg-white text-black border-white shadow-[0_0_40px_rgba(255,255,255,0.15)]" 
-              : "bg-white/5 border-white/10 text-white hover:bg-white/10"
-          )}
-        >
-          {language === l.code && (
-            <motion.div 
-              layoutId="active-lang-bg"
-              className="absolute inset-0 bg-white"
-              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-            />
-          )}
-          <span className="text-5xl group-hover:scale-110 transition-transform relative z-10">{l.flag}</span>
-          <div className="text-center relative z-10">
-            <h3 className="text-lg font-black leading-tight">{l.native}</h3>
-            <p className={cn("text-[10px] font-bold uppercase tracking-widest opacity-40", language === l.code && "text-black/60 opacity-100")}>{l.name}</p>
-          </div>
-          {language === l.code && <Check className="size-4 absolute top-4 right-4 text-black z-10" />}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function ConnectionStep({ t, connectionStatus }: { t: any, connectionStatus: string }) {
-  return (
-    <div className="space-y-4">
-      <div className={cn(
-        "inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
-        connectionStatus === "success" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : "bg-primary/10 border-primary/20 text-primary"
-      )}>
-        <div className={cn("size-1.5 rounded-full", connectionStatus === "success" ? "bg-emerald-500 animate-pulse" : "bg-primary")} />
-        {connectionStatus === "success" ? t.onboarding.systemOnline : t.onboarding.configNeeded}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {interfaceLanguages.map((l) => (
+          <button
+            key={l.code}
+            onClick={() => setLanguage(l.code)}
+            className={cn(
+              "p-4 rounded-xl border transition-colors text-center",
+              language === l.code
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50"
+            )}
+          >
+            <span className="text-2xl block mb-1">{l.flag}</span>
+            <span className="text-sm font-medium block">{l.native}</span>
+            <span className="text-[10px] text-muted-foreground block mt-0.5">{l.name}</span>
+            {language === l.code && <Check className="size-3 mx-auto mt-1.5 text-primary" />}
+          </button>
+        ))}
       </div>
-      <h1 className="text-5xl font-black tracking-tight leading-tight">
-        {t.onboarding.step2Title}
-      </h1>
-      <p className="text-lg text-white/50 max-w-md">
-        {t.onboarding.step2Desc}
-      </p>
     </div>
   )
 }
 
-type ConnectionVisualsProps = {
-  selectedProvider: ProviderType
-  onProviderSelect: (provider: ProviderType) => void
-  apiUrl: string
-  setApiUrl: (url: string) => void
-  apiKey: string
-  setApiKey: (key: string) => void
-  testConnection: () => void
-  status: string
-  t: any
-}
-
-function ConnectionVisuals({ selectedProvider, onProviderSelect, apiUrl, setApiUrl, apiKey, setApiKey, testConnection, status, t }: ConnectionVisualsProps) {
-  const [showApiKey, setShowApiKey] = useState(false)
+function EngineStep({
+  t, selectedProvider, onProviderSelect, apiUrl, setApiUrl,
+  apiKey, setApiKey, showApiKey, setShowApiKey, testConnection, connectionStatus
+}: {
+  t: any; selectedProvider: ProviderType; onProviderSelect: (p: ProviderType) => void
+  apiUrl: string; setApiUrl: (u: string) => void; apiKey: string; setApiKey: (k: string) => void
+  showApiKey: boolean; setShowApiKey: (s: boolean) => void
+  testConnection: () => void; connectionStatus: string
+}) {
   const providerInfo = PROVIDERS[selectedProvider]
 
-  const providerList: { key: ProviderType; icon: any; label: string }[] = [
-    { key: 'lmstudio', icon: Terminal, label: 'LM Studio' },
-    { key: 'ollama', icon: Server, label: 'Ollama' },
-    { key: 'openai', icon: Cloud, label: 'OpenAI' },
-    { key: 'anthropic', icon: Cloud, label: 'Anthropic' },
-    { key: 'gemini', icon: Cloud, label: 'Gemini' },
-    { key: 'custom', icon: Server, label: 'Custom' },
-  ]
-
   return (
-    <div className="col-span-2 space-y-6">
-      {/* Provider Selection */}
-      <div className="grid grid-cols-3 gap-2">
+    <div>
+      <h2 className="text-2xl font-semibold tracking-tight mb-1.5">
+        {t.onboarding.step2Title}
+      </h2>
+      <p className="text-sm text-muted-foreground mb-8">
+        {t.onboarding.step2Desc}
+      </p>
+
+      <div className="flex flex-wrap gap-2 mb-6">
         {providerList.map((p) => (
           <button
             key={p.key}
             onClick={() => onProviderSelect(p.key)}
             className={cn(
-              "p-3 rounded-2xl border transition-all duration-300 flex items-center gap-3",
+              "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors",
               selectedProvider === p.key
-                ? "bg-white text-black border-white shadow-lg"
-                : "bg-white/5 border-white/10 text-white hover:bg-white/10"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-muted-foreground border-border hover:border-primary/50"
             )}
           >
-            <p.icon className={cn("size-4", selectedProvider === p.key ? "text-black" : "text-white/50")} />
-            <span className="text-xs font-bold">{p.label}</span>
-            {selectedProvider === p.key && <Check className="size-3 ml-auto" />}
+            <p.icon className="size-3.5" />
+            {p.label}
           </button>
         ))}
       </div>
 
-      <div className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-6 backdrop-blur-xl">
+      <div className="rounded-2xl border border-border p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/20 rounded-xl">
-              <Network className="size-5 text-primary" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 bg-primary/10 rounded-lg">
+              <Network className="size-4 text-primary" />
             </div>
-            <h3 className="font-bold tracking-tight">{providerInfo.name} {t.onboarding.configuration}</h3>
+            <span className="text-sm font-medium">{providerInfo.name}</span>
           </div>
-          <Badge variant="outline" className="font-mono text-[10px] opacity-50">
+          <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider border border-border text-muted-foreground">
             {providerInfo.requiresApiKey ? "API" : "LOCAL"}
-          </Badge>
+          </span>
         </div>
 
-        <div className="space-y-4">
-          {/* API URL */}
-          <div className="relative group">
-            <Link2 className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/30 group-focus-within:text-white transition-colors" />
-            <Input 
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">URL</label>
+          <div className="relative">
+            <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
-              className="h-14 pl-12 rounded-2xl bg-black/50 border-white/10 focus:border-white transition-all font-mono text-sm"
+              className="h-10 pl-10 rounded-xl text-sm font-mono"
               placeholder={providerInfo.placeholder}
             />
           </div>
+        </div>
 
-          {/* API Key (for cloud providers) */}
-          {providerInfo.requiresApiKey && (
-            <div className="relative group">
-              <Key className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/30 group-focus-within:text-white transition-colors" />
-              <Input 
+        {providerInfo.requiresApiKey && (
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">API Key</label>
+            <div className="relative">
+              <Key className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 type={showApiKey ? "text" : "password"}
-                className="h-14 pl-12 pr-12 rounded-2xl bg-black/50 border-white/10 focus:border-white transition-all font-mono text-sm"
+                className="h-10 pl-10 pr-10 rounded-xl text-sm"
                 placeholder={t.onboarding.enterApiKey}
               />
               <button
                 type="button"
                 onClick={() => setShowApiKey(!showApiKey)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showApiKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
-          )}
-          
-          <Button 
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 pt-2">
+          <Button
             onClick={testConnection}
-            disabled={status === "testing"}
+            disabled={connectionStatus === "testing"}
+            size="sm"
             className={cn(
-              "w-full h-14 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all duration-500",
-              status === "success" ? "bg-emerald-500 text-white hover:bg-emerald-600" : "bg-white text-black hover:bg-white/90"
+              "rounded-xl text-xs",
+              connectionStatus === "success" && "bg-emerald-600 hover:bg-emerald-700"
             )}
           >
-            {status === "testing" ? <RefreshCw className="size-4 animate-spin mr-2" /> : status === "success" ? <Check className="size-4 mr-2" /> : <Zap className="size-4 mr-2" />}
-            {status === "testing" ? t.onboarding.testingLink : status === "success" ? t.onboarding.connectedSuccessfully : t.onboarding.establishConnection}
+            {connectionStatus === "testing" ? (
+              <RefreshCw className="size-3.5 animate-spin mr-1.5" />
+            ) : connectionStatus === "success" ? (
+              <Check className="size-3.5 mr-1.5" />
+            ) : (
+              <Zap className="size-3.5 mr-1.5" />
+            )}
+            {connectionStatus === "testing"
+              ? t.onboarding.testingLink
+              : connectionStatus === "success"
+                ? t.onboarding.connectedSuccessfully
+                : t.onboarding.establishConnection}
           </Button>
+          {connectionStatus === "success" && (
+            <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+              <span className="size-1.5 rounded-full bg-emerald-600 inline-block" />
+              {t.onboarding.systemOnline}
+            </span>
+          )}
         </div>
 
-        {status === "error" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-3xl bg-red-500/10 border border-red-500/20">
-            <div className="flex gap-4">
-              <AlertCircle className="size-5 text-red-500 shrink-0" />
-              <div className="space-y-2">
-                <p className="text-xs font-bold text-red-500 uppercase tracking-widest">{t.onboarding.troubleshooting}</p>
-                <ul className="text-[11px] text-white/60 space-y-1 font-medium">
-                  {!providerInfo.requiresApiKey ? (
-                    <>
-                      <li>• {t.onboarding.troubleLocalRunning.replace('{name}', providerInfo.name)}</li>
-                      <li>• {t.onboarding.troubleLocalUrl}</li>
-                      <li>• {t.onboarding.troubleLocalCors}</li>
-                    </>
-                  ) : (
-                    <>
-                      <li>• {t.onboarding.troubleCloudKey}</li>
-                      <li>• {t.onboarding.troubleCloudCredits}</li>
-                      <li>• {t.onboarding.troubleCloudUrl}</li>
-                    </>
-                  )}
-                </ul>
-              </div>
-            </div>
+        {connectionStatus === "error" && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="text-xs space-y-1.5 pt-1"
+          >
+            <p className="font-medium text-destructive flex items-center gap-1.5">
+              <AlertCircle className="size-3.5" />
+              {t.onboarding.troubleshooting}
+            </p>
+            <ul className="text-muted-foreground space-y-0.5 ml-5 list-disc">
+              {!providerInfo.requiresApiKey ? (
+                <>
+                  <li>{t.onboarding.troubleLocalRunning.replace("{name}", providerInfo.name)}</li>
+                  <li>{t.onboarding.troubleLocalUrl}</li>
+                  <li>{t.onboarding.troubleLocalCors}</li>
+                </>
+              ) : (
+                <>
+                  <li>{t.onboarding.troubleCloudKey}</li>
+                  <li>{t.onboarding.troubleCloudCredits}</li>
+                  <li>{t.onboarding.troubleCloudUrl}</li>
+                </>
+              )}
+            </ul>
           </motion.div>
         )}
       </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-6 rounded-[32px] bg-white/5 border border-white/10 flex items-center gap-4">
-          <Cpu className="size-6 text-white/20" />
-          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-            {providerInfo.requiresApiKey ? t.onboarding.cloudPowered : t.onboarding.gpuAcceleration}
-          </div>
-        </div>
-        <div className="p-6 rounded-[32px] bg-white/5 border border-white/10 flex items-center gap-4">
-          <Database className="size-6 text-white/20" />
-          <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-            {providerInfo.requiresApiKey ? t.onboarding.fastResponse : t.onboarding.zeroDataLeak}
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
 
-function LanguageSetupStep({ t, type }: { t: any, type: "native" | "target" }) {
+function LanguagesStep({
+  t, nativeLang, setNativeLang, targetLang, setTargetLang
+}: {
+  t: any; nativeLang: string; setNativeLang: (l: string) => void
+  targetLang: string; setTargetLang: (l: string) => void
+}) {
   return (
-    <div className="space-y-4">
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-500 text-[10px] font-black uppercase tracking-widest">
-        <Sparkles className="size-3" />
-        {t.onboarding.translationEngine}
-      </div>
-      <h1 className="text-5xl font-black tracking-tight leading-tight">
-        {type === "native" ? t.onboarding.nativeLanguage : t.onboarding.targetLanguage}
-      </h1>
-      <p className="text-lg text-white/50 max-w-md">
-        {type === "native" ? t.onboarding.nativeLanguageDesc : t.onboarding.targetLanguageDesc}
+    <div>
+      <h2 className="text-2xl font-semibold tracking-tight mb-1.5">
+        Your Languages
+      </h2>
+      <p className="text-sm text-muted-foreground mb-8">
+        Select the languages you&apos;ll translate between
       </p>
-    </div>
-  )
-}
 
-function LanguageVisuals({ selected, setSelected }: { selected: string, setSelected: any }) {
-  return (
-    <div className="col-span-2 grid grid-cols-3 gap-3 max-h-[500px] overflow-y-auto p-2 custom-scrollbar pr-4">
-      {translationLanguages.map((lang) => (
-        <button
-          key={lang.code}
-          onClick={() => setSelected(lang.name)}
-          className={cn(
-            "p-6 rounded-3xl border transition-all duration-300 flex flex-col items-center gap-3",
-            selected === lang.name 
-              ? "bg-white text-black border-white shadow-xl scale-105 z-10" 
-              : "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20"
-          )}
-        >
-          <span className="text-4xl">{lang.flag}</span>
-          <span className="text-sm font-black tracking-tight">{lang.name}</span>
-          {selected === lang.name && <Check className="size-4" />}
-        </button>
-      ))}
-    </div>
-  )
-}
+      <div className="space-y-6">
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-sm font-medium">{t.onboarding.nativeLanguage}</span>
+            {nativeLang && (
+              <span className="text-[11px] text-muted-foreground">— {nativeLang}</span>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {translationLanguages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => setNativeLang(lang.name)}
+                className={cn(
+                  "p-3 rounded-xl border transition-colors text-center",
+                  nativeLang === lang.name
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                )}
+              >
+                <span className="text-xl block mb-0.5">{lang.flag}</span>
+                <span className="text-xs font-medium block">{lang.name}</span>
+                {nativeLang === lang.name && (
+                  <Check className="size-3 mx-auto mt-1 text-primary" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
-function Badge({ children, variant = "default", className }: { children: React.ReactNode, variant?: string, className?: string }) {
-  return (
-    <span className={cn(
-      "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
-      variant === "outline" ? "border border-white/20" : "bg-white text-black",
-      className
-    )}>
-      {children}
-    </span>
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-sm font-medium">{t.onboarding.targetLanguage}</span>
+            {targetLang && (
+              <span className="text-[11px] text-muted-foreground">— {targetLang}</span>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {translationLanguages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => setTargetLang(lang.name)}
+                className={cn(
+                  "p-3 rounded-xl border transition-colors text-center",
+                  targetLang === lang.name
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                )}
+              >
+                <span className="text-xl block mb-0.5">{lang.flag}</span>
+                <span className="text-xs font-medium block">{lang.name}</span>
+                {targetLang === lang.name && (
+                  <Check className="size-3 mx-auto mt-1 text-primary" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
