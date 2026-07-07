@@ -864,18 +864,20 @@ function TranslatorWorkspace() {
                   )}
                 </div>
 
-                <div className="p-4 bg-muted/20 border-t shrink-0">
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-xl h-11 font-bold text-xs uppercase tracking-widest"
+                <div className="p-4 border-t shrink-0">
+                  <button
                     onClick={() => {
                       setIsHistoryOpen(false)
                       router.push("/history")
                     }}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border/50 bg-card/50 hover:bg-muted/50 hover:border-border transition-all duration-200 group cursor-pointer"
                   >
-                    <ArrowSquareOut className="size-3.5 mr-2" />
-                    {language === 'tr' ? 'Tüm Geçmişi Gör' : 'View Full History'}
-                  </Button>
+                    <span className="flex items-center gap-3">
+                      <ArrowSquareOut className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      <span className="text-sm font-medium">{language === 'tr' ? 'Tüm Geçmişi Gör' : 'View Full History'}</span>
+                    </span>
+                    <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+                  </button>
                 </div>
               </div>
             </motion.div>
