@@ -167,7 +167,7 @@ export default function HistoryPage() {
   }
 
   const formatTime = (timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString(language === 'tr' ? 'tr-TR' : 'en-US', { hour: '2-digit', minute: '2-digit' })
+    return new Date(timestamp).toLocaleTimeString(language, { hour: '2-digit', minute: '2-digit' })
   }
 
   return (

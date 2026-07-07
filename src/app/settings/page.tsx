@@ -156,7 +156,7 @@ export default function SettingsPage() {
         } else {
           setNotificationsEnabled(false)
           localStorage.setItem("karpa-notifications", "false")
-          toast.error("Notification permission denied")
+          toast.error(t.settings.notificationDenied)
         }
       })
     } else {
@@ -236,7 +236,7 @@ export default function SettingsPage() {
         }
         toast.success(t.settings.importData)
       } catch {
-        toast.error("Invalid backup file")
+        toast.error(t.settings.invalidBackup)
       }
     }
     reader.readAsText(file)
@@ -529,7 +529,7 @@ export default function SettingsPage() {
                     {models.length > 0 ? (
                       <Select value={selectedModel} onValueChange={setSelectedModel}>
                         <SelectTrigger className="h-10 rounded-xl bg-background border-border px-4 text-sm">
-                          <SelectValue placeholder="Select Model" />
+                          <SelectValue placeholder={t.settings.selectModel} />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border">
                           {models.map((m) => (
@@ -542,7 +542,7 @@ export default function SettingsPage() {
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
                         className="h-10 px-4 rounded-xl bg-background border-border font-mono text-sm"
-                        placeholder={providerInfo.defaultModel || "Enter model name..."}
+                        placeholder={providerInfo.defaultModel || t.settings.enterModelName}
                       />
                     )}
                   </div>
@@ -607,7 +607,7 @@ export default function SettingsPage() {
                       <DataButton
                         icon={Download}
                         title={t.settings.exportData}
-                        desc="Export your history, favorites, and settings as a JSON file."
+                        desc={t.settings.exportDesc}
                         onClick={exportData}
                       />
 
@@ -615,7 +615,7 @@ export default function SettingsPage() {
                         <DataButton
                           icon={Upload}
                           title={t.settings.importData}
-                          desc="Restore your data from a previously exported JSON file."
+                          desc={t.settings.importDesc}
                           onClick={() => {}}
                         />
                         <input type="file" accept=".json" className="hidden" onChange={importData} />
@@ -625,8 +625,8 @@ export default function SettingsPage() {
                     <div className="flex items-start gap-3 p-4 rounded-xl border border-border bg-muted/10">
                       <Info className="size-4 text-muted-foreground shrink-0 mt-0.5" />
                       <div className="text-xs text-muted-foreground leading-relaxed">
-                        <span className="font-medium text-foreground">Privacy Notice.</span>{" "}
-                        All data is stored locally in your browser (localStorage). Export creates a copy, and clearing permanently removes it.
+                        <span className="font-medium text-foreground">{t.settings.privacyNoticeTitle}</span>{" "}
+                        {t.settings.privacyNoticeDesc}
                       </div>
                     </div>
                   </div>
@@ -658,7 +658,7 @@ export default function SettingsPage() {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter className="gap-2 pt-2">
-                            <AlertDialogCancel className="rounded-xl border-border text-sm">Cancel</AlertDialogCancel>
+                            <AlertDialogCancel className="rounded-xl border-border text-sm">{t.common.cancel}</AlertDialogCancel>
                             <AlertDialogAction onClick={clearAllData} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl px-6 text-sm">
                               {t.common.delete}
                             </AlertDialogAction>

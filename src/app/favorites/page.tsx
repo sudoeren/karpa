@@ -85,7 +85,7 @@ export default function FavoritesPage() {
   const selectedItem = favorites.find(f => f.id === selectedId)
 
   const formatTime = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { 
+    return new Date(timestamp).toLocaleDateString(language, { 
       day: 'numeric',
       month: 'short'
     })
