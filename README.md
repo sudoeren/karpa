@@ -30,7 +30,7 @@ Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini, and OpenRouter.
 
 | Feature | Description |
 |---|---|
-| **Complete Privacy** | All translations happen locally using LM Studio. No data is ever sent to external servers. |
+| **Complete Privacy** | All translations happen locally. No data is ever sent to external servers. |
 | **Multi-Language Support** | Translate between 12+ languages including English, Turkish, Spanish, French, German, Italian, Portuguese, Russian, Japanese, Chinese, Korean, and Arabic. |
 | **Text & File Translation** | Translate plain text or upload files (`.txt`, `.md`, `.json`, `.csv`, `.srt`, and more). |
 | **Translation Tones** | Choose from Standard, Formal, Casual, or Technical tones to match your context. |
@@ -44,24 +44,27 @@ Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini, and OpenRouter.
 
 ### Prerequisites
 
-1. **[LM Studio](https://lmstudio.ai/)** — Download and install
-2. **Translation Model** — Download a model (recommended: `HY-MT1.5-7B`)
-3. **Start Local Server** — Run LM Studio's local server on port `1234`
+Pick one of the supported providers:
+- **[LM Studio](https://lmstudio.ai/)** — Download, load a model, and start the local server
+- **[Ollama](https://ollama.com/)** — Download and pull a model
+- **OpenAI / Anthropic / Google Gemini / OpenRouter** — Create an account and get an API key
 
-### Run Karpa
+### Run Karpa (Docker)
 
 ```bash
-# Clone
-git clone https://github.com/sudoeren/karpa.git && cd karpa
-
-# Install
-npm install
-
-# Start
-npm run dev
+docker pull ghcr.io/sudoeren/karpa:latest
+docker run -p 7250:7250 ghcr.io/sudoeren/karpa:latest
 ```
 
 Open **http://localhost:7250** and start translating!
+
+### Development
+
+```bash
+git clone https://github.com/sudoeren/karpa.git && cd karpa
+npm install
+npm run dev
+```
 
 ---
 
@@ -76,7 +79,7 @@ npm install
 npm run dev
 ```
 
-### Option 2: Docker
+### Option 2: Docker Compose
 
 ```bash
 git clone https://github.com/sudoeren/karpa.git
@@ -84,11 +87,15 @@ cd karpa
 docker-compose up -d
 ```
 
-### Option 3: Docker Build
+### Option 3: Docker Pull
 
 ```bash
-docker build -t karpa .
-docker run -p 7250:7250 --add-host=host.docker.internal:host-gateway karpa
+docker run -p 7250:7250 ghcr.io/sudoeren/karpa:latest
+```
+
+For local LLM providers (LM Studio, Ollama), add the host gateway:
+```bash
+docker run -p 7250:7250 --add-host=host.docker.internal:host-gateway ghcr.io/sudoeren/karpa:latest
 ```
 
 ---
