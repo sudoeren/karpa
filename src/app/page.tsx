@@ -383,13 +383,13 @@ function TranslatorWorkspace() {
           variant="ghost"
           size="icon"
           className={cn(
-            "absolute right-2 md:right-0 top-1/2 -translate-y-1/2 rounded-full size-9 md:h-9 md:w-auto md:px-4 md:gap-2",
-            isHistoryOpen && "text-primary bg-primary/10"
+            "absolute right-2 md:right-0 top-1/2 -translate-y-1/2 size-9 md:h-9 md:w-auto md:px-4 md:gap-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200",
+            isHistoryOpen && "text-primary bg-primary/10 hover:bg-primary/15"
           )}
           onClick={() => setIsHistoryOpen(true)}
         >
           <ClockCounterClockwise className="size-4" />
-          <span className="hidden md:inline text-xs">{t.history.title}</span>
+          <span className="hidden md:inline text-xs font-medium">{t.history.title}</span>
         </Button>
       </motion.div>
 
@@ -404,13 +404,13 @@ function TranslatorWorkspace() {
           <div className="flex flex-col gap-3 p-3 md:p-4 border-b bg-muted/30 shrink-0">
             {/* Top Row: Mode Toggle + Tone */}
             <div className="flex items-center justify-between gap-2">
-              <div className="flex bg-muted rounded-xl p-1 shrink-0">
+              <div className="flex bg-muted/50 border border-border/50 rounded-lg p-0.5 shrink-0">
                 <button
                   onClick={() => setMode("text")}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200",
                     mode === "text"
-                      ? "bg-background shadow-sm text-foreground"
+                      ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -420,9 +420,9 @@ function TranslatorWorkspace() {
                 <button
                   onClick={() => setMode("file")}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200",
                     mode === "file"
-                      ? "bg-background shadow-sm text-foreground"
+                      ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -746,10 +746,10 @@ function TranslatorWorkspace() {
               <Button
                 onClick={handleCancelTranslation}
                 variant="destructive"
-                className="w-full h-14 md:h-16 rounded-2xl md:rounded-[24px] text-base font-bold gap-3 shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full h-12 md:h-14 rounded-xl text-sm font-bold gap-2 transition-all active:scale-[0.98]"
                 size="lg"
               >
-                <X className="size-5" />
+                <X className="size-4" />
                 {t.common.cancel}
               </Button>
             ) : (
@@ -757,25 +757,25 @@ function TranslatorWorkspace() {
                 onClick={handleTranslate}
                 disabled={mode === "text" ? !sourceText.trim() : !selectedFile}
                 className={cn(
-                  "w-full h-14 md:h-16 rounded-2xl md:rounded-[24px] font-black text-base md:text-lg transition-all duration-500 flex items-center justify-between px-6 md:px-8 group",
+                  "w-full h-12 md:h-14 rounded-xl font-bold text-sm md:text-base transition-all duration-200 flex items-center justify-between px-5 md:px-6 group",
                   mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
                     ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
-                    : "bg-foreground text-background hover:bg-primary hover:text-white shadow-2xl hover:shadow-primary/30"
+                    : "bg-foreground text-background hover:bg-primary hover:text-white active:scale-[0.98]"
                 )}
                 size="lg"
               >
-                <span className="tracking-tight">{t.translator.translate}</span>
+                <span>{t.translator.translate}</span>
                 <div className={cn(
-                  "size-9 md:size-10 rounded-full flex items-center justify-center transition-all duration-500",
+                  "size-8 md:size-9 rounded-lg flex items-center justify-center transition-all duration-200",
                   mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
                     ? "bg-muted-foreground/10"
-                    : "bg-background/20 group-hover:bg-white group-hover:rotate-[360deg] shadow-lg"
+                    : "bg-background/20 group-hover:bg-white/20"
                 )}>
                   <MagicWand className={cn(
-                    "size-4 md:size-5 transition-colors duration-500",
+                    "size-4 transition-colors duration-200",
                     mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
                       ? "text-muted-foreground"
-                      : "text-current group-hover:text-primary"
+                      : "text-current"
                   )} />
                 </div>
               </Button>
