@@ -18,14 +18,31 @@
 
 ---
 
-Traditional translation services send your text to remote servers. **Karpa is different** — it uses LM Studio to run AI models locally on your computer. Your data never leaves your device.
+<table>
+  <tr>
+    <td width="55%" valign="middle">
+      <h3>Translate with full privacy</h3>
+      <p>
+        Karpa is a privacy-first AI translator that runs entirely on your machine.
+        Your data never leaves your device — no cloud, no tracking, no compromises.
+      </p>
+      <p>
+        Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini, and OpenRouter.
+      </p>
+    </td>
+    <td width="45%" align="center">
+      <table border="1" cellpadding="10" cellspacing="0">
+        <tr>
+          <td align="center" bgcolor="white">
+            <img src="screenshot.png" alt="Karpa" width="100%" />
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 
-| Feature           | Karpa          | Cloud Services          |
-| ----------------- | ---------------- | ----------------------- |
-| Privacy           | ✅ 100% Local    | ❌ Data sent to servers |
-| Internet Required | ❌ Works offline | ✅ Always required      |
-| Cost              | ✅ Free forever  | ❌ Usually paid         |
-| Speed             | ✅ Instant       | ❌ Network latency      |
+<br>
 
 ---
 
@@ -97,12 +114,6 @@ docker run -p 3000:3000 --add-host=host.docker.internal:host-gateway karpa
 ---
 
 ## Usage
-
-<p align="center">
-  <kbd>
-    <img src="screenshot.png" alt="Karpa Screenshot" width="800" />
-  </kbd>
-</p>
 
 ### Text Translation
 
