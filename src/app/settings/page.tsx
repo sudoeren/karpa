@@ -12,7 +12,7 @@ import {
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner, Lightning,
   Bell, SpeakerHigh, Info, User, ArrowSquareOut,
   Key, ComputerTower, Cloud, Eye, EyeSlash, SquaresFour, Sliders,
-  HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass
+  X, HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -177,6 +177,8 @@ export default function SettingsPage() {
     localStorage.setItem("llm-api-url", apiUrl)
     localStorage.setItem("llm-temperature", temperature.toString())
     if (selectedModel) localStorage.setItem("llm-model", selectedModel)
+    if (apiKey) sessionStorage.setItem("llm-api-key", apiKey)
+    else sessionStorage.removeItem("llm-api-key")
 
     localStorage.setItem("lm-studio-url", apiUrl)
     if (selectedModel) localStorage.setItem("lm-studio-model", selectedModel)
@@ -528,36 +530,50 @@ export default function SettingsPage() {
 
                   <div className="space-y-3">
                     <Label className="text-xs text-muted-foreground">{t.settings.activeModel}</Label>
-                    {models.length > 0 ? (
-                      <>
-                        <div className="relative">
-                          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-                          <Input
-                            value={modelSearch}
-                            onChange={(e) => setModelSearch(e.target.value)}
-                            className="h-10 pl-10 pr-4 rounded-xl bg-background border-border font-mono text-xs"
-                            placeholder="Search models..."
-                          />
-                        </div>
-                        <Select value={selectedModel} onValueChange={setSelectedModel}>
-                          <SelectTrigger className="h-10 rounded-xl bg-background border-border px-4 text-sm">
-                            <SelectValue placeholder={t.settings.selectModel} />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover border-border max-h-64 overflow-y-auto">
-                            {models.filter(m => !modelSearch || m.id.toLowerCase().includes(modelSearch.toLowerCase())).map((m) => (
-                              <SelectItem key={m.id} value={m.id}>{m.id}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </>
-                    ) : (
-                      <Input
-                        value={selectedModel}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="h-10 px-4 rounded-xl bg-background border-border font-mono text-sm"
-                        placeholder={providerInfo.defaultModel || t.settings.enterModelName}
-                      />
-                    )}
+                    <div className="bg-muted/30 border border-border rounded-xl p-3 space-y-2">
+                      {models.length > 0 ? (
+                        <>
+                          <div className="relative">
+                            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                            <Input
+                              value={modelSearch}
+                              onChange={(e) => setModelSearch(e.target.value)}
+                              className="h-9 pl-9 pr-9 rounded-lg bg-background border-border/80 text-xs"
+                              placeholder="Search models..."
+                            />
+                            {modelSearch && (
+                              <button
+                                onClick={() => setModelSearch("")}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 size-5 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                              >
+                                <X className="size-3" />
+                              </button>
+                            )}
+                          </div>
+                          <Select value={selectedModel} onValueChange={setSelectedModel}>
+                            <SelectTrigger className="h-9 rounded-lg bg-background border-border/80 px-3 text-xs">
+                              <SelectValue placeholder={t.settings.selectModel} />
+                            </SelectTrigger>
+                            <SelectContent className="bg-popover border-border max-h-64 overflow-y-auto">
+                              {models.filter(m => !modelSearch || m.id.toLowerCase().includes(modelSearch.toLowerCase())).map((m) => (
+                                <SelectItem key={m.id} value={m.id} className="text-xs">{m.id}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <div className="flex items-center justify-between px-1 text-[10px] text-muted-foreground/50">
+                            <span>{models.filter(m => !modelSearch || m.id.toLowerCase().includes(modelSearch.toLowerCase())).length} / {models.length} models</span>
+                            {selectedModel && <span className="font-mono text-primary/60 truncate max-w-[200px]">{selectedModel}</span>}
+                          </div>
+                        </>
+                      ) : (
+                        <Input
+                          value={selectedModel}
+                          onChange={(e) => setSelectedModel(e.target.value)}
+                          className="h-9 px-3 rounded-lg bg-background border-border/80 font-mono text-xs"
+                          placeholder={providerInfo.defaultModel || t.settings.enterModelName}
+                        />
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-3 pt-2">
