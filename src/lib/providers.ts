@@ -273,7 +273,7 @@ export function buildRequestBody(
 // Build the full URL for Gemini API calls
 export function getGeminiUrl(baseUrl: string, model: string, apiKey: string): string {
   const url = stripTrailingSlash(baseUrl)
-  return `${url}/v1beta/models/${model}:generateContent?key=${apiKey}`
+  return `${url}/v1beta/models/${model}:generateContent`
 }
 
 // Extract translation text from provider response
