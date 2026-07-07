@@ -124,6 +124,20 @@ docker run -p 7250:7250 --add-host=host.docker.internal:host-gateway ghcr.io/sud
 | `Ctrl+C`     | Copy translation |
 
 ---
+## Uninstall
+
+Run the script inside the karpa folder:
+
+```bash
+./uninstall.sh          # macOS / Linux
+uninstall.bat           # Windows
+```
+
+This stops the container, removes the image and volumes, and deletes the project folder.
+
+Clear browser data (history, settings, API key) manually from Settings → Data.
+
+---
 
 ## Project Structure
 
