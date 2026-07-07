@@ -12,8 +12,7 @@
   <a href="#features">Features</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#installation">Installation</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#tech-stack">Tech Stack</a>
+  <a href="#usage">Usage</a>
 </p>
 
 <p align="center">
@@ -121,43 +120,6 @@ docker run -p 7250:7250 --add-host=host.docker.internal:host-gateway karpa
 
 ---
 
-## Configuration
-
-### Environment Variables
-
-Create a `.env.local` file:
-
-```env
-LM_STUDIO_URL=http://localhost:1234/v1/chat/completions
-LM_STUDIO_MODEL=hy-mt1.5-7b/HY-MT1.5-7B-Q4_K_M.gguf
-LM_STUDIO_TEMPERATURE=0.2
-```
-
-### In-App Settings
-
-Navigate to **Settings** to configure:
-
-- LM Studio connection URL
-- Model temperature
-- Theme (Light/Dark/System)
-- Language (English/Turkish)
-
----
-
-## Tech Stack
-
-| Category   | Technology           |
-| ---------- | -------------------- |
-| Framework  | Next.js 16           |
-| UI Library | React 19             |
-| Language   | TypeScript           |
-| Styling    | Tailwind CSS v4      |
-| Components | shadcn/ui + Radix UI |
-| Animations | Framer Motion        |
-| AI Backend | LM Studio            |
-
----
-
 ## Project Structure
 
 ```
@@ -177,18 +139,6 @@ karpa/
 ├── Dockerfile                # Docker config
 └── docker-compose.yml        # Docker Compose
 ```
-
----
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing`)
-5. Open a Pull Request
 
 ---
 
