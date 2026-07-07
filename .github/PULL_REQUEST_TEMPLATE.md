@@ -49,4 +49,4 @@ If any box is unchecked, explain why it's required:
 - [ ] My code follows the project's style (ESLint passes)
 - [ ] I have added tests for new functionality (or explained why not)
 - [ ] I have updated relevant documentation
-- [ ] I have read [`CONTRIBUTING.md`](../../CONTRIBUTING.md)
+- [ ] I have read the project guidelines

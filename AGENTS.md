@@ -8,9 +8,8 @@ browser; the `/api/translate` route talks to a local LLM server (LM Studio by
 default; Ollama / OpenAI / Anthropic / Gemini / custom are also supported). The
 headline invariant is that **nothing leaves the user's machine** unless they
 configure a non-local provider — any change that breaks that promise is
-almost certainly out of scope. See `CONTRIBUTING.md` § Privacy guidelines for
-the full list of prohibitions (no analytics, no remote fonts/CDNs, no
-phone-home).
+almost certainly out of scope. No analytics, no remote fonts/CDNs, no
+phone-home.
 
 ## Stack & layout
 - Next.js 16 App Router, React 19, TypeScript strict, Tailwind v4, shadcn/ui
@@ -107,7 +106,6 @@ in `README.md` § Configuration. Server-side keys: `LLM_PROVIDER`,
 - `package.json` has an `overrides` and a `pnpm.overrides` block pinning
   `postcss`. If you switch to pnpm, the override still applies; if you
   switch to yarn, you may need to port it.
-- Layout uses `next/font/google` for Geist fonts. CONTRIBUTING.md forbids
-  remote font loading on privacy grounds, so this is a known tension —
-  don't "fix" it by adding more remote fonts, and don't add a third-party
-  font CDN.
+- Layout uses `next/font/google` for Geist fonts. Remote font loading is
+  restricted on privacy grounds, so this is a known tension — don't "fix"
+  it by adding more remote fonts, and don't add a third-party font CDN.
