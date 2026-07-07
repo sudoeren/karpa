@@ -12,7 +12,7 @@ import {
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner, Lightning,
   Bell, SpeakerHigh, Info, User, ArrowSquareOut,
   Key, ComputerTower, Cloud, Eye, EyeSlash, SquaresFour, Sliders,
-  HardDrive, ShieldCheck, ArrowUpRight, GitFork
+  HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -57,6 +57,7 @@ export default function SettingsPage() {
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [models, setModels] = useState<Model[]>([])
+  const [modelSearch, setModelSearch] = useState("")
   const [selectedModel, setSelectedModel] = useState<string>("")
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [notificationSound, setNotificationSound] = useState(true)
@@ -134,6 +135,7 @@ export default function SettingsPage() {
     setApiUrl(info.defaultUrl)
     setApiKey("")
     setModels([])
+    setModelSearch("")
     setSelectedModel(info.defaultModel)
     setConnectionStatus('idle')
 
@@ -527,16 +529,27 @@ export default function SettingsPage() {
                   <div className="space-y-3">
                     <Label className="text-xs text-muted-foreground">{t.settings.activeModel}</Label>
                     {models.length > 0 ? (
-                      <Select value={selectedModel} onValueChange={setSelectedModel}>
-                        <SelectTrigger className="h-10 rounded-xl bg-background border-border px-4 text-sm">
-                          <SelectValue placeholder={t.settings.selectModel} />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover border-border">
-                          {models.map((m) => (
-                            <SelectItem key={m.id} value={m.id}>{m.id}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <>
+                        <div className="relative">
+                          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                          <Input
+                            value={modelSearch}
+                            onChange={(e) => setModelSearch(e.target.value)}
+                            className="h-10 pl-10 pr-4 rounded-xl bg-background border-border font-mono text-xs"
+                            placeholder="Search models..."
+                          />
+                        </div>
+                        <Select value={selectedModel} onValueChange={setSelectedModel}>
+                          <SelectTrigger className="h-10 rounded-xl bg-background border-border px-4 text-sm">
+                            <SelectValue placeholder={t.settings.selectModel} />
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover border-border max-h-64 overflow-y-auto">
+                            {models.filter(m => !modelSearch || m.id.toLowerCase().includes(modelSearch.toLowerCase())).map((m) => (
+                              <SelectItem key={m.id} value={m.id}>{m.id}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </>
                     ) : (
                       <Input
                         value={selectedModel}

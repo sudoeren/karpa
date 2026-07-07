@@ -87,7 +87,7 @@ export const PROVIDERS: Record<ProviderType, ProviderInfo> = {
     description: 'Unified API for 200+ models via OpenRouter',
     defaultUrl: 'https://openrouter.ai/api',
     requiresApiKey: true,
-    defaultModel: '',
+    defaultModel: 'amazon/nova-2-lite-v1',
     modelsEndpoint: '/v1/models',
     placeholder: 'https://openrouter.ai/api',
   },
