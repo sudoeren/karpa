@@ -794,89 +794,88 @@ function TranslatorWorkspace() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsHistoryOpen(false)}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/10 backdrop-blur-sm z-40"
             />
             {/* Floating Panel */}
             <motion.div
-              initial={{ opacity: 0, x: 100, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 100, scale: 0.95 }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-4 top-4 bottom-4 w-[calc(100%-2rem)] sm:max-w-md z-50 bg-background/95 backdrop-blur-xl border rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
+              initial={{ opacity: 0, x: 80 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 80 }}
+              transition={{ type: "spring", damping: 30, stiffness: 250 }}
+              className="fixed right-3 top-3 bottom-3 w-[calc(100%-1.5rem)] sm:max-w-sm z-50 bg-background border border-border/80 rounded-2xl shadow-lg flex flex-col overflow-hidden"
             >
-              <div className="h-full flex flex-col overflow-hidden">
-                <div className="p-6 border-b shrink-0 bg-muted/20 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <ClockCounterClockwise className="size-5" />
-                    </div>
-                    <h2 className="text-xl font-bold">{t.history.title}</h2>
+              <div className="flex flex-col h-full">
+                <div className="px-5 py-4 border-b shrink-0 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <ClockCounterClockwise className="size-4 text-primary" />
+                    <h2 className="text-sm font-semibold">{t.history.title}</h2>
+                    <span className="text-[10px] font-medium text-muted-foreground/50 bg-muted/50 px-1.5 py-0.5 rounded">{history.length}</span>
                   </div>
-                  <Button variant="ghost" size="icon" className="size-10 rounded-full" onClick={() => setIsHistoryOpen(false)}>
-                    <X className="size-5" />
-                  </Button>
+                  <button
+                    onClick={() => setIsHistoryOpen(false)}
+                    className="size-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  >
+                    <X className="size-3.5" />
+                  </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
                   {history.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center p-12 opacity-30">
-                      <ClockCounterClockwise className="size-12 mb-4" />
-                      <p className="font-medium">{t.history.noHistory}</p>
+                    <div className="flex flex-col items-center justify-center h-full text-center px-8">
+                      <div className="size-10 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
+                        <ClockCounterClockwise className="size-5 text-muted-foreground/40" />
+                      </div>
+                      <p className="text-xs font-medium text-muted-foreground/50">{t.history.noHistory}</p>
                     </div>
                   ) : (
-                    <div className="grid gap-3">
-                      {history.map((item) => (
+                    <div className="space-y-2">
+                      {[...history].reverse().map((item) => (
                         <div
                           key={item.id}
                           onClick={() => {
                             restoreHistoryItem(item)
                             setIsHistoryOpen(false)
                           }}
-                          className="p-4 rounded-2xl border border-border/50 bg-card/50 hover:bg-muted/50 hover:border-primary/30 transition-all cursor-pointer group"
+                          className="group px-3.5 py-3 rounded-xl border border-border/40 bg-card/30 hover:bg-muted/40 hover:border-border/60 transition-all cursor-pointer"
                         >
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <div className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-muted border border-border">
-                                {item.sourceLang === "Auto Detect" ? t.translator.autoDetect.toUpperCase() : item.sourceLang.slice(0, 2).toUpperCase()}
-                              </div>
-                              <ArrowRight className="size-3 opacity-40" />
-                              <div className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-primary/10 border border-primary/20 text-primary">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-muted/60 border border-border/50 text-muted-foreground shrink-0">
+                                {item.sourceLang === "Auto Detect" ? "AUTO" : item.sourceLang.slice(0, 2).toUpperCase()}
+                              </span>
+                              <ArrowRight className="size-2.5 text-muted-foreground/30 shrink-0" />
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold font-mono bg-primary/5 border border-primary/15 text-primary shrink-0">
                                 {item.targetLang.slice(0, 2).toUpperCase()}
-                              </div>
+                              </span>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-7 opacity-0 group-hover:opacity-100 text-destructive hover:bg-destructive/10 rounded-full transition-all"
+                            <button
                               onClick={(e) => {
                                 e.stopPropagation()
                                 deleteHistoryItem(item.id)
                               }}
+                              className="size-6 flex items-center justify-center rounded-md text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all shrink-0"
                             >
-                              <Trash className="size-3.5" />
-                            </Button>
+                              <Trash className="size-3" />
+                            </button>
                           </div>
-                          <p className="text-sm font-semibold line-clamp-1 mb-1 group-hover:text-primary transition-colors">{item.sourceText}</p>
-                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{item.translatedText}</p>
+                          <p className="text-xs font-medium mt-2 line-clamp-1">{item.sourceText}</p>
+                          <p className="text-[11px] text-muted-foreground/60 mt-0.5 line-clamp-1">{item.translatedText}</p>
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
 
-                <div className="p-4 border-t shrink-0">
+                <div className="p-3 border-t shrink-0">
                   <button
                     onClick={() => {
                       setIsHistoryOpen(false)
                       router.push("/history")
                     }}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border/50 bg-card/50 hover:bg-muted/50 hover:border-border transition-all duration-200 group cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border/40 bg-card/30 hover:bg-muted/40 hover:border-border/60 transition-all group cursor-pointer text-xs font-medium text-muted-foreground/60 hover:text-foreground"
                   >
-                    <span className="flex items-center gap-3">
-                      <ArrowSquareOut className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      <span className="text-sm font-medium">{language === 'tr' ? 'Tüm Geçmişi Gör' : 'View Full History'}</span>
-                    </span>
-                    <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+                    <ArrowSquareOut className="size-3.5" />
+                    {language === 'tr' ? 'Tüm Geçmişi Gör' : 'View Full History'}
                   </button>
                 </div>
               </div>
