@@ -15,6 +15,7 @@ import { cn, decodeApiKey } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import { Logo } from "@/components/logo"
 import { useState, useEffect } from "react"
+import { version } from '../../package.json'
 import {
   Sidebar,
   SidebarContent,
@@ -144,7 +145,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {isConnected === null ? "Checking..." : isConnected ? "Engine Ready" : "Disconnected"}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
-                   {isConnected === null ? "Please wait" : isConnected ? "v1.1.1" : "Check connection"}
+                   {isConnected === null ? "Please wait" : isConnected ? `v${version}` : "Check connection"}
                 </span>
               </div>
             </SidebarMenuButton>
