@@ -49,22 +49,13 @@ Pick one of the supported providers:
 - **[Ollama](https://ollama.com/)** — Download and pull a model
 - **OpenAI / Anthropic / Google Gemini / OpenRouter** — Create an account and get an API key
 
-### Run Karpa (Docker)
+### Run Karpa
 
 ```bash
-docker pull ghcr.io/sudoeren/karpa:latest
-docker run -p 7250:7250 ghcr.io/sudoeren/karpa:latest
+docker compose up -d
 ```
 
 Open **http://localhost:7250** and start translating!
-
-### Development
-
-```bash
-git clone https://github.com/sudoeren/karpa.git && cd karpa
-npm install
-npm run dev
-```
 
 ---
 
