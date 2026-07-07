@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   MagnifyingGlass, Trash, ArrowRight, ClockCounterClockwise, Copy,
-  ArrowSquareOut, X, Funnel, Calendar, Star, Sparkle, FileArrowUp
+  ArrowSquareOut, X, Funnel, Calendar, Star, Sparkle, FileArrowUp, Download
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -112,8 +112,23 @@ export default function HistoryPage() {
   }
 
   const copyToClipboard = async (text: string) => {
-    await navigator.clipboard.writeText(text)
-    toast.success(t.common.copied)
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(t.common.copied)
+    } catch {}
+  }
+
+  const downloadFile = (item: TranslationItem) => {
+    const ext = item.fileName?.split('.').pop() || 'txt'
+    const name = item.fileName?.replace(`.${ext}`, '') || 'translation'
+    const blob = new Blob([item.translatedText], { type: 'text/plain' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${name}_${item.targetLang.slice(0, 2).toLowerCase()}.${ext}`
+    a.click()
+    window.URL.revokeObjectURL(url)
+    toast.success(t.common.download)
   }
 
   const restoreItem = (item: TranslationItem) => {
@@ -324,11 +339,31 @@ export default function HistoryPage() {
                 >
                   {/* Header */}
                   <div className="px-6 py-4 border-b flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="rounded-md">{selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}</Badge>
-                      <ArrowRight className="size-4 text-muted-foreground" />
-                      <Badge className="rounded-md">{selectedItem.targetLang}</Badge>
-                    </div>
+                    {selectedItem.mode === 'file' && selectedItem.fileName ? (
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <FileArrowUp className="size-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold truncate">{selectedItem.fileName}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <Badge variant="outline" className="rounded-md text-[10px] px-1.5 py-0 h-4">
+                              {selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}
+                            </Badge>
+                            <ArrowRight className="size-2.5 text-muted-foreground" />
+                            <Badge className="rounded-md text-[10px] px-1.5 py-0 h-4">
+                              {selectedItem.targetLang}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="rounded-md">{selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}</Badge>
+                        <ArrowRight className="size-4 text-muted-foreground" />
+                        <Badge className="rounded-md">{selectedItem.targetLang}</Badge>
+                      </div>
+                    )}
                     
                     <div className="flex items-center gap-1">
                       <Button
@@ -362,41 +397,85 @@ export default function HistoryPage() {
                   {/* Body */}
                   <div className="flex-1 overflow-y-auto custom-scrollbar">
                     <div className="p-8 space-y-8">
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t.history.source}</label>
-                        {selectedItem.mode === 'file' && selectedItem.fileName && (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                            <FileArrowUp className="size-3.5" />
-                            <span className="font-medium">{selectedItem.fileName}</span>
+                      {selectedItem.mode === 'file' && selectedItem.fileName ? (
+                        <>
+                          {/* File info banner */}
+                          <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border/50">
+                            <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                              <FileArrowUp className="size-6 text-primary" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-sm truncate">{selectedItem.fileName}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}
+                                {" → "}
+                                {selectedItem.targetLang}
+                              </p>
+                            </div>
                           </div>
-                        )}
-                        <div className="text-lg leading-relaxed text-foreground/70 break-words">
-                          {selectedItem.mode === 'file' && selectedItem.fileName ? selectedItem.fileName : selectedItem.sourceText}
-                        </div>
-                      </div>
 
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-primary">{t.history.target}</label>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-7 text-[10px] font-bold rounded-md px-2"
-                            onClick={() => copyToClipboard(selectedItem.translatedText)}
-                          >
-                            <Copy className="size-3 mr-1.5" />
-                            {t.common.copy}
-                          </Button>
-                        </div>
-                        <div className="text-3xl font-bold leading-tight text-foreground break-words tracking-tight">
-                          {selectedItem.translatedText}
-                        </div>
-                      </div>
+                          {/* Translated content */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[10px] font-bold uppercase tracking-widest text-primary">{t.history.target}</label>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 text-[10px] font-bold rounded-md px-2"
+                                onClick={() => copyToClipboard(selectedItem.translatedText)}
+                              >
+                                <Copy className="size-3 mr-1.5" />
+                                {t.common.copy}
+                              </Button>
+                            </div>
+                            <div className="text-base leading-relaxed text-foreground break-words whitespace-pre-wrap">
+                              {selectedItem.translatedText}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="space-y-3">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t.history.source}</label>
+                            <div className="text-lg leading-relaxed text-foreground/70 break-words">
+                              {selectedItem.sourceText}
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[10px] font-bold uppercase tracking-widest text-primary">{t.history.target}</label>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 text-[10px] font-bold rounded-md px-2"
+                                onClick={() => copyToClipboard(selectedItem.translatedText)}
+                              >
+                                <Copy className="size-3 mr-1.5" />
+                                {t.common.copy}
+                              </Button>
+                            </div>
+                            <div className="text-3xl font-bold leading-tight text-foreground break-words tracking-tight">
+                              {selectedItem.translatedText}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
 
-                  {/* Footer Action - Clean and Simple */}
-                  <div className="p-6 border-t shrink-0">
+                  {/* Footer Action */}
+                  <div className="p-6 border-t shrink-0 space-y-2">
+                    {selectedItem.mode === 'file' && selectedItem.fileName && (
+                      <Button
+                        onClick={() => downloadFile(selectedItem)}
+                        variant="outline"
+                        className="w-full h-11 rounded-xl gap-2 font-bold text-sm"
+                      >
+                        <Download className="size-4" />
+                        {t.common.download}
+                      </Button>
+                    )}
                     <Button
                       onClick={() => restoreItem(selectedItem)}
                       className="w-full h-12 rounded-xl gap-2 font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all group"
@@ -428,22 +507,50 @@ export default function HistoryPage() {
                     </Button>
                   </div>
                   <div className="flex-1 overflow-y-auto p-6 space-y-8">
-                    <div className="space-y-2">
-                      <Badge variant="outline">{selectedItem.sourceLang} → {selectedItem.targetLang}</Badge>
-                      {selectedItem.mode === 'file' && selectedItem.fileName && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <FileArrowUp className="size-3.5" />
-                          <span className="font-medium">{selectedItem.fileName}</span>
+                    {selectedItem.mode === 'file' && selectedItem.fileName ? (
+                      <>
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/50">
+                          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                            <FileArrowUp className="size-5 text-primary" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-sm truncate">{selectedItem.fileName}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              <Badge variant="outline" className="rounded-sm text-[10px] px-1 py-0 h-auto">
+                                {selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}
+                              </Badge>
+                              {" → "}
+                              <Badge className="rounded-sm text-[10px] px-1 py-0 h-auto">
+                                {selectedItem.targetLang}
+                              </Badge>
+                            </p>
+                          </div>
                         </div>
-                      )}
-                      <p className="text-lg text-foreground/60 leading-relaxed">{selectedItem.mode === 'file' && selectedItem.fileName ? selectedItem.fileName : selectedItem.sourceText}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{t.history.target}</p>
-                      <p className="text-3xl font-bold leading-tight">{selectedItem.translatedText}</p>
-                    </div>
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{t.history.target}</p>
+                          <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">{selectedItem.translatedText}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          <Badge variant="outline">{selectedItem.sourceLang} → {selectedItem.targetLang}</Badge>
+                          <p className="text-lg text-foreground/60 leading-relaxed">{selectedItem.sourceText}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{t.history.target}</p>
+                          <p className="text-3xl font-bold leading-tight">{selectedItem.translatedText}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="p-4 border-t grid grid-cols-2 gap-3 pb-safe">
+                    {selectedItem.mode === 'file' && selectedItem.fileName && (
+                      <Button variant="outline" className="h-12 rounded-xl" onClick={() => downloadFile(selectedItem)}>
+                        <Download className="size-4 mr-2" />
+                        {t.common.download}
+                      </Button>
+                    )}
                     <Button variant="outline" className="h-12 rounded-xl" onClick={() => restoreItem(selectedItem)}>
                       {t.history.openInTranslator}
                     </Button>
