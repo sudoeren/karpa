@@ -18,14 +18,24 @@
 
 ---
 
-<img src="screenshot.png" alt="Karpa" width="580" align="right" />
-
-Karpa is a privacy-first AI translator that runs entirely on your machine.
-Your data never leaves your device — no cloud, no tracking, no compromises.
-
-Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini, and OpenRouter.
-
-<br clear="both" />
+<table>
+  <tr>
+    <td valign="top">
+      <br>
+      <p>Karpa is a privacy-first AI translator that runs entirely on your machine. Your data never leaves your device — no cloud, no tracking, no compromises.</p>
+      <p>Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini, and OpenRouter.</p>
+    </td>
+    <td align="center">
+      <table border="1" cellpadding="8" cellspacing="0">
+        <tr>
+          <td bgcolor="white" align="center">
+            <img src="screenshot.png" alt="Karpa" width="560" />
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 
 ---
 
