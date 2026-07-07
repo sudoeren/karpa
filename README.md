@@ -52,6 +52,7 @@ Pick one of the supported providers:
 ### Run Karpa
 
 ```bash
+git clone https://github.com/sudoeren/karpa.git && cd karpa
 docker compose up -d
 ```
 
