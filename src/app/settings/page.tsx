@@ -11,8 +11,8 @@ import {
   Sun, Moon, Monitor, Globe,
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner, Lightning,
   Bell, SpeakerHigh, Info, User, ArrowSquareOut,
-  Key, ComputerTower, Cloud, Eye, EyeSlash, SquaresFour, Sliders,
-  HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown
+  Key, ComputerTower, Cloud, SquaresFour, Sliders,
+  HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -61,7 +61,7 @@ export default function SettingsPage() {
   const [selectedProvider, setSelectedProvider] = useState<ProviderType>("lmstudio")
   const [apiUrl, setApiUrl] = useState("http://localhost:1234")
   const [apiKey, setApiKey] = useState("")
-  const [showApiKey, setShowApiKey] = useState(false)
+  const [hasApiKey, setHasApiKey] = useState(false)
   const [temperature, setTemperature] = useState(0.2)
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -130,7 +130,7 @@ export default function SettingsPage() {
       }
     }
 
-    if (savedKey) setApiKey(savedKey)
+    if (savedKey) setHasApiKey(true)
     if (savedTemp) setTemperature(parseFloat(savedTemp))
     if (savedModel) setSelectedModel(savedModel)
     if (savedNotifs) setNotificationsEnabled(savedNotifs === 'true')
@@ -142,6 +142,7 @@ export default function SettingsPage() {
     const info = PROVIDERS[provider]
     setApiUrl(info.defaultUrl)
     setApiKey("")
+    setHasApiKey(false)
     setModels([])
     setSelectedModel(info.defaultModel)
     setConnectionStatus('idle')
@@ -184,8 +185,13 @@ export default function SettingsPage() {
     localStorage.setItem("llm-api-url", apiUrl)
     localStorage.setItem("llm-temperature", temperature.toString())
     if (selectedModel) localStorage.setItem("llm-model", selectedModel)
-    if (apiKey) sessionStorage.setItem("llm-api-key", apiKey)
-    else sessionStorage.removeItem("llm-api-key")
+    if (apiKey) {
+      sessionStorage.setItem("llm-api-key", apiKey)
+      setHasApiKey(true)
+    } else {
+      sessionStorage.removeItem("llm-api-key")
+      setHasApiKey(false)
+    }
 
     localStorage.setItem("lm-studio-url", apiUrl)
     if (selectedModel) localStorage.setItem("lm-studio-model", selectedModel)
@@ -263,6 +269,7 @@ export default function SettingsPage() {
   const testConnection = async () => {
     setIsTestingConnection(true)
     setConnectionStatus('idle')
+    const effectiveKey = apiKey || sessionStorage.getItem("llm-api-key") || undefined
     try {
       const response = await fetch('/api/test-connection', {
         method: 'POST',
@@ -270,13 +277,13 @@ export default function SettingsPage() {
         body: JSON.stringify({
           url: apiUrl,
           provider: selectedProvider,
-          apiKey: apiKey || undefined
+          apiKey: effectiveKey,
         }),
       })
       const data = await response.json()
       if (data.success) {
         setConnectionStatus('success')
-        await fetchModels(apiUrl, selectedProvider, apiKey || undefined, selectedModel || undefined)
+        await fetchModels(apiUrl, selectedProvider, effectiveKey, selectedModel || undefined)
         toast.success(t.settings.connectionSuccess)
       } else {
         setConnectionStatus('error')
@@ -515,22 +522,43 @@ export default function SettingsPage() {
                   {providerInfo.requiresApiKey && (
                     <div className="space-y-3">
                       <Label className="text-xs text-muted-foreground">{t.settings.apiKey}</Label>
-                      <div className="relative">
-                        <Input
-                          value={apiKey}
-                          onChange={(e) => setApiKey(e.target.value)}
-                          type={showApiKey ? "text" : "password"}
-                          className="h-10 pl-4 pr-10 rounded-xl bg-background border-border font-mono text-sm"
-                          placeholder={t.settings.apiKeyPlaceholder}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowApiKey(!showApiKey)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showApiKey ? <EyeSlash className="size-4" /> : <Eye className="size-4" />}
-                        </button>
-                      </div>
+                      {hasApiKey ? (
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-10 px-4 rounded-xl bg-muted border border-border flex items-center text-sm text-muted-foreground select-none">
+                            <span className="tracking-widest">{"\u2022".repeat(24)}</span>
+                          </div>
+                          <Button
+                            variant="outline"
+                            className="h-10 px-4 rounded-xl shrink-0 text-xs"
+                            onClick={() => {
+                              setHasApiKey(false)
+                              setApiKey("")
+                              sessionStorage.removeItem("llm-api-key")
+                            }}
+                          >
+                            Change
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <Input
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            type="password"
+                            className="h-10 pl-4 pr-10 rounded-xl bg-background border-border font-mono text-sm"
+                            placeholder={t.settings.apiKeyPlaceholder}
+                          />
+                          {apiKey && (
+                            <button
+                              type="button"
+                              onClick={() => setApiKey("")}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <X className="size-4" />
+                            </button>
+                          )}
+                        </div>
+                      )}
                       <p className="text-xs text-muted-foreground">{t.settings.apiKeyDesc}</p>
                     </div>
                   )}
