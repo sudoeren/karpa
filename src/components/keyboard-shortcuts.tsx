@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Keyboard } from "lucide-react"
+import { Keyboard } from "@phosphor-icons/react"
 import { useLanguage } from "@/contexts/language-context"
 
 export function KeyboardShortcuts() {

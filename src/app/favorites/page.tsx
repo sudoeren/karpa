@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  Search, Trash2, ArrowRight, Star, Copy, ExternalLink, Heart, X
-} from "lucide-react"
+  MagnifyingGlass, Trash, CaretRight, Star, Copy, ArrowSquareOut, Heart, X
+} from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -105,7 +105,7 @@ export default function FavoritesPage() {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" size="sm" className="h-9 px-4 text-muted-foreground hover:text-destructive transition-colors rounded-lg">
-                <Trash2 className="size-4 mr-2" />
+                <Trash className="size-4 mr-2" />
                 {t.history.clearAll}
               </Button>
             </AlertDialogTrigger>
@@ -131,7 +131,7 @@ export default function FavoritesPage() {
           {/* Search */}
           <div className="p-3 border-b bg-muted/20 shrink-0">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-yellow-500 transition-colors" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-yellow-500 transition-colors" />
               <Input
                 placeholder={t.common.search}
                 className="pl-9 h-10 rounded-lg bg-background border-input"
@@ -174,7 +174,7 @@ export default function FavoritesPage() {
                           <span className="text-[10px] font-bold text-muted-foreground">
                             {item.sourceLang === "Auto Detect" ? "AUTO" : item.sourceLang.slice(0, 2).toUpperCase()}
                           </span>
-                          <ArrowRight className="size-3 text-muted-foreground/30" />
+                          <CaretRight className="size-3 text-muted-foreground/30" />
                           <span className="text-[10px] font-bold text-primary">
                             {item.targetLang.slice(0, 2).toUpperCase()}
                           </span>
@@ -210,7 +210,7 @@ export default function FavoritesPage() {
                   <div className="px-6 py-4 border-b flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="rounded-md">{selectedItem.sourceLang}</Badge>
-                      <ArrowRight className="size-4 text-muted-foreground" />
+                      <CaretRight className="size-4 text-muted-foreground" />
                       <Badge className="rounded-md bg-yellow-500 hover:bg-yellow-600 border-none text-white">{selectedItem.targetLang}</Badge>
                     </div>
                     
@@ -221,7 +221,7 @@ export default function FavoritesPage() {
                         className="size-9 rounded-lg text-destructive"
                         onClick={() => removeFavorite(selectedId)}
                       >
-                        <Trash2 className="size-4" />
+                        <Trash className="size-4" />
                       </Button>
                       <div className="w-px h-4 bg-border mx-2" />
                       <Button
@@ -271,7 +271,7 @@ export default function FavoritesPage() {
                       onClick={() => restoreItem(selectedItem)}
                       className="w-full h-12 rounded-xl gap-2 font-bold bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/10 hover:shadow-yellow-500/20 transition-all group border-none"
                     >
-                      <ExternalLink className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      <ArrowSquareOut className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                       {t.history.openInTranslator}
                     </Button>
                   </div>
@@ -294,7 +294,7 @@ export default function FavoritesPage() {
                     </Button>
                     <span className="font-bold text-sm">{formatTime(selectedItem.timestamp)}</span>
                     <Button variant="ghost" size="icon" className="text-destructive" onClick={() => removeFavorite(selectedId)}>
-                      <Trash2 className="size-5" />
+                      <Trash className="size-5" />
                     </Button>
                   </div>
                   <div className="flex-1 overflow-y-auto p-6 space-y-8">

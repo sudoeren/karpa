@@ -7,9 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import {
-  ArrowRightLeft, Loader2, Copy, Check, Volume2, VolumeX, X, Star,
-  Languages, Sparkles, Wand2, FileUp, Upload, Download, Info, History, Calendar, Trash2, ArrowRight, ExternalLink
-} from "lucide-react"
+  ArrowsLeftRight, Spinner, Copy, Check, SpeakerHigh, SpeakerX, X, Star,
+  Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Calendar, Trash, ArrowRight, ArrowSquareOut
+} from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence } from "framer-motion"
@@ -388,7 +388,7 @@ function TranslatorWorkspace() {
           )}
           onClick={() => setIsHistoryOpen(true)}
         >
-          <History className="size-4" />
+          <ClockCounterClockwise className="size-4" />
           <span className="hidden md:inline text-xs">{t.history.title}</span>
         </Button>
       </motion.div>
@@ -414,7 +414,7 @@ function TranslatorWorkspace() {
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Languages className="size-3.5" />
+                  <Translate className="size-3.5" />
                   <span>{t.translator.textMode}</span>
                 </button>
                 <button
@@ -426,7 +426,7 @@ function TranslatorWorkspace() {
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <FileUp className="size-3.5" />
+                  <FileArrowUp className="size-3.5" />
                   <span>{t.translator.fileMode}</span>
                 </button>
               </div>
@@ -454,7 +454,7 @@ function TranslatorWorkspace() {
                 <SelectContent>
                   <SelectItem value="Auto Detect">
                     <span className="flex items-center gap-2">
-                      <Sparkles className="size-3" />
+                      <Sparkle className="size-3" />
                       {t.translator.autoDetect}
                     </span>
                   </SelectItem>
@@ -471,7 +471,7 @@ function TranslatorWorkspace() {
                 onClick={swapLanguages}
                 disabled={sourceLanguage === "Auto Detect"}
               >
-                <ArrowRightLeft className="size-4" />
+                <ArrowsLeftRight className="size-4" />
               </Button>
 
               <Select value={targetLanguage} onValueChange={setTargetLanguage}>
@@ -522,7 +522,7 @@ function TranslatorWorkspace() {
                           onClick={() => handleSpeak(sourceText, sourceLanguage)}
                           disabled={!sourceText || !tts.isSupported}
                         >
-                          {tts.isSpeaking ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+                          {tts.isSpeaking ? <SpeakerX className="size-4" /> : <SpeakerHigh className="size-4" />}
                         </Button>
                         {sourceText && (
                           <Button
@@ -544,7 +544,7 @@ function TranslatorWorkspace() {
                       <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center p-6 text-center">
                         <div className="w-full max-w-xs space-y-4">
                           <div className="flex items-center justify-center gap-3 mb-2">
-                            <Loader2 className="size-5 animate-spin text-primary" />
+                            <Spinner className="size-5 animate-spin text-primary" />
                             <span className="font-bold">{t.translator.translating}</span>
                           </div>
                           <Progress value={progress} className="h-1.5" />
@@ -585,7 +585,7 @@ function TranslatorWorkspace() {
                           onClick={() => handleSpeak(translatedText, targetLanguage)}
                           disabled={!translatedText || !tts.isSupported}
                         >
-                          {tts.isSpeaking ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+                          {tts.isSpeaking ? <SpeakerX className="size-4" /> : <SpeakerHigh className="size-4" />}
                         </Button>
                         <Button
                           variant="ghost"
@@ -654,7 +654,7 @@ function TranslatorWorkspace() {
                       <div className="flex items-center justify-between p-3 md:p-5 bg-muted/50 rounded-2xl border gap-3">
                         <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
                           <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <FileUp className="size-5 md:size-6 text-primary" />
+                            <FileArrowUp className="size-5 md:size-6 text-primary" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="font-bold text-sm truncate">{selectedFile.name}</p>
@@ -681,7 +681,7 @@ function TranslatorWorkspace() {
                         <div className="p-8 bg-muted/30 border rounded-3xl space-y-6">
                           <div className="flex items-center justify-between text-xs font-black uppercase tracking-[0.2em]">
                             <div className="flex items-center gap-3 text-primary">
-                              <Loader2 className="size-4 animate-spin" />
+                              <Spinner className="size-4 animate-spin" />
                               <span>{t.translator.translating}</span>
                             </div>
                             <span className="text-muted-foreground">{progress}%</span>
@@ -771,7 +771,7 @@ function TranslatorWorkspace() {
                     ? "bg-muted-foreground/10"
                     : "bg-background/20 group-hover:bg-white group-hover:rotate-[360deg] shadow-lg"
                 )}>
-                  <Wand2 className={cn(
+                  <MagicWand className={cn(
                     "size-4 md:size-5 transition-colors duration-500",
                     mode === "text" && !sourceText.trim() || mode === "file" && !selectedFile
                       ? "text-muted-foreground"
@@ -808,7 +808,7 @@ function TranslatorWorkspace() {
                 <div className="p-6 border-b shrink-0 bg-muted/20 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <History className="size-5" />
+                      <ClockCounterClockwise className="size-5" />
                     </div>
                     <h2 className="text-xl font-bold">{t.history.title}</h2>
                   </div>
@@ -820,7 +820,7 @@ function TranslatorWorkspace() {
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                   {history.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center p-12 opacity-30">
-                      <History className="size-12 mb-4" />
+                      <ClockCounterClockwise className="size-12 mb-4" />
                       <p className="font-medium">{t.history.noHistory}</p>
                     </div>
                   ) : (
@@ -853,7 +853,7 @@ function TranslatorWorkspace() {
                                 deleteHistoryItem(item.id)
                               }}
                             >
-                              <Trash2 className="size-3.5" />
+                              <Trash className="size-3.5" />
                             </Button>
                           </div>
                           <p className="text-sm font-semibold line-clamp-1 mb-1 group-hover:text-primary transition-colors">{item.sourceText}</p>
@@ -873,7 +873,7 @@ function TranslatorWorkspace() {
                       router.push("/history")
                     }}
                   >
-                    <ExternalLink className="size-3.5 mr-2" />
+                    <ArrowSquareOut className="size-3.5 mr-2" />
                     {language === 'tr' ? 'Tüm Geçmişi Gör' : 'View Full History'}
                   </Button>
                 </div>
@@ -890,7 +890,7 @@ export default function Home() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center h-svh">
-        <Loader2 className="size-8 animate-spin text-primary" />
+        <Spinner className="size-8 animate-spin text-primary" />
       </div>
     }>
       <TranslatorWorkspace />

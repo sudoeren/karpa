@@ -3,14 +3,14 @@
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import {
-  Languages,
-  History,
+  Translate,
+  ClockCounterClockwise,
   Star,
-  Settings,
-  CircleCheck,
-  CircleX,
-  Loader2
-} from "lucide-react"
+  Gear,
+  CheckCircle,
+  XCircle,
+  Spinner
+} from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import { Logo } from "@/components/logo"
@@ -30,10 +30,10 @@ import {
 } from "@/components/ui/sidebar"
 
 const navItems = [
-  { href: "/", icon: Languages, labelKey: "translator" as const },
-  { href: "/history", icon: History, labelKey: "history" as const },
+  { href: "/", icon: Translate, labelKey: "translator" as const },
+  { href: "/history", icon: ClockCounterClockwise, labelKey: "history" as const },
   { href: "/favorites", icon: Star, labelKey: "favorites" as const },
-  { href: "/settings", icon: Settings, labelKey: "settings" as const },
+  { href: "/settings", icon: Gear, labelKey: "settings" as const },
 ]
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
@@ -128,11 +128,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 isConnected === null && "text-muted-foreground"
               )}>
                 {isConnected === null ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Spinner className="size-4 animate-spin" />
                 ) : isConnected ? (
-                  <CircleCheck className="size-4" />
+                  <CheckCircle className="size-4" />
                 ) : (
-                  <CircleX className="size-4" />
+                  <XCircle className="size-4" />
                 )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">

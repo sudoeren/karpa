@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Languages, History, Star, Settings } from "lucide-react"
+import { Translate, ClockCounterClockwise, Star, Gear } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 
@@ -11,10 +11,10 @@ export function MobileNav() {
   const { t } = useLanguage()
 
   const items = [
-    { href: "/", label: t.nav.translator, icon: Languages },
-    { href: "/history", label: t.nav.history, icon: History },
+    { href: "/", label: t.nav.translator, icon: Translate },
+    { href: "/history", label: t.nav.history, icon: ClockCounterClockwise },
     { href: "/favorites", label: t.nav.favorites, icon: Star },
-    { href: "/settings", label: t.nav.settings, icon: Settings },
+    { href: "/settings", label: t.nav.settings, icon: Gear },
   ]
 
   return (

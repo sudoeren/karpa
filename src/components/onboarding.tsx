@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Logo } from "@/components/logo"
 import {
-  ChevronRight, Check, Network, Key, Eye, EyeOff, Link2,
-  RefreshCw, Zap, AlertCircle, Server, Terminal, Cloud
-} from "lucide-react"
+  CaretRight, Check, Network, Key, Eye, EyeSlash, Link,
+  ArrowsClockwise, Lightning, WarningCircle, ComputerTower, Terminal, Cloud
+} from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { type ProviderType, PROVIDERS } from "@/lib/providers"
@@ -38,11 +38,11 @@ const interfaceLanguages = [
 
 const providerList: { key: ProviderType; icon: any; label: string }[] = [
   { key: 'lmstudio', icon: Terminal, label: 'LM Studio' },
-  { key: 'ollama', icon: Server, label: 'Ollama' },
+  { key: 'ollama', icon: ComputerTower, label: 'Ollama' },
   { key: 'openai', icon: Cloud, label: 'OpenAI' },
   { key: 'anthropic', icon: Cloud, label: 'Anthropic' },
   { key: 'gemini', icon: Cloud, label: 'Gemini' },
-  { key: 'custom', icon: Server, label: 'Custom' },
+  { key: 'custom', icon: ComputerTower, label: 'Custom' },
 ]
 
 const stepVariants = {
@@ -203,7 +203,7 @@ export function Onboarding() {
             <div className="flex-1" />
             <Button onClick={nextStep} className="rounded-xl">
               {step === 3 ? t.onboarding.letsGo : step === 0 ? t.onboarding.getStarted : t.common.next}
-              <ChevronRight className="size-4 ml-1" />
+              <CaretRight className="size-4 ml-1" />
             </Button>
           </div>
         </div>
@@ -314,7 +314,7 @@ function EngineStep({
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">URL</label>
           <div className="relative">
-            <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Link className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
@@ -341,7 +341,7 @@ function EngineStep({
                 onClick={() => setShowApiKey(!showApiKey)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                {showApiKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                {showApiKey ? <EyeSlash className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
           </div>
@@ -358,11 +358,11 @@ function EngineStep({
             )}
           >
             {connectionStatus === "testing" ? (
-              <RefreshCw className="size-3.5 animate-spin mr-1.5" />
+              <ArrowsClockwise className="size-3.5 animate-spin mr-1.5" />
             ) : connectionStatus === "success" ? (
               <Check className="size-3.5 mr-1.5" />
             ) : (
-              <Zap className="size-3.5 mr-1.5" />
+              <Lightning className="size-3.5 mr-1.5" />
             )}
             {connectionStatus === "testing"
               ? t.onboarding.testingLink
@@ -385,7 +385,7 @@ function EngineStep({
             className="text-xs space-y-1.5 pt-1"
           >
             <p className="font-medium text-destructive flex items-center gap-1.5">
-              <AlertCircle className="size-3.5" />
+              <WarningCircle className="size-3.5" />
               {t.onboarding.troubleshooting}
             </p>
             <ul className="text-muted-foreground space-y-0.5 ml-5 list-disc">

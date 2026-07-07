@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Languages, History, Star, Settings, Wifi, WifiOff, Loader2 } from "lucide-react"
+import { Translate, ClockCounterClockwise, Star, Gear, WifiHigh, WifiSlash, Spinner } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import {
@@ -42,10 +42,10 @@ export function FloatingNavbar() {
   }, [])
 
   const navItems = [
-    { href: "/", icon: Languages, labelKey: "translator" as const },
-    { href: "/history", icon: History, labelKey: "history" as const },
+    { href: "/", icon: Translate, labelKey: "translator" as const },
+    { href: "/history", icon: ClockCounterClockwise, labelKey: "history" as const },
     { href: "/favorites", icon: Star, labelKey: "favorites" as const },
-    { href: "/settings", icon: Settings, labelKey: "settings" as const },
+    { href: "/settings", icon: Gear, labelKey: "settings" as const },
   ]
 
   return (
@@ -66,7 +66,7 @@ export function FloatingNavbar() {
               </TooltipTrigger>
               <TooltipContent side="top" sideOffset={15} className="text-xs">
                 <div className="flex items-center gap-1.5">
-                  {isConnected === null ? <Loader2 className="size-3 animate-spin" /> : isConnected ? <Wifi className="size-3 text-emerald-500" /> : <WifiOff className="size-3 text-rose-500" />}
+                  {isConnected === null ? <Spinner className="size-3 animate-spin" /> : isConnected ? <WifiHigh className="size-3 text-emerald-500" /> : <WifiSlash className="size-3 text-rose-500" />}
                   {isConnected === null ? "Checking..." : isConnected ? "Engine Online" : "Engine Offline"}
                 </div>
               </TooltipContent>

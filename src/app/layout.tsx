@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { IconProvider } from "@/components/icon-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
@@ -57,6 +58,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground transition-colors duration-300`}
       >
+        <IconProvider>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -82,6 +84,7 @@ export default function RootLayout({
           </LanguageProvider>
           <Toaster />
         </ThemeProvider>
+        </IconProvider>
       </body>
     </html>
   );

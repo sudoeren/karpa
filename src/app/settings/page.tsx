@@ -9,11 +9,11 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Sun, Moon, Monitor, Globe,
-  Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  Bell, Volume2, Info, User, ExternalLink,
-  Key, Server, Cloud, Eye, EyeOff, LayoutGrid, Sliders,
-  HardDrive, Shield, ArrowUpRight, GitFork
-} from "lucide-react"
+  Trash, Download, Upload, ArrowsClockwise, Check, Spinner, Lightning,
+  Bell, SpeakerHigh, Info, User, ArrowSquareOut,
+  Key, ComputerTower, Cloud, Eye, EyeSlash, SquaresFour, Sliders,
+  HardDrive, ShieldCheck, ArrowUpRight, GitFork
+} from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -282,7 +282,7 @@ export default function SettingsPage() {
   const providerInfo = PROVIDERS[selectedProvider]
 
   const sidebarItems = [
-    { id: 'appearance', label: t.settings.appearance, icon: LayoutGrid },
+    { id: 'appearance', label: t.settings.appearance, icon: SquaresFour },
     { id: 'connection', label: t.settings.connection, icon: Sliders },
     { id: 'notifications', label: t.settings.notifications, icon: Bell },
     { id: 'data', label: t.settings.data, icon: HardDrive },
@@ -467,7 +467,7 @@ export default function SettingsPage() {
                             {info.requiresApiKey ? (
                               <Cloud className={cn("size-4", selectedProvider === key && "text-primary")} />
                             ) : (
-                              <Server className={cn("size-4", selectedProvider === key && "text-primary")} />
+                              <ComputerTower className={cn("size-4", selectedProvider === key && "text-primary")} />
                             )}
                           </div>
                           <div className="min-w-0">
@@ -495,7 +495,7 @@ export default function SettingsPage() {
                         onClick={testConnection}
                         disabled={isTestingConnection}
                       >
-                        {isTestingConnection ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <RefreshCw className="size-4 mr-1.5" />}
+                        {isTestingConnection ? <Spinner className="size-4 animate-spin mr-1.5" /> : <ArrowsClockwise className="size-4 mr-1.5" />}
                         {t.settings.testConnection}
                       </Button>
                     </div>
@@ -517,7 +517,7 @@ export default function SettingsPage() {
                           onClick={() => setShowApiKey(!showApiKey)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
-                          {showApiKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                          {showApiKey ? <EyeSlash className="size-4" /> : <Eye className="size-4" />}
                         </button>
                       </div>
                       <p className="text-xs text-muted-foreground">{t.settings.apiKeyDesc}</p>
@@ -584,7 +584,7 @@ export default function SettingsPage() {
                       onChange={handleNotificationsChange}
                     />
                     <ToggleTile
-                      icon={Volume2}
+                      icon={SpeakerHigh}
                       title={t.settings.audioFeedback}
                       desc={t.settings.audioFeedbackDesc}
                       checked={notificationSound}
@@ -642,7 +642,7 @@ export default function SettingsPage() {
                         <AlertDialogTrigger asChild>
                           <button className="w-full flex items-center gap-4 p-4 rounded-xl border border-destructive/20 bg-destructive/[0.02] hover:bg-destructive/[0.04] transition-colors text-left">
                             <div className="p-2.5 bg-destructive/10 rounded-xl">
-                              <Trash2 className="size-4 text-destructive" />
+                              <Trash className="size-4 text-destructive" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-destructive">{t.settings.clearData}</p>
@@ -671,7 +671,7 @@ export default function SettingsPage() {
                         className="w-full flex items-center gap-4 p-4 rounded-xl border border-border hover:bg-muted/20 transition-colors text-left"
                       >
                         <div className="p-2.5 bg-muted rounded-xl">
-                          <RefreshCw className="size-4 text-muted-foreground" />
+                          <ArrowsClockwise className="size-4 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium">{t.settings.resetOnboarding}</p>

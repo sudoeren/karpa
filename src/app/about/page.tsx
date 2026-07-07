@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/contexts/language-context"
 import { motion } from "framer-motion"
-import { GitFork, Globe, Heart, Code2, ArrowUpRight } from "lucide-react"
+import { GitFork, Globe, Heart, Code, ArrowUpRight } from "@phosphor-icons/react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
@@ -59,7 +59,7 @@ export default function AboutPage() {
             <div className="flex flex-col h-full justify-between gap-4 md:gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground/60 text-xs font-mono uppercase tracking-wider">
-                  <Code2 className="size-3" />
+                  <Code className="size-3" />
                   {t.about.developer}
                 </div>
                 <h3 className="text-lg md:text-xl font-medium text-foreground">Eren Cakar</h3>

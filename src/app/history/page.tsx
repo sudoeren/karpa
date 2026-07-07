@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
-  Search, Trash2, ArrowRight, History, Copy,
-  ExternalLink, X, Filter, Calendar, Star, Sparkles
-} from "lucide-react"
+  MagnifyingGlass, Trash, ArrowRight, ClockCounterClockwise, Copy,
+  ArrowSquareOut, X, Funnel, Calendar, Star, Sparkle
+} from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -175,7 +175,7 @@ export default function HistoryPage() {
       {/* Crisp Header */}
       <div className="flex items-center justify-between mb-4 md:mb-6 shrink-0">
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
-          <History className="size-5 md:size-6 text-primary shrink-0" />
+          <ClockCounterClockwise className="size-5 md:size-6 text-primary shrink-0" />
           <h1 className="text-lg md:text-2xl font-bold tracking-tight truncate">{t.history.title}</h1>
           <Badge variant="secondary" className="rounded-md font-mono shrink-0">{history.length}</Badge>
         </div>
@@ -184,7 +184,7 @@ export default function HistoryPage() {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" size="sm" className="h-9 px-4 text-muted-foreground hover:text-destructive transition-colors rounded-lg">
-                <Trash2 className="size-4 mr-2" />
+                <Trash className="size-4 mr-2" />
                 {t.history.clearAll}
               </Button>
             </AlertDialogTrigger>
@@ -210,7 +210,7 @@ export default function HistoryPage() {
           {/* Action Bar */}
           <div className="p-3 border-b bg-muted/20 flex flex-col md:flex-row gap-3 shrink-0">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
                 placeholder={t.common.search}
                 className="pl-9 h-10 rounded-lg bg-background border-input"
@@ -257,7 +257,7 @@ export default function HistoryPage() {
             >
               {filteredHistory.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-12 opacity-50">
-                  <History className="size-10 mb-4" />
+                  <ClockCounterClockwise className="size-10 mb-4" />
                   <p className="text-sm font-medium">{t.history.noHistory}</p>
                 </div>
               ) : (
@@ -340,7 +340,7 @@ export default function HistoryPage() {
                         className="size-9 rounded-lg text-destructive"
                         onClick={() => deleteItem(selectedId)}
                       >
-                        <Trash2 className="size-4" />
+                        <Trash className="size-4" />
                       </Button>
                       <div className="w-px h-4 bg-border mx-2" />
                       <Button
@@ -390,7 +390,7 @@ export default function HistoryPage() {
                       onClick={() => restoreItem(selectedItem)}
                       className="w-full h-12 rounded-xl gap-2 font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all group"
                     >
-                      <ExternalLink className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      <ArrowSquareOut className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                       {t.history.openInTranslator}
                     </Button>
                   </div>
@@ -413,7 +413,7 @@ export default function HistoryPage() {
                     </Button>
                     <span className="font-bold text-sm">{formatTime(selectedItem.timestamp)}</span>
                     <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteItem(selectedId)}>
-                      <Trash2 className="size-5" />
+                      <Trash className="size-5" />
                     </Button>
                   </div>
                   <div className="flex-1 overflow-y-auto p-6 space-y-8">
