@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { cn, safeJSONParse } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -51,7 +51,7 @@ export default function HistoryPage() {
   useEffect(() => {
     const saved = localStorage.getItem("translation-history")
     if (saved) {
-      const historyData = JSON.parse(saved)
+      const historyData = safeJSONParse(saved, [])
       setHistory(historyData)
       
       const hash = window.location.hash.replace('#', '')
@@ -61,7 +61,7 @@ export default function HistoryPage() {
     }
     
     const savedF = localStorage.getItem("translation-favorites")
-    if (savedF) setFavorites(JSON.parse(savedF))
+    if (savedF) setFavorites(safeJSONParse(savedF, []))
   }, [])
 
   useEffect(() => {

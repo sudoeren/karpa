@@ -38,7 +38,7 @@ import {
 import { useLanguage } from "@/contexts/language-context"
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
-import { cn, decodeApiKey } from "@/lib/utils"
+import { cn, decodeApiKey, safeJSONParse } from "@/lib/utils"
 import { useOnboarding } from "@/contexts/onboarding-context"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
@@ -227,8 +227,8 @@ export default function SettingsPage() {
 
   const exportData = () => {
     const data = {
-      history: JSON.parse(localStorage.getItem("translation-history") || "[]"),
-      favorites: JSON.parse(localStorage.getItem("translation-favorites") || "[]"),
+      history: safeJSONParse(localStorage.getItem("translation-history"), []),
+      favorites: safeJSONParse(localStorage.getItem("translation-favorites"), []),
       settings: {
         provider: selectedProvider,
         apiUrl,

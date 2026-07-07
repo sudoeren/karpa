@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { cn, safeJSONParse } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -44,7 +44,7 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-favorites")
-    if (saved) setFavorites(JSON.parse(saved))
+    if (saved) setFavorites(safeJSONParse(saved, []))
   }, [])
 
   const removeFavorite = (id: string) => {

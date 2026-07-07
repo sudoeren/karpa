@@ -67,6 +67,15 @@ export function splitIntoChunks(text: string, maxChunkSize: number = 2000, prese
   return chunks;
 }
 
+export function safeJSONParse<T>(value: string | null | undefined, fallback: T): T {
+  if (!value) return fallback
+  try { return JSON.parse(value) } catch { return fallback }
+}
+
+export function safeSetItem(key: string, value: string): void {
+  try { localStorage.setItem(key, value) } catch { /* storage full or unavailable */ }
+}
+
 export function decodeApiKey(key: string): string {
   try { return atob(key) } catch { return key }
 }
