@@ -18,9 +18,7 @@
 
 ---
 
-<img src="screenshot.png" alt="Karpa" width="400" align="right" />
-
-## Translate with full privacy
+<img src="screenshot.png" alt="Karpa" width="580" align="right" />
 
 Karpa is a privacy-first AI translator that runs entirely on your machine.
 Your data never leaves your device — no cloud, no tracking, no compromises.
