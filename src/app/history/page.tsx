@@ -399,7 +399,6 @@ export default function HistoryPage() {
                     <div className="p-8 space-y-8">
                       {selectedItem.mode === 'file' && selectedItem.fileName ? (
                         <>
-                          {/* File info banner */}
                           <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border/50">
                             <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                               <FileArrowUp className="size-6 text-primary" />
@@ -411,25 +410,6 @@ export default function HistoryPage() {
                                 {" → "}
                                 {selectedItem.targetLang}
                               </p>
-                            </div>
-                          </div>
-
-                          {/* Translated content */}
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <label className="text-[10px] font-bold uppercase tracking-widest text-primary">{t.history.target}</label>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-7 text-[10px] font-bold rounded-md px-2"
-                                onClick={() => copyToClipboard(selectedItem.translatedText)}
-                              >
-                                <Copy className="size-3 mr-1.5" />
-                                {t.common.copy}
-                              </Button>
-                            </div>
-                            <div className="text-base leading-relaxed text-foreground break-words whitespace-pre-wrap">
-                              {selectedItem.translatedText}
                             </div>
                           </div>
                         </>
@@ -466,23 +446,23 @@ export default function HistoryPage() {
 
                   {/* Footer Action */}
                   <div className="p-6 border-t shrink-0 space-y-2">
-                    {selectedItem.mode === 'file' && selectedItem.fileName && (
+                    {selectedItem.mode === 'file' && selectedItem.fileName ? (
                       <Button
                         onClick={() => downloadFile(selectedItem)}
-                        variant="outline"
-                        className="w-full h-11 rounded-xl gap-2 font-bold text-sm"
+                        className="w-full h-12 rounded-xl gap-2 font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all"
                       >
                         <Download className="size-4" />
                         {t.common.download}
                       </Button>
+                    ) : (
+                      <Button
+                        onClick={() => restoreItem(selectedItem)}
+                        className="w-full h-12 rounded-xl gap-2 font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all group"
+                      >
+                        <ArrowSquareOut className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        {t.history.openInTranslator}
+                      </Button>
                     )}
-                    <Button
-                      onClick={() => restoreItem(selectedItem)}
-                      className="w-full h-12 rounded-xl gap-2 font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all group"
-                    >
-                      <ArrowSquareOut className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      {t.history.openInTranslator}
-                    </Button>
                   </div>
                 </motion.div>
               )}
@@ -508,29 +488,23 @@ export default function HistoryPage() {
                   </div>
                   <div className="flex-1 overflow-y-auto p-6 space-y-8">
                     {selectedItem.mode === 'file' && selectedItem.fileName ? (
-                      <>
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/50">
-                          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                            <FileArrowUp className="size-5 text-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-semibold text-sm truncate">{selectedItem.fileName}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              <Badge variant="outline" className="rounded-sm text-[10px] px-1 py-0 h-auto">
-                                {selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}
-                              </Badge>
-                              {" → "}
-                              <Badge className="rounded-sm text-[10px] px-1 py-0 h-auto">
-                                {selectedItem.targetLang}
-                              </Badge>
-                            </p>
-                          </div>
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/50">
+                        <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <FileArrowUp className="size-5 text-primary" />
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{t.history.target}</p>
-                          <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">{selectedItem.translatedText}</p>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-sm truncate">{selectedItem.fileName}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            <Badge variant="outline" className="rounded-sm text-[10px] px-1 py-0 h-auto">
+                              {selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}
+                            </Badge>
+                            {" → "}
+                            <Badge className="rounded-sm text-[10px] px-1 py-0 h-auto">
+                              {selectedItem.targetLang}
+                            </Badge>
+                          </p>
                         </div>
-                      </>
+                      </div>
                     ) : (
                       <>
                         <div className="space-y-2">
@@ -544,19 +518,22 @@ export default function HistoryPage() {
                       </>
                     )}
                   </div>
-                  <div className="p-4 border-t grid grid-cols-2 gap-3 pb-safe">
-                    {selectedItem.mode === 'file' && selectedItem.fileName && (
-                      <Button variant="outline" className="h-12 rounded-xl" onClick={() => downloadFile(selectedItem)}>
+                  <div className="p-4 border-t gap-3 pb-safe">
+                    {selectedItem.mode === 'file' && selectedItem.fileName ? (
+                      <Button className="w-full h-12 rounded-xl bg-primary text-primary-foreground" onClick={() => downloadFile(selectedItem)}>
                         <Download className="size-4 mr-2" />
                         {t.common.download}
                       </Button>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button variant="outline" className="h-12 rounded-xl" onClick={() => restoreItem(selectedItem)}>
+                          {t.history.openInTranslator}
+                        </Button>
+                        <Button className="h-12 rounded-xl bg-primary text-primary-foreground" onClick={() => copyToClipboard(selectedItem.translatedText)}>
+                          {t.common.copy}
+                        </Button>
+                      </div>
                     )}
-                    <Button variant="outline" className="h-12 rounded-xl" onClick={() => restoreItem(selectedItem)}>
-                      {t.history.openInTranslator}
-                    </Button>
-                    <Button className="h-12 rounded-xl bg-primary text-primary-foreground" onClick={() => copyToClipboard(selectedItem.translatedText)}>
-                      {t.common.copy}
-                    </Button>
                   </div>
                 </motion.div>
               )}
