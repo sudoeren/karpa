@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
-import { ScrollArea } from "@/components/ui/scroll-area"
+
 import {
   Sun, Moon, Monitor, Globe,
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner, Lightning,
   Bell, SpeakerHigh, Info, User, ArrowSquareOut,
   Key, ComputerTower, Cloud, Eye, EyeSlash, SquaresFour, Sliders,
-  HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass
+  HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -26,6 +26,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
@@ -57,12 +66,11 @@ export default function SettingsPage() {
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [models, setModels] = useState<Model[]>([])
-  const [modelSearch, setModelSearch] = useState("")
   const [selectedModel, setSelectedModel] = useState<string>("")
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [notificationSound, setNotificationSound] = useState(true)
 
-  const fetchModels = useCallback(async (url: string, provider: ProviderType, key?: string) => {
+  const fetchModels = useCallback(async (url: string, provider: ProviderType, key?: string, currentSelected?: string) => {
     try {
       const response = await fetch('/api/models', {
         method: 'POST',
@@ -72,19 +80,19 @@ export default function SettingsPage() {
       const data = await response.json()
       if (data.success) {
         setModels(data.models)
-        if (!selectedModel && data.models.length > 0) {
-          const savedModel = localStorage.getItem("llm-model")
-          if (savedModel && data.models.some((m: Model) => m.id === savedModel)) {
-            setSelectedModel(savedModel)
-          } else {
-            setSelectedModel(data.models[0].id)
-          }
+        const savedModel = localStorage.getItem("llm-model")
+        if (savedModel && data.models.some((m: Model) => m.id === savedModel)) {
+          setSelectedModel(savedModel)
+        } else if (currentSelected && data.models.some((m: Model) => m.id === currentSelected)) {
+          setSelectedModel(currentSelected)
+        } else if (data.models.length > 0) {
+          setSelectedModel(data.models[0].id)
         }
       }
     } catch (error) {
       console.error("Failed to fetch models", error)
     }
-  }, [selectedModel])
+  }, [])
 
   useEffect(() => {
     const savedProvider = localStorage.getItem("llm-provider") as ProviderType | null
@@ -109,13 +117,13 @@ export default function SettingsPage() {
         setApiUrl(oldUrl)
         if (oldModel) setSelectedModel(oldModel)
         if (oldTemp) setTemperature(parseFloat(oldTemp))
-        fetchModels(oldUrl, "lmstudio")
+        fetchModels(oldUrl, "lmstudio", undefined, oldModel || undefined)
       }
     } else {
       setSelectedProvider(savedProvider)
       if (savedUrl) {
         setApiUrl(savedUrl)
-        fetchModels(savedUrl, savedProvider, savedKey || undefined)
+        fetchModels(savedUrl, savedProvider, savedKey || undefined, savedModel || undefined)
       } else {
         const defaultUrl = PROVIDERS[savedProvider]?.defaultUrl || ''
         setApiUrl(defaultUrl)
@@ -127,7 +135,7 @@ export default function SettingsPage() {
     if (savedModel) setSelectedModel(savedModel)
     if (savedNotifs) setNotificationsEnabled(savedNotifs === 'true')
     if (savedNotifSound) setNotificationSound(savedNotifSound !== 'false')
-  }, [fetchModels])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleProviderChange = (provider: ProviderType) => {
     setSelectedProvider(provider)
@@ -135,7 +143,6 @@ export default function SettingsPage() {
     setApiUrl(info.defaultUrl)
     setApiKey("")
     setModels([])
-    setModelSearch("")
     setSelectedModel(info.defaultModel)
     setConnectionStatus('idle')
 
@@ -269,7 +276,7 @@ export default function SettingsPage() {
       const data = await response.json()
       if (data.success) {
         setConnectionStatus('success')
-        await fetchModels(apiUrl, selectedProvider, apiKey || undefined)
+        await fetchModels(apiUrl, selectedProvider, apiKey || undefined, selectedModel || undefined)
         toast.success(t.settings.connectionSuccess)
       } else {
         setConnectionStatus('error')
@@ -530,60 +537,30 @@ export default function SettingsPage() {
 
                   <div className="space-y-3">
                     <Label className="text-xs text-muted-foreground">{t.settings.activeModel}</Label>
-                    {models.length > 0 ? (
-                      <div className="border border-border rounded-xl overflow-hidden bg-background">
-                        <div className="relative border-b border-border">
-                          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-                          <Input
-                            value={modelSearch}
-                            onChange={(e) => setModelSearch(e.target.value)}
-                            className="h-9 pl-9 pr-3 border-0 rounded-none bg-transparent text-xs shadow-none focus-visible:ring-0"
-                            placeholder="Search models..."
-                          />
-                        </div>
-                        <ScrollArea className="h-48">
-                          <div className="py-1">
-                            {models.filter(m => !modelSearch || m.id.toLowerCase().includes(modelSearch.toLowerCase())).map((m) => (
-                              <button
-                                key={m.id}
-                                onClick={() => setSelectedModel(m.id)}
-                                className={cn(
-                                  "w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left transition-colors",
-                                  selectedModel === m.id
-                                    ? "bg-primary/5 text-primary"
-                                    : "text-foreground hover:bg-muted"
-                                )}
-                              >
-                                <Check
-                                  className={cn(
-                                    "size-3.5 shrink-0",
-                                    selectedModel === m.id ? "opacity-100 text-primary" : "opacity-0"
-                                  )}
-                                />
-                                <span className="truncate font-medium">{m.id}</span>
-                              </button>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                        <div className="border-t border-border px-3 py-1.5 flex items-center justify-between">
-                          <span className="text-[10px] text-muted-foreground/50">
-                            {models.filter(m => !modelSearch || m.id.toLowerCase().includes(modelSearch.toLowerCase())).length} / {models.length} models
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="w-full h-10 px-4 rounded-xl border border-border bg-background flex items-center justify-between gap-2 text-sm hover:bg-muted/30 transition-colors">
+                          <span className={selectedModel ? "font-mono text-xs truncate" : "text-xs text-muted-foreground"}>
+                            {selectedModel || (models.length > 0 ? "Select a model" : "Enter model name")}
                           </span>
-                          {selectedModel && (
-                            <span className="text-[10px] font-mono text-primary/60 truncate max-w-[160px]">{selectedModel}</span>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="border border-border rounded-xl p-3 bg-background">
-                        <Input
-                          value={selectedModel}
-                          onChange={(e) => setSelectedModel(e.target.value)}
-                          className="h-9 px-3 rounded-lg border-border/80 font-mono text-xs"
-                          placeholder={providerInfo.defaultModel || t.settings.enterModelName}
+                          <CaretDown className="size-3.5 text-muted-foreground shrink-0" />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-popover border-border gap-0 p-0 rounded-2xl max-w-md">
+                        <DialogHeader className="px-4 pt-4 pb-2">
+                          <DialogTitle className="text-sm font-semibold">Select Model</DialogTitle>
+                          <DialogDescription className="text-xs">
+                            Choose a model for translation
+                          </DialogDescription>
+                        </DialogHeader>
+                        <ModelPickerDialog
+                          models={models}
+                          selected={selectedModel}
+                          onSelect={setSelectedModel}
+                          manualPlaceholder={providerInfo.defaultModel || t.settings.enterModelName}
                         />
-                      </div>
-                    )}
+                      </DialogContent>
+                    </Dialog>
                   </div>
 
                   <div className="space-y-3 pt-2">
@@ -767,6 +744,82 @@ export default function SettingsPage() {
 }
 
 /* SUB-COMPONENTS */
+
+function ModelPickerDialog({ models, selected, onSelect, manualPlaceholder }: {
+  models: Model[]
+  selected: string
+  onSelect: (id: string) => void
+  manualPlaceholder: string
+}) {
+  const [query, setQuery] = useState("")
+
+  const filtered = query
+    ? models.filter(m => m.id.toLowerCase().includes(query.toLowerCase()))
+    : models
+
+  if (models.length === 0) {
+    return (
+      <div className="p-4 pt-2">
+        <Input
+          value={selected}
+          onChange={(e) => onSelect(e.target.value)}
+          className="h-10 px-4 rounded-xl border-border font-mono text-sm"
+          placeholder={manualPlaceholder}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="relative px-4 pb-2">
+        <MagnifyingGlass className="absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full h-10 pl-10 pr-4 text-sm bg-muted/50 border border-border rounded-xl outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground/50"
+          placeholder="Search models..."
+          autoFocus
+        />
+      </div>
+      <div className="max-h-80 overflow-y-auto overscroll-contain border-t border-border">
+        {filtered.map((m) => (
+          <DialogClose key={m.id} asChild>
+            <button
+              onClick={() => onSelect(m.id)}
+              className={cn(
+                "w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-b border-border/50 last:border-0",
+                selected === m.id
+                  ? "bg-primary/5 text-primary font-medium"
+                  : "text-foreground hover:bg-muted"
+              )}
+            >
+              <div className={cn(
+                "size-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                selected === m.id
+                  ? "border-primary bg-primary"
+                  : "border-muted-foreground/30"
+              )}>
+                {selected === m.id && <Check className="size-3 text-primary-foreground" />}
+              </div>
+              <span className="truncate">{m.id}</span>
+            </button>
+          </DialogClose>
+        ))}
+        {filtered.length === 0 && (
+          <div className="px-4 py-10 text-sm text-muted-foreground/50 text-center">
+            No models match "<span className="font-mono">{query}</span>"
+          </div>
+        )}
+      </div>
+      <div className="px-4 py-2.5 flex items-center justify-between border-t border-border">
+        <span className="text-xs text-muted-foreground/50">
+          {filtered.length} / {models.length} models
+        </span>
+      </div>
+    </div>
+  )
+}
 
 function ToggleTile({ icon: Icon, title, desc, checked, onChange, disabled = false }: { icon: any, title: string, desc: string, checked: boolean, onChange: any, disabled?: boolean }) {
   return (
