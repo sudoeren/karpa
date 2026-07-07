@@ -30,6 +30,9 @@ export type ProviderKey = keyof typeof CANONICAL_CLOUD_HOSTS | 'lmstudio' | 'oll
  * allowed, and CodeQL accepts a validated URL as a clean source.
  */
 export function validateProviderUrl(url: string, provider: string): void {
+  if (!url || !url.trim()) {
+    throw new Error(`${provider} URL is required. Please enter a valid URL in Settings.`)
+  }
   const parsed = new URL(url)
   const hostname = parsed.hostname.toLowerCase()
 
