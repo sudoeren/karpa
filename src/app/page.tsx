@@ -504,7 +504,7 @@ function TranslatorWorkspace() {
                       value={sourceText}
                       onChange={(e) => setSourceText(e.target.value)}
                       placeholder={t.translator.enterText}
-                      className="flex-1 resize-none border-none focus-visible:ring-0 rounded-none p-4 md:p-6 text-base md:text-lg bg-transparent custom-scrollbar"
+                      className="flex-1 resize-none border-none focus-visible:ring-0 rounded-none p-4 md:p-6 text-base md:text-lg font-light placeholder:text-muted-foreground/40 bg-transparent custom-scrollbar"
                       spellCheck={false}
                     />
                     <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3 md:p-4 bg-gradient-to-t from-card/90 to-transparent shrink-0">
@@ -567,7 +567,7 @@ function TranslatorWorkspace() {
                       {translatedText ? (
                         <MarkdownViewer content={translatedText} className="text-base md:text-lg leading-relaxed" />
                       ) : (
-                        <p className="text-muted-foreground italic text-sm md:text-base">{t.translator.translationWillAppear}</p>
+                        <p className="text-muted-foreground/40 text-base md:text-lg font-light">{t.translator.translationWillAppear}</p>
                       )}
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3 md:p-4 bg-gradient-to-t from-muted/40 to-transparent shrink-0">
