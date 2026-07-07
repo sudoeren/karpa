@@ -8,11 +8,11 @@ import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
-  Sun, Moon, Monitor, Globe, 
+  Sun, Moon, Monitor, Globe,
   Trash2, Download, Upload, RefreshCw, Check, Loader2, Zap,
-  GitFork, Code2, ArrowUpRight, Bell, Volume2,
-  Shield, Terminal, LayoutGrid, Sliders, HardDrive, Info, User, ExternalLink,
-  Key, Server, Cloud, Eye, EyeOff
+  Bell, Volume2, Info, User, ExternalLink,
+  Key, Server, Cloud, Eye, EyeOff, LayoutGrid, Sliders,
+  HardDrive, Shield, ArrowUpRight, GitFork
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -47,7 +47,7 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const { resetOnboarding } = useOnboarding()
   const [activeTab, setActiveTab] = useState<TabType>('appearance')
-  
+
   // Provider settings
   const [selectedProvider, setSelectedProvider] = useState<ProviderType>("lmstudio")
   const [apiUrl, setApiUrl] = useState("http://localhost:1234")
@@ -120,7 +120,7 @@ export default function SettingsPage() {
         setApiUrl(defaultUrl)
       }
     }
-    
+
     if (savedKey) setApiKey(savedKey)
     if (savedTemp) setTemperature(parseFloat(savedTemp))
     if (savedModel) setSelectedModel(savedModel)
@@ -136,8 +136,7 @@ export default function SettingsPage() {
     setModels([])
     setSelectedModel(info.defaultModel)
     setConnectionStatus('idle')
-    
-    // Load known models for providers that have them
+
     const knownModels = KNOWN_MODELS[provider]
     if (knownModels) {
       setModels(knownModels.map(id => ({ id, object: 'model' })))
@@ -175,10 +174,8 @@ export default function SettingsPage() {
     localStorage.setItem("llm-provider", selectedProvider)
     localStorage.setItem("llm-api-url", apiUrl)
     localStorage.setItem("llm-temperature", temperature.toString())
-    // apiKey intentionally not persisted to storage (kept in memory only)
     if (selectedModel) localStorage.setItem("llm-model", selectedModel)
 
-    // Also keep backward-compatible keys for sidebar/navbar connection checks
     localStorage.setItem("lm-studio-url", apiUrl)
     if (selectedModel) localStorage.setItem("lm-studio-model", selectedModel)
     localStorage.setItem("lm-studio-temperature", temperature.toString())
@@ -190,13 +187,13 @@ export default function SettingsPage() {
     const data = {
       history: JSON.parse(localStorage.getItem("translation-history") || "[]"),
       favorites: JSON.parse(localStorage.getItem("translation-favorites") || "[]"),
-      settings: { 
-        provider: selectedProvider, 
-        apiUrl, 
-        temperature, 
-        language, 
-        theme, 
-        notificationsEnabled, 
+      settings: {
+        provider: selectedProvider,
+        apiUrl,
+        temperature,
+        language,
+        theme,
+        notificationsEnabled,
         notificationSound,
         model: selectedModel,
       }
@@ -225,7 +222,6 @@ export default function SettingsPage() {
             setSelectedProvider(data.settings.provider)
             handleProviderChange(data.settings.provider)
           }
-          // Support old format
           if (data.settings.lmStudioUrl && !data.settings.apiUrl) {
             setApiUrl(data.settings.lmStudioUrl)
           } else if (data.settings.apiUrl) {
@@ -260,10 +256,10 @@ export default function SettingsPage() {
       const response = await fetch('/api/test-connection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          url: apiUrl, 
-          provider: selectedProvider, 
-          apiKey: apiKey || undefined 
+        body: JSON.stringify({
+          url: apiUrl,
+          provider: selectedProvider,
+          apiKey: apiKey || undefined
         }),
       })
       const data = await response.json()
@@ -295,147 +291,125 @@ export default function SettingsPage() {
 
   return (
     <div className="h-full flex items-stretch md:items-center justify-center p-0 md:p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-5xl h-full md:h-[700px] bg-card md:border md:border-border md:rounded-[32px] shadow-2xl overflow-hidden flex flex-col md:flex-row"
-      >
-        {/* Mobile Tab Bar - horizontal scroll on mobile */}
-        <div className="md:hidden border-b border-border bg-muted/20 shrink-0">
-          <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
+      <div className="w-full max-w-5xl h-full md:h-[700px] bg-card border border-border rounded-2xl overflow-hidden flex flex-col md:flex-row">
+        {/* Mobile Header */}
+        <div className="md:hidden border-b border-border">
+          <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-primary/10 rounded-lg">
-                <Logo size={18} />
-              </div>
-              <span className="font-bold text-sm tracking-tight">{t.settings.title}</span>
+              <Logo size={20} />
+              <span className="font-semibold text-sm">{t.settings.title}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className={cn(
-                "size-1.5 rounded-full",
-                connectionStatus === 'success' ? "bg-emerald-500" : "bg-muted-foreground/30"
-              )} />
-              <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
-                {connectionStatus === 'success' ? t.settings.coreOnline : t.settings.coreOffline}
-              </span>
+            <div className={cn(
+              "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium",
+              connectionStatus === 'success' ? "text-emerald-600" : "text-muted-foreground"
+            )}>
+              <span className={cn("size-1.5 rounded-full", connectionStatus === 'success' ? "bg-emerald-500" : "bg-muted-foreground/30")} />
+              {connectionStatus === 'success' ? t.settings.coreOnline : t.settings.coreOffline}
             </div>
           </div>
-          <nav className="flex items-center gap-1 p-2 overflow-x-auto custom-scrollbar">
-            {sidebarItems.map((item) => {
-              const isActive = activeTab === item.id
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <item.icon className="size-3.5" />
-                  <span>{item.label}</span>
-                </button>
-              )
-            })}
-          </nav>
+          <div className="flex gap-1 px-3 pb-3 overflow-x-auto">
+            {sidebarItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors",
+                  activeTab === item.id
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <item.icon className="size-3.5" />
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:flex w-64 border-r border-border bg-muted/20 flex-col p-6 space-y-8">
-          <div className="flex items-center gap-3 px-2">
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <Logo size={24} />
-            </div>
-            <h1 className="font-bold text-lg tracking-tight">{t.settings.title}</h1>
+        <div className="hidden md:flex w-56 border-r border-border flex-col p-5 gap-8">
+          <div className="flex items-center gap-2.5 px-1">
+            <Logo size={24} />
+            <h1 className="font-semibold text-base">{t.settings.title}</h1>
           </div>
 
           <nav className="flex-1 space-y-1">
-            {sidebarItems.map((item) => {
-              const isActive = activeTab === item.id
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative",
-                    isActive 
-                      ? "text-foreground bg-accent/50 shadow-sm" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  <item.icon className={cn(
-                    "size-4.5 transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground/50"
-                  )} />
-                  <span className="text-sm font-medium relative z-10">{item.label}</span>
-                  {isActive && (
-                    <motion.div 
-                      layoutId="sidebar-active-indicator"
-                      className="w-1 h-4 bg-primary rounded-full absolute left-0" 
-                    />
-                  )}
-                </button>
-              )
-            })}
+            {sidebarItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={cn(
+                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors",
+                  activeTab === item.id
+                    ? "bg-primary/5 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                <item.icon className="size-4" />
+                {item.label}
+              </button>
+            ))}
           </nav>
 
-          <div className="pt-6 border-t border-border space-y-4">
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/30 border border-border">
-               <div className={cn(
-                 "size-1.5 rounded-full",
-                 connectionStatus === 'success' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" : "bg-muted-foreground/30"
-               )} />
-               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                 {connectionStatus === 'success' ? t.settings.coreOnline : t.settings.coreOffline}
-               </span>
+          <div className="pt-5 border-t border-border">
+            <div className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium",
+              connectionStatus === 'success' ? "text-emerald-600" : "text-muted-foreground"
+            )}>
+              <span className={cn("size-1.5 rounded-full", connectionStatus === 'success' ? "bg-emerald-500" : "bg-muted-foreground/30")} />
+              {connectionStatus === 'success' ? t.settings.coreOnline : t.settings.coreOffline}
             </div>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col bg-muted/[0.02]">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, x: 5 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -5 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
-              className="flex-1 p-4 md:p-12 overflow-y-auto custom-scrollbar"
+              className="flex-1 p-6 md:p-10 overflow-y-auto"
             >
               {activeTab === 'appearance' && (
-                <div className="max-w-2xl space-y-6 md:space-y-10">
-                  <SectionHeader title={t.settings.appearance} desc={t.settings.appearanceDesc} icon={LayoutGrid} />
-                  
-                  <div className="space-y-4">
-                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.colorTheme}</Label>
-                    <div className="grid grid-cols-3 gap-3">
+                <div className="max-w-2xl space-y-8">
+                  <div className="space-y-1">
+                    <h2 className="text-xl font-semibold tracking-tight">{t.settings.appearance}</h2>
+                    <p className="text-sm text-muted-foreground">{t.settings.appearanceDesc}</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-xs text-muted-foreground">{t.settings.colorTheme}</Label>
+                    <div className="grid grid-cols-3 gap-2">
                       {[
                         { id: 'light', icon: Sun, label: t.common.light },
                         { id: 'dark', icon: Moon, label: t.common.dark },
                         { id: 'system', icon: Monitor, label: t.common.system }
-                      ].map((tItem) => (
+                      ].map((item) => (
                         <button
-                          key={tItem.id}
-                          onClick={() => setTheme(tItem.id)}
+                          key={item.id}
+                          onClick={() => setTheme(item.id)}
                           className={cn(
-                            "flex items-center gap-3 p-4 rounded-2xl border transition-all duration-200",
-                            theme === tItem.id 
-                              ? "bg-foreground text-background border-foreground shadow-lg" 
-                              : "bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                            "flex items-center gap-2.5 p-3.5 rounded-xl border transition-colors",
+                            theme === item.id
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
                           )}
                         >
-                          <tItem.icon className="size-4" />
-                          <span className="text-xs font-bold uppercase tracking-wider">{tItem.label}</span>
+                          <item.icon className={cn("size-4", theme === item.id ? "text-primary" : "text-muted-foreground")} />
+                          <span className={cn("text-sm font-medium", theme === item.id ? "text-foreground" : "text-muted-foreground")}>
+                            {item.label}
+                          </span>
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.systemLanguage}</Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="space-y-3">
+                    <Label className="text-xs text-muted-foreground">{t.settings.systemLanguage}</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {[
                         { id: 'en', native: 'English', flag: '🇺🇸' },
                         { id: 'tr', native: 'Türkçe', flag: '🇹🇷' },
@@ -447,15 +421,17 @@ export default function SettingsPage() {
                           key={l.id}
                           onClick={() => setLanguage(l.id as any)}
                           className={cn(
-                            "flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200",
-                            language === l.id 
-                              ? "bg-primary/10 border-primary/30 text-primary" 
-                              : "bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                            "flex items-center gap-3 p-3.5 rounded-xl border transition-colors",
+                            language === l.id
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
                           )}
                         >
-                          <span className="text-xl">{l.flag}</span>
-                          <span className="text-sm font-bold">{l.native}</span>
-                          {language === l.id && <Check className="size-4 ml-auto" />}
+                          <span className="text-lg">{l.flag}</span>
+                          <span className={cn("text-sm font-medium", language === l.id ? "text-foreground" : "text-muted-foreground")}>
+                            {l.native}
+                          </span>
+                          {language === l.id && <Check className="size-3.5 text-primary ml-auto" />}
                         </button>
                       ))}
                     </div>
@@ -464,156 +440,155 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'connection' && (
-                <div className="max-w-2xl space-y-5 md:space-y-8">
-                  <SectionHeader title={t.settings.connection} desc={t.settings.connectionDesc} icon={Sliders} />
-                  
-                  <div className="space-y-6">
-                    {/* Provider Selection */}
-                    <div className="space-y-3">
-                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.provider}</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {(Object.entries(PROVIDERS) as [ProviderType, typeof PROVIDERS[ProviderType]][]).map(([key, info]) => (
-                          <button
-                            key={key}
-                            onClick={() => handleProviderChange(key)}
-                            className={cn(
-                              "flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 text-left",
-                              selectedProvider === key
-                                ? "bg-primary/10 border-primary/30 text-foreground shadow-sm"
-                                : "bg-muted/20 border-border text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                            )}
-                          >
-                            <div className={cn(
-                              "size-8 rounded-lg flex items-center justify-center shrink-0",
-                              selectedProvider === key ? "bg-primary/20" : "bg-muted/30"
-                            )}>
-                              {info.requiresApiKey ? (
-                                <Cloud className={cn("size-4", selectedProvider === key && "text-primary")} />
-                              ) : (
-                                <Server className={cn("size-4", selectedProvider === key && "text-primary")} />
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold truncate">{info.name}</p>
-                              <p className="text-[10px] text-muted-foreground truncate">{info.description}</p>
-                            </div>
-                            {selectedProvider === key && <Check className="size-3.5 text-primary shrink-0 ml-auto" />}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* API URL */}
-                    <div className="space-y-3">
-                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.engineUrl}</Label>
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <Input
-                          value={apiUrl}
-                          onChange={(e) => setApiUrl(e.target.value)}
-                          className="h-12 pl-5 rounded-xl bg-background border-border focus:border-primary transition-all font-mono text-sm"
-                          placeholder={providerInfo.placeholder}
-                        />
-                        <Button
-                          variant="outline"
-                          className="h-12 px-6 rounded-xl border-border bg-muted/20 shrink-0"
-                          onClick={testConnection}
-                          disabled={isTestingConnection}
-                        >
-                          {isTestingConnection ? <Loader2 className="size-4 animate-spin sm:mr-2" /> : <RefreshCw className="size-4 sm:mr-2" />}
-                          <span className="hidden sm:inline">{t.settings.testConnection}</span>
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* API Key (for providers that require it) */}
-                    {providerInfo.requiresApiKey && (
-                      <div className="space-y-3">
-                        <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.apiKey}</Label>
-                        <div className="relative">
-                          <Input
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                            type={showApiKey ? "text" : "password"}
-                            className="h-12 pl-5 pr-12 rounded-xl bg-background border-border focus:border-primary transition-all font-mono text-sm"
-                            placeholder={t.settings.apiKeyPlaceholder}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowApiKey(!showApiKey)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            {showApiKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                          </button>
-                        </div>
-                        <p className="text-[10px] text-muted-foreground font-medium leading-relaxed ml-1">{t.settings.apiKeyDesc}</p>
-                      </div>
-                    )}
-
-                    {/* Model Selection */}
-                    <div className="space-y-3">
-                      <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.activeModel}</Label>
-                      {models.length > 0 ? (
-                        <Select value={selectedModel} onValueChange={setSelectedModel}>
-                          <SelectTrigger className="h-12 rounded-xl bg-background border-border px-5">
-                            <SelectValue placeholder="Select Model" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover border-border">
-                            {models.map((m) => (
-                              <SelectItem key={m.id} value={m.id}>{m.id}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input
-                          value={selectedModel}
-                          onChange={(e) => setSelectedModel(e.target.value)}
-                          className="h-12 pl-5 rounded-xl bg-background border-border focus:border-primary transition-all font-mono text-sm"
-                          placeholder={providerInfo.defaultModel || "Enter model name..."}
-                        />
-                      )}
-                    </div>
-
-                    {/* Temperature */}
-                    <div className="space-y-4 pt-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">{t.settings.temperature}</Label>
-                        <span className="text-xs font-mono font-bold text-primary">{temperature.toFixed(1)}</span>
-                      </div>
-                      <Slider
-                        value={[temperature]}
-                        onValueChange={(v) => setTemperature(v[0])}
-                        min={0}
-                        max={1}
-                        step={0.1}
-                      />
-                      <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">{t.settings.temperatureDesc}</p>
-                    </div>
-
-                    <Button onClick={saveSettings} className="w-full h-12 rounded-xl font-bold text-sm shadow-xl shadow-primary/10">
-                      {t.settings.saveConfig}
-                    </Button>
+                <div className="max-w-2xl space-y-6">
+                  <div className="space-y-1">
+                    <h2 className="text-xl font-semibold tracking-tight">{t.settings.connection}</h2>
+                    <p className="text-sm text-muted-foreground">{t.settings.connectionDesc}</p>
                   </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-xs text-muted-foreground">{t.settings.provider}</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(Object.entries(PROVIDERS) as [ProviderType, typeof PROVIDERS[ProviderType]][]).map(([key, info]) => (
+                        <button
+                          key={key}
+                          onClick={() => handleProviderChange(key)}
+                          className={cn(
+                            "flex items-center gap-3 p-3 rounded-xl border transition-colors text-left",
+                            selectedProvider === key
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
+                          )}
+                        >
+                          <div className={cn(
+                            "size-8 rounded-lg flex items-center justify-center shrink-0",
+                            selectedProvider === key ? "bg-primary/10" : "bg-muted"
+                          )}>
+                            {info.requiresApiKey ? (
+                              <Cloud className={cn("size-4", selectedProvider === key && "text-primary")} />
+                            ) : (
+                              <Server className={cn("size-4", selectedProvider === key && "text-primary")} />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{info.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{info.description}</p>
+                          </div>
+                          {selectedProvider === key && <Check className="size-3.5 text-primary shrink-0 ml-auto" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-xs text-muted-foreground">{t.settings.engineUrl}</Label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        value={apiUrl}
+                        onChange={(e) => setApiUrl(e.target.value)}
+                        className="h-10 px-4 rounded-xl bg-background border-border font-mono text-sm"
+                        placeholder={providerInfo.placeholder}
+                      />
+                      <Button
+                        variant="outline"
+                        className="h-10 px-5 rounded-xl shrink-0 text-sm"
+                        onClick={testConnection}
+                        disabled={isTestingConnection}
+                      >
+                        {isTestingConnection ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <RefreshCw className="size-4 mr-1.5" />}
+                        {t.settings.testConnection}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {providerInfo.requiresApiKey && (
+                    <div className="space-y-3">
+                      <Label className="text-xs text-muted-foreground">{t.settings.apiKey}</Label>
+                      <div className="relative">
+                        <Input
+                          value={apiKey}
+                          onChange={(e) => setApiKey(e.target.value)}
+                          type={showApiKey ? "text" : "password"}
+                          className="h-10 pl-4 pr-10 rounded-xl bg-background border-border font-mono text-sm"
+                          placeholder={t.settings.apiKeyPlaceholder}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowApiKey(!showApiKey)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showApiKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{t.settings.apiKeyDesc}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <Label className="text-xs text-muted-foreground">{t.settings.activeModel}</Label>
+                    {models.length > 0 ? (
+                      <Select value={selectedModel} onValueChange={setSelectedModel}>
+                        <SelectTrigger className="h-10 rounded-xl bg-background border-border px-4 text-sm">
+                          <SelectValue placeholder="Select Model" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover border-border">
+                          {models.map((m) => (
+                            <SelectItem key={m.id} value={m.id}>{m.id}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        value={selectedModel}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="h-10 px-4 rounded-xl bg-background border-border font-mono text-sm"
+                        placeholder={providerInfo.defaultModel || "Enter model name..."}
+                      />
+                    )}
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs text-muted-foreground">{t.settings.temperature}</Label>
+                      <span className="text-xs font-mono font-semibold text-primary">{temperature.toFixed(1)}</span>
+                    </div>
+                    <Slider
+                      value={[temperature]}
+                      onValueChange={(v) => setTemperature(v[0])}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                    />
+                    <p className="text-xs text-muted-foreground">{t.settings.temperatureDesc}</p>
+                  </div>
+
+                  <Button onClick={saveSettings} className="w-full h-11 rounded-xl text-sm font-medium">
+                    {t.settings.saveConfig}
+                  </Button>
                 </div>
               )}
 
               {activeTab === 'notifications' && (
-                <div className="max-w-2xl space-y-4 md:space-y-6">
-                  <SectionHeader title={t.settings.notifications} desc={t.settings.notificationsDesc} icon={Bell} />
-                  
-                  <div className="space-y-3">
-                    <ToggleTile 
-                      icon={Bell} 
-                      title={t.settings.enableNotifications} 
-                      desc={t.settings.notifyOnComplete} 
-                      checked={notificationsEnabled} 
-                      onChange={handleNotificationsChange} 
+                <div className="max-w-2xl space-y-6">
+                  <div className="space-y-1">
+                    <h2 className="text-xl font-semibold tracking-tight">{t.settings.notifications}</h2>
+                    <p className="text-sm text-muted-foreground">{t.settings.notificationsDesc}</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <ToggleTile
+                      icon={Bell}
+                      title={t.settings.enableNotifications}
+                      desc={t.settings.notifyOnComplete}
+                      checked={notificationsEnabled}
+                      onChange={handleNotificationsChange}
                     />
-                    <ToggleTile 
-                      icon={Volume2} 
-                      title={t.settings.audioFeedback} 
-                      desc={t.settings.audioFeedbackDesc} 
-                      checked={notificationSound} 
-                      onChange={handleNotificationSoundChange} 
+                    <ToggleTile
+                      icon={Volume2}
+                      title={t.settings.audioFeedback}
+                      desc={t.settings.audioFeedbackDesc}
+                      checked={notificationSound}
+                      onChange={handleNotificationSoundChange}
                       disabled={!notificationsEnabled}
                     />
                   </div>
@@ -621,109 +596,88 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'data' && (
-                <div className="max-w-2xl space-y-6 md:space-y-12">
-                  <div className="space-y-6">
-                    <SectionHeader title={t.settings.vaultTitle} desc={t.settings.vaultDesc} icon={HardDrive} />
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-br from-primary/20 to-transparent rounded-[24px] blur opacity-0 group-hover:opacity-100 transition duration-500" />
-                        <DataButton 
-                          icon={Download} 
-                          title={t.settings.exportData} 
-                          desc="Tüm geçmişinizi ve ayarlarınızı JSON formatında indirin."
-                          onClick={exportData} 
-                          className="bg-card relative"
-                        />
-                      </div>
-                      
-                      <label className="block cursor-pointer group relative">
-                        <div className="absolute -inset-0.5 bg-gradient-to-br from-primary/20 to-transparent rounded-[24px] blur opacity-0 group-hover:opacity-100 transition duration-500" />
-                        <DataButton 
-                          icon={Upload} 
-                          title={t.settings.importData} 
-                          desc="Daha önce yedeklediğiniz verileri sisteme geri yükleyin."
-                          onClick={() => {}} 
-                          className="bg-card relative"
+                <div className="max-w-2xl space-y-10">
+                  <div className="space-y-1">
+                    <h2 className="text-xl font-semibold tracking-tight">{t.settings.vaultTitle}</h2>
+                    <p className="text-sm text-muted-foreground">{t.settings.vaultDesc}</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <DataButton
+                        icon={Download}
+                        title={t.settings.exportData}
+                        desc="Export your history, favorites, and settings as a JSON file."
+                        onClick={exportData}
+                      />
+
+                      <label className="block cursor-pointer">
+                        <DataButton
+                          icon={Upload}
+                          title={t.settings.importData}
+                          desc="Restore your data from a previously exported JSON file."
+                          onClick={() => {}}
                         />
                         <input type="file" accept=".json" className="hidden" onChange={importData} />
                       </label>
                     </div>
 
-                    <div className="p-6 rounded-[24px] bg-primary/[0.03] border border-primary/10 flex items-start gap-4">
-                      <div className="p-3 bg-primary/10 rounded-2xl">
-                        <Info className="size-5 text-primary" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-bold text-foreground">Gizlilik Notu</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          Verileriniz tamamen yerel olarak tarayıcınızda (localStorage) saklanır. 
-                          Dışa aktarma işlemi bu verilerin bir kopyasını oluşturur, silme işlemi ise kalıcı olarak kaldırır.
-                        </p>
+                    <div className="flex items-start gap-3 p-4 rounded-xl border border-border bg-muted/10">
+                      <Info className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="text-xs text-muted-foreground leading-relaxed">
+                        <span className="font-medium text-foreground">Privacy Notice.</span>{" "}
+                        All data is stored locally in your browser (localStorage). Export creates a copy, and clearing permanently removes it.
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-6 md:pt-10 border-t border-border/50 space-y-5 md:space-y-8">
-                    <SectionHeader 
-                      title={t.settings.purgeTitle} 
-                      desc={t.settings.purgeDesc} 
-                      icon={Shield} 
-                      color="text-destructive" 
-                    />
-                    
-                    <div className="grid gap-3">
+                  <div className="pt-6 border-t border-border space-y-6">
+                    <div className="space-y-1">
+                      <h3 className="text-base font-semibold tracking-tight text-destructive">{t.settings.purgeTitle}</h3>
+                      <p className="text-sm text-muted-foreground">{t.settings.purgeDesc}</p>
+                    </div>
+
+                    <div className="space-y-2">
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <button className="w-full flex items-center justify-between p-6 rounded-[24px] border border-destructive/10 bg-destructive/[0.02] hover:bg-destructive/[0.04] transition-all group overflow-hidden relative">
-                            <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity translate-x-4 -translate-y-4">
-                              <Trash2 size={80} />
+                          <button className="w-full flex items-center gap-4 p-4 rounded-xl border border-destructive/20 bg-destructive/[0.02] hover:bg-destructive/[0.04] transition-colors text-left">
+                            <div className="p-2.5 bg-destructive/10 rounded-xl">
+                              <Trash2 className="size-4 text-destructive" />
                             </div>
-                            <div className="flex items-center gap-5 relative z-10">
-                              <div className="p-3 bg-destructive/10 rounded-2xl group-hover:scale-110 transition-transform">
-                                <Trash2 className="size-5 text-destructive" />
-                              </div>
-                              <div className="text-left">
-                                <p className="font-bold text-destructive text-sm tracking-tight">{t.settings.clearData}</p>
-                                <p className="text-[11px] text-destructive/50 font-medium">{t.settings.clearDataDesc}</p>
-                              </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-destructive">{t.settings.clearData}</p>
+                              <p className="text-xs text-destructive/60">{t.settings.clearDataDesc}</p>
                             </div>
-                            <Check className="size-4 text-destructive/20 group-hover:text-destructive transition-colors relative z-10" />
                           </button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-popover border-border rounded-[32px]">
+                        <AlertDialogContent className="bg-popover border-border rounded-2xl max-w-sm">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-2xl font-bold tracking-tight">{t.settings.clearDataTitle}</AlertDialogTitle>
-                            <AlertDialogDescription className="text-muted-foreground text-sm leading-relaxed italic">
-                              "{t.settings.clearDataDesc}"
+                            <AlertDialogTitle className="text-lg font-semibold tracking-tight">{t.settings.clearDataTitle}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm text-muted-foreground">
+                              {t.settings.clearDataDesc}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter className="gap-3 pt-4">
-                            <AlertDialogCancel className="rounded-2xl border-border bg-muted/50">{t.common.cancel}</AlertDialogCancel>
-                            <AlertDialogAction onClick={clearAllData} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-2xl px-8">
+                          <AlertDialogFooter className="gap-2 pt-2">
+                            <AlertDialogCancel className="rounded-xl border-border text-sm">Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={clearAllData} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl px-6 text-sm">
                               {t.common.delete}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
 
-                      <button 
+                      <button
                         onClick={resetOnboarding}
-                        className="w-full flex items-center justify-between p-6 rounded-[24px] border border-border bg-muted/10 hover:bg-muted/20 transition-all group relative overflow-hidden"
+                        className="w-full flex items-center gap-4 p-4 rounded-xl border border-border hover:bg-muted/20 transition-colors text-left"
                       >
-                        <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity translate-x-4 -translate-y-4">
-                          <RefreshCw size={80} />
+                        <div className="p-2.5 bg-muted rounded-xl">
+                          <RefreshCw className="size-4 text-muted-foreground" />
                         </div>
-                        <div className="flex items-center gap-5 relative z-10">
-                          <div className="p-3 bg-muted/20 rounded-2xl group-hover:rotate-180 transition-transform duration-700">
-                            <RefreshCw className="size-5 text-muted-foreground" />
-                          </div>
-                          <div className="text-left">
-                            <p className="font-bold text-sm tracking-tight">{t.settings.resetOnboarding}</p>
-                            <p className="text-[11px] text-muted-foreground font-medium">{t.settings.resetOnboardingDesc}</p>
-                          </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">{t.settings.resetOnboarding}</p>
+                          <p className="text-xs text-muted-foreground">{t.settings.resetOnboardingDesc}</p>
                         </div>
-                        <ArrowUpRight className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors relative z-10" />
+                        <ArrowUpRight className="size-3.5 text-muted-foreground/40" />
                       </button>
                     </div>
                   </div>
@@ -731,126 +685,88 @@ export default function SettingsPage() {
               )}
 
               {activeTab === 'about' && (
-                <div className="max-w-2xl mx-auto space-y-6 md:space-y-10">
-                  {/* Brand & Identity Header */}
-                  <div className="relative p-6 md:p-12 rounded-2xl md:rounded-[48px] bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent border border-primary/5 overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-1000 hidden md:block">
-                      <Logo size={240} />
-                    </div>
-
-                    <div className="relative z-10 space-y-6 md:space-y-8">
-                      <div className="space-y-3 md:space-y-4">
-                        <h2 className="text-4xl md:text-7xl font-black tracking-tighter leading-none text-foreground">Karpa</h2>
-                        <p className="text-sm md:text-lg text-muted-foreground/80 font-medium leading-relaxed max-w-md">
-                          {t.about.description}
-                        </p>
-                      </div>
-
-                      {/* Developer & Project Info - Unified Layout */}
-                      <div className="pt-6 md:pt-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 md:gap-8 border-t border-border/40">
-                        <Link href="https://erencakar.com" target="_blank" className="group/dev">
-                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2 group-hover/dev:text-primary transition-colors">{t.about.developer}</p>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xl md:text-2xl font-bold tracking-tight group-hover/dev:underline decoration-primary/30 underline-offset-8 transition-all">Eren Çakar</span>
-                            <ArrowUpRight className="size-4 text-muted-foreground/20 group-hover/dev:text-primary group-hover/dev:translate-x-0.5 group-hover/dev:-translate-y-0.5 transition-all" />
-                          </div>
-                        </Link>
-
-                        <div className="hidden sm:block w-px h-10 bg-border/40" />
-
-                        <Link href="https://github.com/sudoeren/karpa" target="_blank" className="group/code">
-                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2 group-hover/code:text-primary transition-colors">{t.about.sourceCode}</p>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xl md:text-2xl font-bold tracking-tight group-hover/code:underline decoration-primary/30 underline-offset-8 transition-all">{t.about.openSource}</span>
-                            <GitFork className="size-5 text-muted-foreground/30 group-hover/code:text-foreground transition-colors" />
-                          </div>
-                        </Link>
-                      </div>
+                <div className="max-w-2xl space-y-8">
+                  <div className="space-y-4">
+                    <Logo size={48} />
+                    <div className="space-y-2">
+                      <h2 className="text-4xl font-light tracking-tight">Karpa</h2>
+                      <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                        {t.about.description}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Footer Meta */}
-                  <div className="flex justify-center px-6">
-                    <div className="flex items-center gap-3 px-4 py-1.5 rounded-2xl bg-muted/30 border border-border/50">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t.about.version}</span>
-                      <div className="w-px h-3 bg-border" />
-                      <span className="text-xs font-bold font-mono">1.1.1</span>
-                    </div>
+                  <div className="pt-6 border-t border-border flex flex-col sm:flex-row gap-6">
+                    <Link href="https://erencakar.com" target="_blank" className="group flex items-center gap-3">
+                      <div>
+                        <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.developer}</p>
+                        <span className="text-sm font-medium group-hover:text-primary transition-colors">Eren Çakar</span>
+                      </div>
+                      <ArrowUpRight className="size-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />
+                    </Link>
+
+                    <div className="hidden sm:block w-px bg-border" />
+
+                    <Link href="https://github.com/sudoeren/karpa" target="_blank" className="group flex items-center gap-3">
+                      <div>
+                        <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.sourceCode}</p>
+                        <span className="text-sm font-medium group-hover:text-primary transition-colors">{t.about.openSource}</span>
+                      </div>
+                      <GitFork className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+                    </Link>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border w-fit">
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t.about.version}</span>
+                    <span className="w-px h-3 bg-border" />
+                    <span className="text-xs font-mono font-medium">1.1.1</span>
                   </div>
                 </div>
               )}
             </motion.div>
           </AnimatePresence>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }
 
 /* SUB-COMPONENTS */
 
-function SectionHeader({ title, desc, icon: Icon, color = "text-foreground" }: { title: string, desc: string, icon: any, color?: string }) {
-  return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-2 md:gap-3">
-        <Icon className={cn("size-4 md:size-5", color)} />
-        <h2 className={cn("text-lg md:text-2xl font-bold tracking-tight", color)}>{title}</h2>
-      </div>
-      <p className="text-xs md:text-sm text-muted-foreground font-medium ml-6 md:ml-8 leading-relaxed">{desc}</p>
-    </div>
-  )
-}
-
 function ToggleTile({ icon: Icon, title, desc, checked, onChange, disabled = false }: { icon: any, title: string, desc: string, checked: boolean, onChange: any, disabled?: boolean }) {
   return (
     <div className={cn(
-      "flex items-center justify-between p-5 rounded-2xl border border-border bg-muted/10 transition-all",
+      "flex items-center justify-between p-4 rounded-xl border border-border transition-colors",
       disabled && "opacity-40 pointer-events-none"
     )}>
-      <div className="flex items-center gap-4">
-        <div className="p-2 bg-muted/20 rounded-xl">
-          <Icon className="size-4.5 text-muted-foreground" />
-        </div>
-        <div className="text-left">
-          <p className="text-sm font-bold">{title}</p>
-          <p className="text-[11px] text-muted-foreground font-medium">{desc}</p>
+      <div className="flex items-center gap-3">
+        <Icon className="size-4.5 text-muted-foreground shrink-0" />
+        <div>
+          <p className="text-sm font-medium">{title}</p>
+          <p className="text-xs text-muted-foreground">{desc}</p>
         </div>
       </div>
-      <Switch checked={checked} onCheckedChange={onChange} className="scale-90" />
+      <Switch checked={checked} onCheckedChange={onChange} />
     </div>
   )
 }
 
 function DataButton({ icon: Icon, title, desc, onClick, className }: { icon: any, title: string, desc?: string, onClick: any, className?: string }) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-start gap-5 p-6 rounded-[24px] border border-border bg-muted/10 hover:bg-muted/20 transition-all group text-left",
+        "w-full flex items-center gap-4 p-4 rounded-xl border border-border hover:bg-muted/20 transition-colors text-left",
         className
       )}
     >
-      <div className="p-3 bg-muted/20 rounded-2xl group-hover:scale-110 group-hover:bg-primary/10 group-hover:text-primary transition-all shrink-0">
-        <Icon className="size-5 transition-colors" />
+      <div className="p-2.5 bg-muted rounded-xl shrink-0">
+        <Icon className="size-4 text-muted-foreground" />
       </div>
-      <div className="space-y-1">
-        <p className="font-bold text-sm tracking-tight">{title}</p>
-        {desc && <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">{desc}</p>}
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{title}</p>
+        {desc && <p className="text-xs text-muted-foreground">{desc}</p>}
       </div>
     </button>
-  )
-}
-
-function SocialLinkItem({ icon: Icon, label, href }: { icon: any, label: string, href: string }) {
-  return (
-    <Link 
-      href={href} 
-      target="_blank"
-      className="flex items-center gap-3 px-4 py-2 rounded-xl border border-border bg-muted/10 hover:bg-muted/20 hover:border-primary/20 hover:text-primary transition-all group"
-    >
-      <Icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
-      <span className="text-xs font-bold tracking-tight">{label}</span>
-      <ExternalLink className="size-3 opacity-30 group-hover:opacity-100 transition-all" />
-    </Link>
   )
 }
