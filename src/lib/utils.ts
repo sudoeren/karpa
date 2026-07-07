@@ -40,7 +40,7 @@ export function splitIntoChunks(text: string, maxChunkSize: number = 2000, prese
            if (!preserveFormatting) {
                // Try to find a sentence ending
                const match = remaining.substring(0, maxChunkSize).match(/(?<=[.!?])\s+$/);
-               if (match && match.index) splitIndex = match.index;
+               if (match && match.index !== undefined) splitIndex = match.index;
            }
            
            chunks.push(remaining.substring(0, splitIndex));
