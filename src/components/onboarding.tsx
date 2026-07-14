@@ -439,66 +439,70 @@ function LanguagesStep({
       <h2 className="text-2xl font-semibold tracking-tight mb-1.5">
         Your Languages
       </h2>
-      <p className="text-sm text-muted-foreground mb-8">
+      <p className="text-sm text-muted-foreground mb-6">
         Select the languages you&apos;ll translate between
       </p>
 
-      <div className="space-y-6">
-        <div>
-          <div className="flex items-center gap-2 mb-3">
+      <div className="flex gap-4 h-[55vh]">
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex items-center gap-2 mb-3 shrink-0">
             <span className="text-sm font-medium">{t.onboarding.nativeLanguage}</span>
             {nativeLang && (
               <span className="text-[11px] text-muted-foreground">— {nativeLang}</span>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {translationLanguages.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => setNativeLang(lang.name)}
-                className={cn(
-                  "p-3 rounded-xl border transition-colors text-center",
-                  nativeLang === lang.name
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
-                )}
-              >
-                <span className="text-xl block mb-0.5">{lang.flag}</span>
-                <span className="text-xs font-medium block">{lang.name}</span>
-                {nativeLang === lang.name && (
-                  <Check className="size-3 mx-auto mt-1 text-primary" />
-                )}
-              </button>
-            ))}
+          <div className="overflow-y-auto hide-scrollbar flex-1 min-h-0">
+            <div className="grid grid-cols-2 gap-2">
+              {translationLanguages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => setNativeLang(lang.name)}
+                  className={cn(
+                    "p-3 rounded-xl border transition-colors text-center",
+                    nativeLang === lang.name
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  <span className="text-xl block mb-0.5">{lang.flag}</span>
+                  <span className="text-xs font-medium block">{lang.name}</span>
+                  {nativeLang === lang.name && (
+                    <Check className="size-3 mx-auto mt-1 text-primary" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center gap-2 mb-3">
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex items-center gap-2 mb-3 shrink-0">
             <span className="text-sm font-medium">{t.onboarding.targetLanguage}</span>
             {targetLang && (
               <span className="text-[11px] text-muted-foreground">— {targetLang}</span>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {translationLanguages.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => setTargetLang(lang.name)}
-                className={cn(
-                  "p-3 rounded-xl border transition-colors text-center",
-                  targetLang === lang.name
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
-                )}
-              >
-                <span className="text-xl block mb-0.5">{lang.flag}</span>
-                <span className="text-xs font-medium block">{lang.name}</span>
-                {targetLang === lang.name && (
-                  <Check className="size-3 mx-auto mt-1 text-primary" />
-                )}
-              </button>
-            ))}
+          <div className="overflow-y-auto hide-scrollbar flex-1 min-h-0">
+            <div className="grid grid-cols-2 gap-2">
+              {translationLanguages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => setTargetLang(lang.name)}
+                  className={cn(
+                    "p-3 rounded-xl border transition-colors text-center",
+                    targetLang === lang.name
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  <span className="text-xl block mb-0.5">{lang.flag}</span>
+                  <span className="text-xs font-medium block">{lang.name}</span>
+                  {targetLang === lang.name && (
+                    <Check className="size-3 mx-auto mt-1 text-primary" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
