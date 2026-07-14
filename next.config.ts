@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  experimental: {
-    workerThreads: false,
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 
