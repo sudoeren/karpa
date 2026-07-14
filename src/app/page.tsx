@@ -10,7 +10,7 @@ import {
   ArrowsLeftRight, Spinner, Copy, Check, SpeakerHigh, SpeakerX, X, Star,
   Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Calendar, Trash, ArrowRight, ArrowSquareOut
 } from "@phosphor-icons/react"
-import { cn } from "@/lib/utils"
+import { cn, splitIntoChunks, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "@/components/logo"
@@ -20,7 +20,6 @@ import { useOnboarding } from "@/contexts/onboarding-context"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { splitIntoChunks } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -31,6 +30,8 @@ type TranslationItem = {
   timestamp: number
   tone?: string
   isFavorite?: boolean
+  mode?: 'text' | 'file'
+  fileName?: string
 }
 
 const languages = [
@@ -96,6 +97,7 @@ function TranslatorWorkspace() {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
   const tts = useTTS()
 
   useEffect(() => {
@@ -103,28 +105,37 @@ function TranslatorWorkspace() {
     const translation = searchParams.get("translation")
     const src = searchParams.get("sourceLang")
     const tgt = searchParams.get("targetLang")
+    const modeParam = searchParams.get("mode")
+    const fileName = searchParams.get("fileName")
 
     if (text) setSourceText(decodeURIComponent(text))
     if (translation) setTranslatedText(decodeURIComponent(translation))
     if (src) setSourceLanguage(src)
     if (tgt) setTargetLanguage(tgt)
+    if (modeParam === 'file' && fileName && text) {
+      setMode('file')
+      setFileContent(decodeURIComponent(text))
+      setTranslatedFileContent(decodeURIComponent(translation || ''))
+      const fakeFile = new File([decodeURIComponent(text)], fileName, { type: 'text/plain' })
+      setSelectedFile(fakeFile)
+    }
 
     const saved = localStorage.getItem("translation-history")
-    if (saved) setHistory(JSON.parse(saved))
+    if (saved) setHistory(safeJSONParse(saved, []))
   }, [searchParams])
 
   const addToHistory = (item: TranslationItem) => {
     const savedH = localStorage.getItem("translation-history")
-    let historyData: TranslationItem[] = savedH ? JSON.parse(savedH) : []
+    let historyData: TranslationItem[] = safeJSONParse(savedH, [])
     historyData = [item, ...historyData].slice(0, 100)
-    localStorage.setItem("translation-history", JSON.stringify(historyData))
+    safeSetItem("translation-history", JSON.stringify(historyData))
     setHistory(historyData)
   }
 
   const deleteHistoryItem = (id: string) => {
     const newHistory = history.filter(item => item.id !== id)
     setHistory(newHistory)
-    localStorage.setItem("translation-history", JSON.stringify(newHistory))
+    safeSetItem("translation-history", JSON.stringify(newHistory))
   }
 
   const restoreHistoryItem = (item: TranslationItem) => {
@@ -133,12 +144,20 @@ function TranslatorWorkspace() {
     setSourceLanguage(item.sourceLang)
     setTargetLanguage(item.targetLang)
     if (item.tone) setTone(item.tone)
-    setMode("text")
+    if (item.mode === 'file' && item.fileName) {
+      setMode('file')
+      setFileContent(item.sourceText)
+      setTranslatedFileContent(item.translatedText)
+      const fakeFile = new File([item.sourceText], item.fileName, { type: 'text/plain' })
+      setSelectedFile(fakeFile)
+    } else {
+      setMode('text')
+    }
   }
   const addToFavorites = () => {
     if (!translatedText) return
     const savedF = localStorage.getItem("translation-favorites")
-    let favorites: TranslationItem[] = savedF ? JSON.parse(savedF) : []
+    let favorites: TranslationItem[] = safeJSONParse(savedF, [])
 
     const item: TranslationItem = {
       id: Date.now().toString(),
@@ -148,12 +167,14 @@ function TranslatorWorkspace() {
       targetLang: targetLanguage,
       timestamp: Date.now(),
       tone,
-      isFavorite: true
+      isFavorite: true,
+      mode: mode as 'text' | 'file',
+      ...(mode === 'file' && selectedFile ? { fileName: selectedFile.name } : {}),
     }
 
     if (!favorites.some(f => f.translatedText === item.translatedText)) {
       favorites = [item, ...favorites]
-      localStorage.setItem("translation-favorites", JSON.stringify(favorites))
+      safeSetItem("translation-favorites", JSON.stringify(favorites))
       toast.success(t.favorites.added)
     } else {
       toast.info(t.favorites.alreadyExists)
@@ -202,6 +223,7 @@ function TranslatorWorkspace() {
       const savedTemp = localStorage.getItem("llm-temperature") || localStorage.getItem("lm-studio-temperature")
       const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
       const savedApiKey = sessionStorage.getItem("llm-api-key")
+      const finalApiKey = savedApiKey ? decodeApiKey(savedApiKey) : undefined
 
       for (let i = 0; i < chunks.length; i++) {
         setCurrentChunk(i + 1)
@@ -225,7 +247,7 @@ function TranslatorWorkspace() {
             apiUrl: savedUrl,
             temperature: savedTemp ? parseFloat(savedTemp) : undefined,
             provider: savedProvider,
-            apiKey: savedApiKey || undefined,
+            apiKey: finalApiKey,
             preserveFormatting: true,
           }),
           signal: abortControllerRef.current.signal,
@@ -255,7 +277,9 @@ function TranslatorWorkspace() {
         sourceLang: sourceLanguage,
         targetLang: targetLanguage,
         timestamp: Date.now(),
-        tone
+        tone,
+        mode: mode as 'text' | 'file',
+        ...(mode === 'file' && selectedFile ? { fileName: selectedFile.name } : {}),
       }
       addToHistory(newEntry)
 
@@ -275,7 +299,10 @@ function TranslatorWorkspace() {
         const soundEnabled = localStorage.getItem("karpa-notification-sound") !== "false"
         if (soundEnabled) {
           try {
-            const ctx = new AudioContext()
+            if (!audioContextRef.current) {
+              audioContextRef.current = new AudioContext()
+            }
+            const ctx = audioContextRef.current
             const osc = ctx.createOscillator()
             const gain = ctx.createGain()
             osc.connect(gain)
@@ -323,8 +350,9 @@ function TranslatorWorkspace() {
 
     const reader = new FileReader()
     reader.onload = (event) => {
-      const content = event.target?.result as string
-      setFileContent(content)
+      const result = event.target?.result
+      if (typeof result !== 'string') return
+      setFileContent(result)
       setSelectedFile(file)
       setTranslatedFileContent("")
     }
@@ -888,7 +916,7 @@ function TranslatorWorkspace() {
                               <Trash className="size-3" />
                             </button>
                           </div>
-                          <p className="text-xs font-medium mt-2 line-clamp-1">{item.sourceText}</p>
+                          <p className="text-xs font-medium mt-2 line-clamp-1">{item.mode === 'file' && item.fileName ? item.fileName : item.sourceText}</p>
                           <p className="text-[11px] text-muted-foreground/60 mt-0.5 line-clamp-1">{item.translatedText}</p>
                         </div>
                       ))}

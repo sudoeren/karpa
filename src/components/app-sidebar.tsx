@@ -11,10 +11,11 @@ import {
   XCircle,
   Spinner
 } from "@phosphor-icons/react"
-import { cn } from "@/lib/utils"
+import { cn, decodeApiKey } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
 import { Logo } from "@/components/logo"
 import { useState, useEffect } from "react"
+import { version } from '../../package.json'
 import {
   Sidebar,
   SidebarContent,
@@ -46,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       try {
         const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url") || "http://localhost:1234"
         const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
-        const savedApiKey = sessionStorage.getItem("llm-api-key") || undefined
+        const savedApiKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
         const response = await fetch('/api/test-connection', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -144,7 +145,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {isConnected === null ? "Checking..." : isConnected ? "Engine Ready" : "Disconnected"}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
-                   {isConnected === null ? "Please wait" : isConnected ? "v1.1.1" : "Check connection"}
+                   {isConnected === null ? "Please wait" : isConnected ? `v${version}` : "Check connection"}
                 </span>
               </div>
             </SidebarMenuButton>

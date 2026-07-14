@@ -6,7 +6,7 @@ import {
   getChatCompletionUrl,
   getModelsUrl,
 } from '@/lib/providers'
-import { validateProviderUrl, stripTrailingSlash } from '@/lib/url-validation'
+import { validateProviderUrl } from '@/lib/url-validation'
 
 export async function POST(request: Request) {
   try {
@@ -26,16 +26,15 @@ export async function POST(request: Request) {
     // Validate that the user-supplied base URL is safe to fetch. After this
     // succeeds, the URL is provably on an allowed host and is used to build
     // the outbound fetch URL — that's the whole point of the validation.
+    let baseUrl: string
     try {
-      validateProviderUrl(url, provider)
+      baseUrl = validateProviderUrl(url, provider)
     } catch (validationError) {
       return NextResponse.json(
         { success: false, error: (validationError as Error).message },
         { status: 400 }
       )
     }
-
-    const baseUrl = stripTrailingSlash(url)
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
@@ -44,7 +43,7 @@ export async function POST(request: Request) {
       switch (provider) {
         case 'openai': {
           const headers = getHeaders(provider, apiKey)
-          const response = await fetch(getModelsUrl(provider, baseUrl) || 'https://api.openai.com/v1/models', {
+          const response = await fetch('https://api.openai.com/v1/models', {
             method: 'GET',
             signal: controller.signal,
             headers,
@@ -60,7 +59,7 @@ export async function POST(request: Request) {
 
         case 'anthropic': {
           const headers = getHeaders(provider, apiKey)
-          const response = await fetch(baseUrl + '/v1/messages', {
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers,
             body: JSON.stringify({
@@ -82,7 +81,7 @@ export async function POST(request: Request) {
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['x-goog-api-key'] = apiKey
           const response = await fetch(
-            baseUrl + '/v1beta/models',
+            'https://generativelanguage.googleapis.com/v1beta/models',
             {
               method: 'GET',
               signal: controller.signal,
@@ -99,7 +98,7 @@ export async function POST(request: Request) {
         }
 
         case 'ollama': {
-          const response = await fetch(baseUrl + '/api/tags', {
+          const response = await fetch(getModelsUrl(provider, baseUrl)!, {
             method: 'GET',
             signal: controller.signal,
             headers: { 'Accept': 'application/json' },
@@ -116,7 +115,7 @@ export async function POST(request: Request) {
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey
 
-          const response = await fetch(baseUrl + '/v1/models', {
+          const response = await fetch(getModelsUrl(provider, baseUrl)!, {
             method: 'GET',
             signal: controller.signal,
             headers,
@@ -166,11 +165,27 @@ export async function POST(request: Request) {
           }, { status: 502 })
         }
 
+        case 'openrouter': {
+          const headers = getHeaders(provider, apiKey)
+          const response = await fetch('https://openrouter.ai/api/v1/models', {
+            method: 'GET',
+            signal: controller.signal,
+            headers: { ...headers, 'Accept': 'application/json' },
+          })
+          clearTimeout(timeoutId)
+          if (response.ok) {
+            const data = await response.json()
+            return NextResponse.json({ success: true, models: data?.data?.length || 0, message: 'Connected to OpenRouter' })
+          }
+          if (response.status === 401) return NextResponse.json({ success: false, error: 'Invalid API key.' }, { status: 401 })
+          return NextResponse.json({ success: false, error: 'OpenRouter returned ' + response.status }, { status: 502 })
+        }
+
         case 'custom': {
           const headers: Record<string, string> = { 'Accept': 'application/json' }
           if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey
 
-          const response = await fetch(baseUrl + '/v1/models', {
+          const response = await fetch(getModelsUrl(provider, baseUrl)!, {
             method: 'GET',
             signal: controller.signal,
             headers,

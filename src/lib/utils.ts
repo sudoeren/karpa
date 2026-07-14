@@ -40,7 +40,7 @@ export function splitIntoChunks(text: string, maxChunkSize: number = 2000, prese
            if (!preserveFormatting) {
                // Try to find a sentence ending
                const match = remaining.substring(0, maxChunkSize).match(/(?<=[.!?])\s+$/);
-               if (match && match.index) splitIndex = match.index;
+               if (match && match.index !== undefined) splitIndex = match.index;
            }
            
            chunks.push(remaining.substring(0, splitIndex));
@@ -65,6 +65,19 @@ export function splitIntoChunks(text: string, maxChunkSize: number = 2000, prese
   }
 
   return chunks;
+}
+
+export function safeJSONParse<T>(value: string | null | undefined, fallback: T): T {
+  if (!value) return fallback
+  try { return JSON.parse(value) } catch { return fallback }
+}
+
+export function safeSetItem(key: string, value: string): void {
+  try { localStorage.setItem(key, value) } catch { /* storage full or unavailable */ }
+}
+
+export function decodeApiKey(key: string): string {
+  try { return atob(key) } catch { return key }
 }
 
 export function cleanTranslation(text: string): string {

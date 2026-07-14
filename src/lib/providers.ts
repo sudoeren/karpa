@@ -8,6 +8,7 @@ export type ProviderType =
   | 'openai' 
   | 'anthropic' 
   | 'gemini' 
+  | 'openrouter'
   | 'custom'
 
 export interface ProviderConfig {
@@ -80,6 +81,16 @@ export const PROVIDERS: Record<ProviderType, ProviderInfo> = {
     modelsEndpoint: null,
     placeholder: 'https://generativelanguage.googleapis.com',
   },
+  openrouter: {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    description: 'Unified API for 200+ models via OpenRouter',
+    defaultUrl: 'https://openrouter.ai/api',
+    requiresApiKey: true,
+    defaultModel: 'amazon/nova-2-lite-v1',
+    modelsEndpoint: '/v1/models',
+    placeholder: 'https://openrouter.ai/api',
+  },
   custom: {
     id: 'custom',
     name: 'Custom (OpenAI Compatible)',
@@ -136,6 +147,7 @@ export function getChatCompletionUrl(provider: ProviderType, baseUrl: string): s
   switch (provider) {
     case 'lmstudio':
     case 'openai':
+    case 'openrouter':
     case 'custom':
       if (!url.endsWith('/v1/chat/completions')) {
         if (url.endsWith('/v1')) url += '/chat/completions'
@@ -185,6 +197,13 @@ export function getHeaders(provider: ProviderType, apiKey?: string): Record<stri
     case 'gemini':
       // API key goes in x-goog-api-key header (keeps it out of the URL)
       if (apiKey) headers['x-goog-api-key'] = apiKey
+      break
+    case 'openrouter':
+      if (apiKey) {
+        headers['Authorization'] = `Bearer ${apiKey}`
+        headers['HTTP-Referer'] = 'https://karpa.erenustaoglu.com'
+        headers['X-Title'] = 'Karpa'
+      }
       break
     case 'custom':
       if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`
@@ -252,9 +271,9 @@ export function buildRequestBody(
 }
 
 // Build the full URL for Gemini API calls
-export function getGeminiUrl(baseUrl: string, model: string, apiKey: string): string {
+export function getGeminiUrl(baseUrl: string, model: string, _apiKey: string): string {
   const url = stripTrailingSlash(baseUrl)
-  return `${url}/v1beta/models/${model}:generateContent?key=${apiKey}`
+  return `${url}/v1beta/models/${model}:generateContent`
 }
 
 // Extract translation text from provider response

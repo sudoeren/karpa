@@ -12,22 +12,23 @@
   <a href="#features">Features</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#installation">Installation</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#tech-stack">Tech Stack</a>
+  <a href="#usage">Usage</a>
 </p>
 
----
+<p align="center">
+  <table border="1" cellpadding="10" cellspacing="0">
+    <tr>
+      <td align="center" bgcolor="white">
+        <img src="screenshot.png" alt="Karpa" width="800" />
+      </td>
+    </tr>
+  </table>
+</p>
 
-## Why Karpa?
+Karpa is a privacy-first AI translator that runs entirely on your machine.
+Your data never leaves your device — no cloud, no tracking, no compromises.
 
-Traditional translation services send your text to remote servers. **Karpa is different** — it uses LM Studio to run AI models locally on your computer. Your data never leaves your device.
-
-| Feature           | Karpa          | Cloud Services          |
-| ----------------- | ---------------- | ----------------------- |
-| Privacy           | ✅ 100% Local    | ❌ Data sent to servers |
-| Internet Required | ❌ Works offline | ✅ Always required      |
-| Cost              | ✅ Free forever  | ❌ Usually paid         |
-| Speed             | ✅ Instant       | ❌ Network latency      |
+Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini, and OpenRouter.
 
 ---
 
@@ -35,7 +36,7 @@ Traditional translation services send your text to remote servers. **Karpa is di
 
 | Feature | Description |
 |---|---|
-| **Complete Privacy** | All translations happen locally using LM Studio. No data is ever sent to external servers. |
+| **Complete Privacy** | All translations happen locally. No data is ever sent to external servers. |
 | **Multi-Language Support** | Translate between 12+ languages including English, Turkish, Spanish, French, German, Italian, Portuguese, Russian, Japanese, Chinese, Korean, and Arabic. |
 | **Text & File Translation** | Translate plain text or upload files (`.txt`, `.md`, `.json`, `.csv`, `.srt`, and more). |
 | **Translation Tones** | Choose from Standard, Formal, Casual, or Technical tones to match your context. |
@@ -49,24 +50,19 @@ Traditional translation services send your text to remote servers. **Karpa is di
 
 ### Prerequisites
 
-1. **[LM Studio](https://lmstudio.ai/)** — Download and install
-2. **Translation Model** — Download a model (recommended: `HY-MT1.5-7B`)
-3. **Start Local Server** — Run LM Studio's local server on port `1234`
+Pick one of the supported providers:
+- **[LM Studio](https://lmstudio.ai/)** — Download, load a model, and start the local server
+- **[Ollama](https://ollama.com/)** — Download and pull a model
+- **OpenAI / Anthropic / Google Gemini / OpenRouter** — Create an account and get an API key
 
 ### Run Karpa
 
 ```bash
-# Clone
 git clone https://github.com/sudoeren/karpa.git && cd karpa
-
-# Install
-npm install
-
-# Start
-npm run dev
+docker compose up -d
 ```
 
-Open **http://localhost:3000** and start translating!
+Open **http://localhost:7250** and start translating!
 
 ---
 
@@ -81,7 +77,7 @@ npm install
 npm run dev
 ```
 
-### Option 2: Docker
+### Option 2: Docker Compose
 
 ```bash
 git clone https://github.com/sudoeren/karpa.git
@@ -89,11 +85,15 @@ cd karpa
 docker-compose up -d
 ```
 
-### Option 3: Docker Build
+### Option 3: Docker Pull
 
 ```bash
-docker build -t karpa .
-docker run -p 3000:3000 --add-host=host.docker.internal:host-gateway karpa
+docker run -p 7250:7250 ghcr.io/sudoeren/karpa:latest
+```
+
+For local LLM providers (LM Studio, Ollama), add the host gateway:
+```bash
+docker run -p 7250:7250 --add-host=host.docker.internal:host-gateway ghcr.io/sudoeren/karpa:latest
 ```
 
 ---
@@ -124,41 +124,18 @@ docker run -p 3000:3000 --add-host=host.docker.internal:host-gateway karpa
 | `Ctrl+C`     | Copy translation |
 
 ---
+## Uninstall
 
-## Configuration
+Run the script inside the karpa folder:
 
-### Environment Variables
-
-Create a `.env.local` file:
-
-```env
-LM_STUDIO_URL=http://localhost:1234/v1/chat/completions
-LM_STUDIO_MODEL=hy-mt1.5-7b/HY-MT1.5-7B-Q4_K_M.gguf
-LM_STUDIO_TEMPERATURE=0.2
+```bash
+./uninstall.sh          # macOS / Linux
+uninstall.bat           # Windows
 ```
 
-### In-App Settings
+This stops the container, removes the image and volumes, and deletes the project folder.
 
-Navigate to **Settings** to configure:
-
-- LM Studio connection URL
-- Model temperature
-- Theme (Light/Dark/System)
-- Language (English/Turkish)
-
----
-
-## Tech Stack
-
-| Category   | Technology           |
-| ---------- | -------------------- |
-| Framework  | Next.js 16           |
-| UI Library | React 19             |
-| Language   | TypeScript           |
-| Styling    | Tailwind CSS v4      |
-| Components | shadcn/ui + Radix UI |
-| Animations | Framer Motion        |
-| AI Backend | LM Studio            |
+Clear browser data (history, settings, API key) manually from Settings → Data.
 
 ---
 
@@ -181,18 +158,6 @@ karpa/
 ├── Dockerfile                # Docker config
 └── docker-compose.yml        # Docker Compose
 ```
-
----
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing`)
-5. Open a Pull Request
 
 ---
 

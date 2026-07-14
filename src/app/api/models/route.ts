@@ -6,7 +6,7 @@ import {
   parseModelsResponse,
   getModelsUrl,
 } from '@/lib/providers'
-import { validateProviderUrl, stripTrailingSlash } from '@/lib/url-validation'
+import { validateProviderUrl } from '@/lib/url-validation'
 
 export async function POST(req: Request) {
   try {
@@ -35,8 +35,9 @@ export async function POST(req: Request) {
     // Validate that the user-supplied base URL is safe to fetch. After this
     // succeeds, the URL is provably on an allowed host and is used to build
     // the outbound fetch URL — that's the whole point of the validation.
+    let validatedUrl: string
     try {
-      validateProviderUrl(url, provider)
+      validatedUrl = validateProviderUrl(url, provider)
     } catch (validationError) {
       return NextResponse.json(
         { success: false, error: (validationError as Error).message },
@@ -44,7 +45,11 @@ export async function POST(req: Request) {
       )
     }
 
-    const modelsUrl = getModelsUrl(provider, stripTrailingSlash(url))
+    const modelsUrl = provider === 'openai'
+      ? 'https://api.openai.com/v1/models'
+      : provider === 'openrouter'
+        ? 'https://openrouter.ai/api/v1/models'
+        : getModelsUrl(provider, validatedUrl)
 
     if (!modelsUrl) {
       return NextResponse.json({
@@ -57,7 +62,7 @@ export async function POST(req: Request) {
       'Content-Type': 'application/json',
     }
     if (apiKey) {
-      if (provider === 'openai' || provider === 'custom') {
+      if (provider === 'openai' || provider === 'openrouter' || provider === 'custom') {
         headers['Authorization'] = 'Bearer ' + apiKey
       } else if (provider === 'gemini') {
         headers['x-goog-api-key'] = apiKey

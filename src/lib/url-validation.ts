@@ -13,6 +13,7 @@ const CANONICAL_CLOUD_HOSTS: Record<string, string> = {
   openai: 'api.openai.com',
   anthropic: 'api.anthropic.com',
   gemini: 'generativelanguage.googleapis.com',
+  openrouter: 'openrouter.ai',
 }
 
 export type ProviderKey = keyof typeof CANONICAL_CLOUD_HOSTS | 'lmstudio' | 'ollama' | 'custom'
@@ -28,7 +29,10 @@ export type ProviderKey = keyof typeof CANONICAL_CLOUD_HOSTS | 'lmstudio' | 'oll
  * the outbound fetch: SSRF protection requires the host to be provably
  * allowed, and CodeQL accepts a validated URL as a clean source.
  */
-export function validateProviderUrl(url: string, provider: string): void {
+export function validateProviderUrl(url: string, provider: string): string {
+  if (!url || !url.trim()) {
+    throw new Error(`${provider} URL is required. Please enter a valid URL in Settings.`)
+  }
   const parsed = new URL(url)
   const hostname = parsed.hostname.toLowerCase()
 
@@ -37,7 +41,7 @@ export function validateProviderUrl(url: string, provider: string): void {
     if (hostname !== canonical) {
       throw new Error(`Invalid ${provider} host: ${hostname}`)
     }
-    return
+    return stripTrailingSlash(url)
   }
 
   if (
@@ -48,4 +52,5 @@ export function validateProviderUrl(url: string, provider: string): void {
   ) {
     throw new Error('URL must point to a local or private address')
   }
+  return stripTrailingSlash(url)
 }

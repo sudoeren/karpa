@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  MagnifyingGlass, Trash, CaretRight, Star, Copy, ArrowSquareOut, Heart, X
+  MagnifyingGlass, Trash, CaretRight, Star, Copy, ArrowSquareOut, Heart, X, FileArrowUp, Download
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { cn, safeJSONParse, safeSetItem } from "@/lib/utils"
 
 type TranslationItem = {
   id: string
@@ -33,6 +33,8 @@ type TranslationItem = {
   timestamp: number
   tone?: string
   isFavorite?: boolean
+  mode?: 'text' | 'file'
+  fileName?: string
 }
 
 export default function FavoritesPage() {
@@ -44,20 +46,35 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-favorites")
-    if (saved) setFavorites(JSON.parse(saved))
+    if (saved) setFavorites(safeJSONParse(saved, []))
   }, [])
 
   const removeFavorite = (id: string) => {
     const newFavorites = favorites.filter(item => item.id !== id)
     setFavorites(newFavorites)
-    localStorage.setItem("translation-favorites", JSON.stringify(newFavorites))
+    safeSetItem("translation-favorites", JSON.stringify(newFavorites))
     if (selectedId === id) setSelectedId(null)
     toast.info(t.favorites.removed)
   }
 
   const copyToClipboard = async (text: string) => {
-    await navigator.clipboard.writeText(text)
-    toast.success(t.common.copied)
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(t.common.copied)
+    } catch {}
+  }
+
+  const downloadFile = (item: TranslationItem) => {
+    const ext = item.fileName?.split('.').pop() || 'txt'
+    const name = item.fileName?.replace(`.${ext}`, '') || 'translation'
+    const blob = new Blob([item.translatedText], { type: 'text/plain' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${name}_${item.targetLang.slice(0, 2).toLowerCase()}.${ext}`
+    a.click()
+    window.URL.revokeObjectURL(url)
+    toast.success(t.common.download)
   }
 
   const clearAllFavorites = () => {
@@ -72,7 +89,8 @@ export default function FavoritesPage() {
       text: item.sourceText,
       translation: item.translatedText,
       sourceLang: item.sourceLang,
-      targetLang: item.targetLang
+      targetLang: item.targetLang,
+      ...(item.mode === 'file' && item.fileName ? { mode: 'file', fileName: item.fileName } : {}),
     })
     router.push(`/?${params.toString()}`)
   }
@@ -171,6 +189,7 @@ export default function FavoritesPage() {
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-1.5">
+                          {item.mode === 'file' && <FileArrowUp className="size-3 text-muted-foreground/50 shrink-0" />}
                           <span className="text-[10px] font-bold text-muted-foreground">
                             {item.sourceLang === "Auto Detect" ? "AUTO" : item.sourceLang.slice(0, 2).toUpperCase()}
                           </span>
@@ -184,10 +203,11 @@ export default function FavoritesPage() {
                         </span>
                       </div>
                       <p className={cn(
-                        "text-sm line-clamp-2",
+                        "text-sm",
+                        item.mode === 'file' ? "line-clamp-1 font-medium text-muted-foreground" : "line-clamp-2",
                         selectedId === item.id ? "font-semibold text-foreground" : "text-foreground/80"
                       )}>
-                        {item.sourceText}
+                        {item.mode === 'file' && item.fileName ? item.fileName : item.sourceText}
                       </p>
                     </div>
                   ))}
@@ -208,11 +228,31 @@ export default function FavoritesPage() {
                 >
                   {/* Header */}
                   <div className="px-6 py-4 border-b flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="rounded-md">{selectedItem.sourceLang}</Badge>
-                      <CaretRight className="size-4 text-muted-foreground" />
-                      <Badge className="rounded-md bg-yellow-500 hover:bg-yellow-600 border-none text-white">{selectedItem.targetLang}</Badge>
-                    </div>
+                    {selectedItem.mode === 'file' && selectedItem.fileName ? (
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="size-8 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+                          <FileArrowUp className="size-4 text-yellow-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold truncate">{selectedItem.fileName}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <Badge variant="outline" className="rounded-md text-[10px] px-1.5 py-0 h-4">
+                              {selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}
+                            </Badge>
+                            <CaretRight className="size-2.5 text-muted-foreground" />
+                            <Badge className="rounded-md text-[10px] px-1.5 py-0 h-4 bg-yellow-500 text-white border-none">
+                              {selectedItem.targetLang}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="rounded-md">{selectedItem.sourceLang}</Badge>
+                        <CaretRight className="size-4 text-muted-foreground" />
+                        <Badge className="rounded-md bg-yellow-500 hover:bg-yellow-600 border-none text-white">{selectedItem.targetLang}</Badge>
+                      </div>
+                    )}
                     
                     <div className="flex items-center gap-1">
                       <Button
@@ -238,42 +278,70 @@ export default function FavoritesPage() {
                   {/* Body */}
                   <div className="flex-1 overflow-y-auto custom-scrollbar">
                     <div className="p-8 space-y-8">
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t.history.source}</label>
-                        <div className="text-lg leading-relaxed text-foreground/70 break-words">
-                          {selectedItem.sourceText}
+                      {selectedItem.mode === 'file' && selectedItem.fileName ? (
+                        <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border/50">
+                          <div className="size-12 rounded-xl bg-yellow-500/10 flex items-center justify-center shrink-0">
+                            <FileArrowUp className="size-6 text-yellow-600" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-sm truncate">{selectedItem.fileName}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}
+                              {" → "}
+                              {selectedItem.targetLang}
+                            </p>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <>
+                          <div className="space-y-3">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t.history.source}</label>
+                            <div className="text-lg leading-relaxed text-foreground/70 break-words">
+                              {selectedItem.sourceText}
+                            </div>
+                          </div>
 
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-yellow-600">{t.history.target}</label>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-7 text-[10px] font-bold rounded-md px-2"
-                            onClick={() => copyToClipboard(selectedItem.translatedText)}
-                          >
-                            <Copy className="size-3 mr-1.5" />
-                            {t.common.copy}
-                          </Button>
-                        </div>
-                        <div className="text-3xl font-bold leading-tight text-foreground break-words tracking-tight">
-                          {selectedItem.translatedText}
-                        </div>
-                      </div>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[10px] font-bold uppercase tracking-widest text-yellow-600">{t.history.target}</label>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 text-[10px] font-bold rounded-md px-2"
+                                onClick={() => copyToClipboard(selectedItem.translatedText)}
+                              >
+                                <Copy className="size-3 mr-1.5" />
+                                {t.common.copy}
+                              </Button>
+                            </div>
+                            <div className="text-3xl font-bold leading-tight text-foreground break-words tracking-tight">
+                              {selectedItem.translatedText}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
 
                   {/* Footer Action */}
-                  <div className="p-6 border-t shrink-0">
-                    <Button
-                      onClick={() => restoreItem(selectedItem)}
-                      className="w-full h-12 rounded-xl gap-2 font-bold bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/10 hover:shadow-yellow-500/20 transition-all group border-none"
-                    >
-                      <ArrowSquareOut className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      {t.history.openInTranslator}
-                    </Button>
+                  <div className="p-6 border-t shrink-0 space-y-2">
+                    {selectedItem.mode === 'file' && selectedItem.fileName ? (
+                      <Button
+                        onClick={() => downloadFile(selectedItem)}
+                        className="w-full h-12 rounded-xl gap-2 font-bold bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/10 hover:shadow-yellow-500/20 transition-all group border-none"
+                      >
+                        <Download className="size-4" />
+                        {t.common.download}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => restoreItem(selectedItem)}
+                        className="w-full h-12 rounded-xl gap-2 font-bold bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg shadow-yellow-500/10 hover:shadow-yellow-500/20 transition-all group border-none"
+                      >
+                        <ArrowSquareOut className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        {t.history.openInTranslator}
+                      </Button>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -298,22 +366,53 @@ export default function FavoritesPage() {
                     </Button>
                   </div>
                   <div className="flex-1 overflow-y-auto p-6 space-y-8">
-                    <div className="space-y-2">
-                      <Badge variant="outline">{selectedItem.sourceLang} → {selectedItem.targetLang}</Badge>
-                      <p className="text-lg text-foreground/60 leading-relaxed">{selectedItem.sourceText}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-yellow-600">{t.history.target}</p>
-                      <p className="text-3xl font-bold leading-tight">{selectedItem.translatedText}</p>
-                    </div>
+                    {selectedItem.mode === 'file' && selectedItem.fileName ? (
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/50">
+                        <div className="size-10 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+                          <FileArrowUp className="size-5 text-yellow-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-sm truncate">{selectedItem.fileName}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            <Badge variant="outline" className="rounded-sm text-[10px] px-1 py-0 h-auto">
+                              {selectedItem.sourceLang === "Auto Detect" ? t.translator.autoDetect : selectedItem.sourceLang}
+                            </Badge>
+                            {" → "}
+                            <Badge className="rounded-sm text-[10px] px-1 py-0 h-auto bg-yellow-500 text-white border-none">
+                              {selectedItem.targetLang}
+                            </Badge>
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          <Badge variant="outline">{selectedItem.sourceLang} → {selectedItem.targetLang}</Badge>
+                          <p className="text-lg text-foreground/60 leading-relaxed">{selectedItem.sourceText}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-yellow-600">{t.history.target}</p>
+                          <p className="text-3xl font-bold leading-tight">{selectedItem.translatedText}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <div className="p-4 border-t grid grid-cols-2 gap-3 pb-safe">
-                    <Button variant="outline" className="h-12 rounded-xl" onClick={() => restoreItem(selectedItem)}>
-                      {t.history.openInTranslator}
-                    </Button>
-                    <Button className="h-12 rounded-xl bg-yellow-500 text-white border-none" onClick={() => copyToClipboard(selectedItem.translatedText)}>
-                      {t.common.copy}
-                    </Button>
+                  <div className="p-4 border-t gap-3 pb-safe">
+                    {selectedItem.mode === 'file' && selectedItem.fileName ? (
+                      <Button className="w-full h-12 rounded-xl bg-yellow-500 text-white border-none" onClick={() => downloadFile(selectedItem)}>
+                        <Download className="size-4 mr-2" />
+                        {t.common.download}
+                      </Button>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button variant="outline" className="h-12 rounded-xl" onClick={() => restoreItem(selectedItem)}>
+                          {t.history.openInTranslator}
+                        </Button>
+                        <Button className="h-12 rounded-xl bg-yellow-500 text-white border-none" onClick={() => copyToClipboard(selectedItem.translatedText)}>
+                          {t.common.copy}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}

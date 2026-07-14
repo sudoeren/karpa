@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 import {
   Sun, Moon, Monitor, Globe,
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner, Lightning,
   Bell, SpeakerHigh, Info, User, ArrowSquareOut,
-  Key, ComputerTower, Cloud, Eye, EyeSlash, SquaresFour, Sliders,
-  HardDrive, ShieldCheck, ArrowUpRight, GitFork
+  Key, ComputerTower, Cloud, SquaresFour, Sliders,
+  HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -26,14 +26,24 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useLanguage } from "@/contexts/language-context"
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { cn, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
 import { useOnboarding } from "@/contexts/onboarding-context"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
 import { type ProviderType, PROVIDERS, KNOWN_MODELS } from "@/lib/providers"
+import { version } from '../../../package.json'
 
 type Model = {
   id: string
@@ -52,7 +62,7 @@ export default function SettingsPage() {
   const [selectedProvider, setSelectedProvider] = useState<ProviderType>("lmstudio")
   const [apiUrl, setApiUrl] = useState("http://localhost:1234")
   const [apiKey, setApiKey] = useState("")
-  const [showApiKey, setShowApiKey] = useState(false)
+  const [hasApiKey, setHasApiKey] = useState(false)
   const [temperature, setTemperature] = useState(0.2)
   const [isTestingConnection, setIsTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -61,7 +71,7 @@ export default function SettingsPage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [notificationSound, setNotificationSound] = useState(true)
 
-  const fetchModels = useCallback(async (url: string, provider: ProviderType, key?: string) => {
+  const fetchModels = useCallback(async (url: string, provider: ProviderType, key?: string, currentSelected?: string) => {
     try {
       const response = await fetch('/api/models', {
         method: 'POST',
@@ -71,24 +81,24 @@ export default function SettingsPage() {
       const data = await response.json()
       if (data.success) {
         setModels(data.models)
-        if (!selectedModel && data.models.length > 0) {
-          const savedModel = localStorage.getItem("llm-model")
-          if (savedModel && data.models.some((m: Model) => m.id === savedModel)) {
-            setSelectedModel(savedModel)
-          } else {
-            setSelectedModel(data.models[0].id)
-          }
+        const savedModel = localStorage.getItem("llm-model")
+        if (savedModel && data.models.some((m: Model) => m.id === savedModel)) {
+          setSelectedModel(savedModel)
+        } else if (currentSelected && data.models.some((m: Model) => m.id === currentSelected)) {
+          setSelectedModel(currentSelected)
+        } else if (data.models.length > 0) {
+          setSelectedModel(data.models[0].id)
         }
       }
     } catch (error) {
       console.error("Failed to fetch models", error)
     }
-  }, [selectedModel])
+  }, [])
 
   useEffect(() => {
     const savedProvider = localStorage.getItem("llm-provider") as ProviderType | null
     const savedUrl = localStorage.getItem("llm-api-url")
-    const savedKey = sessionStorage.getItem("llm-api-key")
+    const savedKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
     const savedTemp = localStorage.getItem("llm-temperature")
     const savedModel = localStorage.getItem("llm-model")
     const savedNotifs = localStorage.getItem("karpa-notifications")
@@ -100,39 +110,65 @@ export default function SettingsPage() {
       const oldModel = localStorage.getItem("lm-studio-model")
       const oldTemp = localStorage.getItem("lm-studio-temperature")
       if (oldUrl) {
-        localStorage.setItem("llm-provider", "lmstudio")
-        localStorage.setItem("llm-api-url", oldUrl)
-        if (oldModel) localStorage.setItem("llm-model", oldModel)
-        if (oldTemp) localStorage.setItem("llm-temperature", oldTemp)
+        safeSetItem("llm-provider", "lmstudio")
+        safeSetItem("llm-api-url", oldUrl)
+        if (oldModel) safeSetItem("llm-model", oldModel)
+        if (oldTemp) safeSetItem("llm-temperature", oldTemp)
         setSelectedProvider("lmstudio")
         setApiUrl(oldUrl)
         if (oldModel) setSelectedModel(oldModel)
         if (oldTemp) setTemperature(parseFloat(oldTemp))
-        fetchModels(oldUrl, "lmstudio")
+        fetchModels(oldUrl, "lmstudio", undefined, oldModel || undefined)
       }
     } else {
       setSelectedProvider(savedProvider)
       if (savedUrl) {
         setApiUrl(savedUrl)
-        fetchModels(savedUrl, savedProvider, savedKey || undefined)
+        fetchModels(savedUrl, savedProvider, savedKey || undefined, savedModel || undefined)
       } else {
         const defaultUrl = PROVIDERS[savedProvider]?.defaultUrl || ''
         setApiUrl(defaultUrl)
       }
     }
 
-    if (savedKey) setApiKey(savedKey)
+    if (savedKey) setHasApiKey(true)
     if (savedTemp) setTemperature(parseFloat(savedTemp))
     if (savedModel) setSelectedModel(savedModel)
     if (savedNotifs) setNotificationsEnabled(savedNotifs === 'true')
     if (savedNotifSound) setNotificationSound(savedNotifSound !== 'false')
-  }, [fetchModels])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-detect connection on mount and when provider/url changes
+  useEffect(() => {
+    const savedUrl = localStorage.getItem("llm-api-url")
+    const savedProvider = localStorage.getItem("llm-provider") as ProviderType | null
+    const url = savedUrl || apiUrl
+    const provider = savedProvider || selectedProvider
+
+    const checkConnection = async () => {
+      try {
+        const savedKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
+        const response = await fetch('/api/test-connection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, provider, apiKey: savedKey }),
+        })
+        const data = await response.json()
+        setConnectionStatus(data.success ? 'success' : 'error')
+      } catch {
+        setConnectionStatus('error')
+      }
+    }
+
+    checkConnection()
+  }, [selectedProvider, apiUrl]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleProviderChange = (provider: ProviderType) => {
     setSelectedProvider(provider)
     const info = PROVIDERS[provider]
     setApiUrl(info.defaultUrl)
     setApiKey("")
+    setHasApiKey(false)
     setModels([])
     setSelectedModel(info.defaultModel)
     setConnectionStatus('idle')
@@ -151,42 +187,48 @@ export default function SettingsPage() {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
           setNotificationsEnabled(true)
-          localStorage.setItem("karpa-notifications", "true")
+          safeSetItem("karpa-notifications", "true")
           toast.success(t.settings.notifications)
         } else {
           setNotificationsEnabled(false)
-          localStorage.setItem("karpa-notifications", "false")
+          safeSetItem("karpa-notifications", "false")
           toast.error(t.settings.notificationDenied)
         }
       })
     } else {
       setNotificationsEnabled(checked)
-      localStorage.setItem("karpa-notifications", String(checked))
+      safeSetItem("karpa-notifications", String(checked))
     }
   }
 
   const handleNotificationSoundChange = (checked: boolean) => {
     setNotificationSound(checked)
-    localStorage.setItem("karpa-notification-sound", String(checked))
+    safeSetItem("karpa-notification-sound", String(checked))
   }
 
   const saveSettings = () => {
-    localStorage.setItem("llm-provider", selectedProvider)
-    localStorage.setItem("llm-api-url", apiUrl)
-    localStorage.setItem("llm-temperature", temperature.toString())
-    if (selectedModel) localStorage.setItem("llm-model", selectedModel)
+    safeSetItem("llm-provider", selectedProvider)
+    safeSetItem("llm-api-url", apiUrl)
+    safeSetItem("llm-temperature", temperature.toString())
+    if (selectedModel) safeSetItem("llm-model", selectedModel)
+    if (apiKey) {
+      sessionStorage.setItem("llm-api-key", btoa(apiKey))
+      setHasApiKey(true)
+    } else if (!hasApiKey) {
+      sessionStorage.removeItem("llm-api-key")
+    }
 
-    localStorage.setItem("lm-studio-url", apiUrl)
-    if (selectedModel) localStorage.setItem("lm-studio-model", selectedModel)
-    localStorage.setItem("lm-studio-temperature", temperature.toString())
+    safeSetItem("lm-studio-url", apiUrl)
+    if (selectedModel) safeSetItem("lm-studio-model", selectedModel)
+    safeSetItem("lm-studio-temperature", temperature.toString())
 
     toast.success(t.settings.saved)
   }
 
   const exportData = () => {
     const data = {
-      history: JSON.parse(localStorage.getItem("translation-history") || "[]"),
-      favorites: JSON.parse(localStorage.getItem("translation-favorites") || "[]"),
+      history: safeJSONParse(localStorage.getItem("translation-history"), []),
+      favorites: safeJSONParse(localStorage.getItem("translation-favorites"), []),
       settings: {
         provider: selectedProvider,
         apiUrl,
@@ -214,9 +256,11 @@ export default function SettingsPage() {
     const reader = new FileReader()
     reader.onload = (event) => {
       try {
-        const data = JSON.parse(event.target?.result as string)
-        if (data.history) localStorage.setItem("translation-history", JSON.stringify(data.history))
-        if (data.favorites) localStorage.setItem("translation-favorites", JSON.stringify(data.favorites))
+        const result = event.target?.result
+        if (typeof result !== 'string') throw new Error('Invalid file')
+        const data = JSON.parse(result)
+        if (data.history) safeSetItem("translation-history", JSON.stringify(data.history))
+        if (data.favorites) safeSetItem("translation-favorites", JSON.stringify(data.favorites))
         if (data.settings) {
           if (data.settings.provider) {
             setSelectedProvider(data.settings.provider)
@@ -252,6 +296,7 @@ export default function SettingsPage() {
   const testConnection = async () => {
     setIsTestingConnection(true)
     setConnectionStatus('idle')
+    const effectiveKey = apiKey || (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
     try {
       const response = await fetch('/api/test-connection', {
         method: 'POST',
@@ -259,13 +304,13 @@ export default function SettingsPage() {
         body: JSON.stringify({
           url: apiUrl,
           provider: selectedProvider,
-          apiKey: apiKey || undefined
+          apiKey: effectiveKey,
         }),
       })
       const data = await response.json()
       if (data.success) {
         setConnectionStatus('success')
-        await fetchModels(apiUrl, selectedProvider, apiKey || undefined)
+        await fetchModels(apiUrl, selectedProvider, effectiveKey, selectedModel || undefined)
         toast.success(t.settings.connectionSuccess)
       } else {
         setConnectionStatus('error')
@@ -504,47 +549,72 @@ export default function SettingsPage() {
                   {providerInfo.requiresApiKey && (
                     <div className="space-y-3">
                       <Label className="text-xs text-muted-foreground">{t.settings.apiKey}</Label>
-                      <div className="relative">
-                        <Input
-                          value={apiKey}
-                          onChange={(e) => setApiKey(e.target.value)}
-                          type={showApiKey ? "text" : "password"}
-                          className="h-10 pl-4 pr-10 rounded-xl bg-background border-border font-mono text-sm"
-                          placeholder={t.settings.apiKeyPlaceholder}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowApiKey(!showApiKey)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showApiKey ? <EyeSlash className="size-4" /> : <Eye className="size-4" />}
-                        </button>
-                      </div>
+                      {hasApiKey ? (
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-10 px-4 rounded-xl bg-muted border border-border flex items-center text-sm text-muted-foreground select-none">
+                            <span className="tracking-widest">{"\u2022".repeat(24)}</span>
+                          </div>
+                          <Button
+                            variant="outline"
+                            className="h-10 px-4 rounded-xl shrink-0 text-xs"
+                            onClick={() => {
+                              setHasApiKey(false)
+                              setApiKey("")
+                            }}
+                          >
+                            Change
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <Input
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            type="password"
+                            className="h-10 pl-4 pr-10 rounded-xl bg-background border-border font-mono text-sm"
+                            placeholder={t.settings.apiKeyPlaceholder}
+                          />
+                          {apiKey && (
+                            <button
+                              type="button"
+                              onClick={() => setApiKey("")}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <X className="size-4" />
+                            </button>
+                          )}
+                        </div>
+                      )}
                       <p className="text-xs text-muted-foreground">{t.settings.apiKeyDesc}</p>
                     </div>
                   )}
 
                   <div className="space-y-3">
                     <Label className="text-xs text-muted-foreground">{t.settings.activeModel}</Label>
-                    {models.length > 0 ? (
-                      <Select value={selectedModel} onValueChange={setSelectedModel}>
-                        <SelectTrigger className="h-10 rounded-xl bg-background border-border px-4 text-sm">
-                          <SelectValue placeholder={t.settings.selectModel} />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover border-border">
-                          {models.map((m) => (
-                            <SelectItem key={m.id} value={m.id}>{m.id}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Input
-                        value={selectedModel}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="h-10 px-4 rounded-xl bg-background border-border font-mono text-sm"
-                        placeholder={providerInfo.defaultModel || t.settings.enterModelName}
-                      />
-                    )}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="w-full h-10 px-4 rounded-xl border border-border bg-background flex items-center justify-between gap-2 text-sm hover:bg-muted/30 transition-colors">
+                          <span className={selectedModel ? "font-mono text-xs truncate" : "text-xs text-muted-foreground"}>
+                            {selectedModel || (models.length > 0 ? "Select a model" : "Enter model name")}
+                          </span>
+                          <CaretDown className="size-3.5 text-muted-foreground shrink-0" />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-popover border-border gap-0 p-0 rounded-2xl max-w-md">
+                        <DialogHeader className="px-4 pt-4 pb-2">
+                          <DialogTitle className="text-sm font-semibold">Select Model</DialogTitle>
+                          <DialogDescription className="text-xs">
+                            Choose a model for translation
+                          </DialogDescription>
+                        </DialogHeader>
+                        <ModelPickerDialog
+                          models={models}
+                          selected={selectedModel}
+                          onSelect={setSelectedModel}
+                          manualPlaceholder={providerInfo.defaultModel || t.settings.enterModelName}
+                        />
+                      </DialogContent>
+                    </Dialog>
                   </div>
 
                   <div className="space-y-3 pt-2">
@@ -686,15 +756,19 @@ export default function SettingsPage() {
 
               {activeTab === 'about' && (
                 <div className="max-w-2xl space-y-8">
-                  <div className="space-y-4">
-                    <Logo size={48} />
-                    <div className="space-y-2">
-                      <h2 className="text-4xl font-light tracking-tight">Karpa</h2>
-                      <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-                        {t.about.description}
-                      </p>
+                    <div className="space-y-4">
+                      <Logo size={48} />
+                      <div className="space-y-2">
+                        <h2 className="text-4xl font-light tracking-tight">Karpa</h2>
+                        <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                          {t.about.description}
+                        </p>
+                      </div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border/50">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Version</span>
+                        <span className="text-xs font-mono font-bold text-foreground">v{version}</span>
+                      </div>
                     </div>
-                  </div>
 
                   <div className="pt-6 border-t border-border flex flex-col sm:flex-row gap-6">
                     <Link href="https://erencakar.com" target="_blank" className="group flex items-center gap-3">
@@ -728,6 +802,82 @@ export default function SettingsPage() {
 }
 
 /* SUB-COMPONENTS */
+
+function ModelPickerDialog({ models, selected, onSelect, manualPlaceholder }: {
+  models: Model[]
+  selected: string
+  onSelect: (id: string) => void
+  manualPlaceholder: string
+}) {
+  const [query, setQuery] = useState("")
+
+  const filtered = query
+    ? models.filter(m => m.id.toLowerCase().includes(query.toLowerCase()))
+    : models
+
+  if (models.length === 0) {
+    return (
+      <div className="p-4 pt-2">
+        <Input
+          value={selected}
+          onChange={(e) => onSelect(e.target.value)}
+          className="h-10 px-4 rounded-xl border-border font-mono text-sm"
+          placeholder={manualPlaceholder}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="relative px-4 pb-2">
+        <MagnifyingGlass className="absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full h-10 pl-10 pr-4 text-sm bg-muted/50 border border-border rounded-xl outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground/50"
+          placeholder="Search models..."
+          autoFocus
+        />
+      </div>
+      <div className="max-h-80 overflow-y-auto overscroll-contain border-t border-border">
+        {filtered.map((m) => (
+          <DialogClose key={m.id} asChild>
+            <button
+              onClick={() => onSelect(m.id)}
+              className={cn(
+                "w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors border-b border-border/50 last:border-0",
+                selected === m.id
+                  ? "bg-primary/5 text-primary font-medium"
+                  : "text-foreground hover:bg-muted"
+              )}
+            >
+              <div className={cn(
+                "size-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                selected === m.id
+                  ? "border-primary bg-primary"
+                  : "border-muted-foreground/30"
+              )}>
+                {selected === m.id && <Check className="size-3 text-primary-foreground" />}
+              </div>
+              <span className="truncate">{m.id}</span>
+            </button>
+          </DialogClose>
+        ))}
+        {filtered.length === 0 && (
+          <div className="px-4 py-10 text-sm text-muted-foreground/50 text-center">
+            No models match "<span className="font-mono">{query}</span>"
+          </div>
+        )}
+      </div>
+      <div className="px-4 py-2.5 flex items-center justify-between border-t border-border">
+        <span className="text-xs text-muted-foreground/50">
+          {filtered.length} / {models.length} models
+        </span>
+      </div>
+    </div>
+  )
+}
 
 function ToggleTile({ icon: Icon, title, desc, checked, onChange, disabled = false }: { icon: any, title: string, desc: string, checked: boolean, onChange: any, disabled?: boolean }) {
   return (

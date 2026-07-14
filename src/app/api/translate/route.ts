@@ -191,10 +191,10 @@ export async function POST(req: Request) {
       : provider === 'lmstudio' ? process.env.LM_STUDIO_API_URL
       : provider === 'custom' ? process.env.CUSTOM_API_URL
       : undefined
-    const baseUrl = (typeof urlParam === 'string' && urlParam.trim()) ? urlParam.trim() : (envBaseUrl || providerInfo.defaultUrl)
+    let baseUrl = (typeof urlParam === 'string' && urlParam.trim()) ? urlParam.trim() : (envBaseUrl || providerInfo.defaultUrl)
 
     try {
-      validateProviderUrl(baseUrl, provider)
+      baseUrl = validateProviderUrl(baseUrl, provider)
     } catch (validationError) {
       return NextResponse.json(
         { error: (validationError as Error).message },
