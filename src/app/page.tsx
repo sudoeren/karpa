@@ -46,6 +46,21 @@ const languages = [
   { code: "zh", name: "Chinese" },
   { code: "ko", name: "Korean" },
   { code: "ar", name: "Arabic" },
+  { code: "nl", name: "Dutch" },
+  { code: "pl", name: "Polish" },
+  { code: "sv", name: "Swedish" },
+  { code: "vi", name: "Vietnamese" },
+  { code: "th", name: "Thai" },
+  { code: "hi", name: "Hindi" },
+  { code: "cs", name: "Czech" },
+  { code: "ro", name: "Romanian" },
+  { code: "uk", name: "Ukrainian" },
+  { code: "el", name: "Greek" },
+  { code: "hu", name: "Hungarian" },
+  { code: "da", name: "Danish" },
+  { code: "fi", name: "Finnish" },
+  { code: "id", name: "Indonesian" },
+  { code: "bn", name: "Bengali" },
 ]
 
 const tones = [
