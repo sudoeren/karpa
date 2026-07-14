@@ -1,23 +1,23 @@
 # Build stage
-FROM node:26-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies (NODE_ENV=production to skip devDeps, but we need them for build)
 RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build the application (Turbopack disabled for Docker compatibility)
-ENV NEXT_TURBOPACK_BUILD=0
+# Build the application
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Production stage
-FROM node:26-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
