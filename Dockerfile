@@ -12,7 +12,8 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application (Turbopack disabled for Docker compatibility)
+ENV NEXT_TURBOPACK_BUILD=0
 RUN npm run build
 
 # Production stage
