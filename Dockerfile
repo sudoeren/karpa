@@ -6,7 +6,10 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (NODE_ENV=production to skip devDeps, but we need them for build)
+# Install build dependencies for native modules
+RUN apk add --no-cache libc6-compat python3 make g++
+
+# Install dependencies
 RUN npm ci
 
 # Copy source code
