@@ -359,13 +359,13 @@ export default function SettingsPage() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Desktop Sidebar */}
-        <div className="hidden md:flex w-60 shrink-0 border-r border-border/60 bg-muted/20 flex-col">
+        <div className="hidden md:flex w-60 shrink-0 border-r border-border/40 bg-background flex-col">
           <div className="p-5 pb-4">
             <div className="flex items-center gap-2.5">
               <Logo size={22} />
               <h1 className="font-semibold text-base">{t.settings.title}</h1>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1.5">v{version}</p>
+            <p className="text-[11px] text-muted-foreground/60 mt-1.5">v{version}</p>
           </div>
 
           <nav className="flex-1 px-3 space-y-0.5">
@@ -376,8 +376,8 @@ export default function SettingsPage() {
                 className={cn(
                   "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
                   activeTab === item.id
-                    ? "bg-background text-foreground shadow-sm border border-border/60"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50 border border-transparent"
+                    ? "bg-muted text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent"
                 )}
               >
                 <item.icon className={cn("size-4", activeTab === item.id && "text-primary")} />
@@ -386,12 +386,12 @@ export default function SettingsPage() {
             ))}
           </nav>
 
-          <div className="p-5 pt-4 border-t border-border/60">
+          <div className="p-5 pt-4 border-t border-border/30">
             <div className={cn(
               "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium",
               connectionStatus === 'success'
                 ? "bg-emerald-500/10 text-emerald-600"
-                : "bg-muted/50 text-muted-foreground"
+                : "text-muted-foreground/60"
             )}>
               <span className={cn(
                 "size-1.5 rounded-full",
