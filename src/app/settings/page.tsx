@@ -322,88 +322,96 @@ export default function SettingsPage() {
   ] as const
 
   return (
-    <div className="h-full flex items-stretch md:items-center justify-center p-0 md:p-4">
-      <div className="w-full max-w-5xl h-full md:h-[700px] bg-card border border-border rounded-2xl overflow-hidden flex flex-col md:flex-row">
-        {/* Mobile Header */}
-        <div className="md:hidden border-b border-border">
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2">
-              <Logo size={20} />
-              <span className="font-semibold text-sm">{t.settings.title}</span>
-            </div>
-            <div className={cn(
-              "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium",
-              connectionStatus === 'success' ? "text-emerald-600" : "text-muted-foreground"
-            )}>
-              <span className={cn("size-1.5 rounded-full", connectionStatus === 'success' ? "bg-emerald-500" : "bg-muted-foreground/30")} />
-              {connectionStatus === 'success' ? t.settings.coreOnline : t.settings.coreOffline}
-            </div>
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Mobile Header */}
+      <div className="md:hidden border-b border-border shrink-0">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Logo size={20} />
+            <span className="font-semibold text-sm">{t.settings.title}</span>
           </div>
-          <div className="flex gap-1 px-3 pb-3 overflow-x-auto">
-            {sidebarItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors",
-                  activeTab === item.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <item.icon className="size-3.5" />
-                {item.label}
-              </button>
-            ))}
+          <div className={cn(
+            "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium",
+            connectionStatus === 'success' ? "text-emerald-600" : "text-muted-foreground"
+          )}>
+            <span className={cn("size-1.5 rounded-full", connectionStatus === 'success' ? "bg-emerald-500" : "bg-muted-foreground/30")} />
+            {connectionStatus === 'success' ? t.settings.coreOnline : t.settings.coreOffline}
           </div>
         </div>
+        <div className="flex gap-1 px-3 pb-3 overflow-x-auto scrollbar-none">
+          {sidebarItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors",
+                activeTab === item.id
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <item.icon className="size-3.5" />
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
+      <div className="flex-1 flex overflow-hidden">
         {/* Desktop Sidebar */}
-        <div className="hidden md:flex w-56 border-r border-border flex-col p-5 gap-8">
-          <div className="flex items-center gap-2.5 px-1">
-            <Logo size={24} />
-            <h1 className="font-semibold text-base">{t.settings.title}</h1>
+        <div className="hidden md:flex w-60 shrink-0 border-r border-border/60 bg-muted/20 flex-col">
+          <div className="p-5 pb-4">
+            <div className="flex items-center gap-2.5">
+              <Logo size={22} />
+              <h1 className="font-semibold text-base">{t.settings.title}</h1>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1.5">v{version}</p>
           </div>
 
-          <nav className="flex-1 space-y-1">
+          <nav className="flex-1 px-3 space-y-0.5">
             {sidebarItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors",
+                  "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
                   activeTab === item.id
-                    ? "bg-primary/5 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    ? "bg-background text-foreground shadow-sm border border-border/60"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50 border border-transparent"
                 )}
               >
-                <item.icon className="size-4" />
+                <item.icon className={cn("size-4", activeTab === item.id && "text-primary")} />
                 {item.label}
               </button>
             ))}
           </nav>
 
-          <div className="pt-5 border-t border-border">
+          <div className="p-5 pt-4 border-t border-border/60">
             <div className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium",
-              connectionStatus === 'success' ? "text-emerald-600" : "text-muted-foreground"
+              "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium",
+              connectionStatus === 'success'
+                ? "bg-emerald-500/10 text-emerald-600"
+                : "bg-muted/50 text-muted-foreground"
             )}>
-              <span className={cn("size-1.5 rounded-full", connectionStatus === 'success' ? "bg-emerald-500" : "bg-muted-foreground/30")} />
+              <span className={cn(
+                "size-1.5 rounded-full",
+                connectionStatus === 'success' ? "bg-emerald-500" : "bg-muted-foreground/30"
+              )} />
               {connectionStatus === 'success' ? t.settings.coreOnline : t.settings.coreOffline}
             </div>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+        <div className="flex-1 min-w-0 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="flex-1 p-6 md:p-10 overflow-y-auto"
+              transition={{ duration: 0.15 }}
+              className="p-4 md:p-8 lg:p-10"
             >
               {activeTab === 'appearance' && (
                 <div className="max-w-2xl space-y-8">
