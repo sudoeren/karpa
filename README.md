@@ -11,9 +11,8 @@
 <p align="center">
   <a href="#features">Features</a> •
   <a href="#quick-start">Quick Start</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#desktop-app">Desktop App</a> •
-  <a href="#usage">Usage</a>
+  <a href="#usage">Usage</a> •
+  <a href="#build-from-source">Build from Source</a>
 </p>
 
 Karpa is a privacy-first AI translator that runs entirely on your machine.
@@ -57,95 +56,6 @@ Download the latest installer from [Releases](https://github.com/sudoeren/karpa/
 | **macOS** | `Karpa_x64.dmg` |
 | **Linux** | `Karpa_amd64.AppImage` / `Karpa_amd64.deb` |
 
-### Run Karpa
-
-```bash
-git clone https://github.com/sudoeren/karpa.git && cd karpa
-npm install && npm run dev
-```
-
-Open **http://localhost:7250** and start translating!
-
----
-
-## Installation
-
-### Option 1: Desktop App (Windows / macOS / Linux)
-
-Build from source:
-```bash
-git clone https://github.com/sudoeren/karpa.git
-cd karpa
-npm install
-npm run desktop:build
-```
-
-Output per platform:
-```
-Windows  → src-tauri/target/release/bundle/msi/*.msi
-           src-tauri/target/release/bundle/nsis/*.exe
-macOS    → src-tauri/target/release/bundle/dmg/*.dmg
-Linux    → src-tauri/target/release/bundle/deb/*.deb
-```
-
-### Option 2: Development (Web)
-
-```bash
-git clone https://github.com/sudoeren/karpa.git
-cd karpa
-npm install
-npm run dev
-```
-
-### Option 3: Docker Compose
-
-```bash
-git clone https://github.com/sudoeren/karpa.git
-cd karpa
-docker-compose up -d
-```
-
-### Option 4: Docker Pull
-
-```bash
-docker run -p 7250:7250 ghcr.io/sudoeren/karpa:latest
-```
-
-For local LLM providers (LM Studio, Ollama), add the host gateway:
-```bash
-docker run -p 7250:7250 --add-host=host.docker.internal:host-gateway ghcr.io/sudoeren/karpa:latest
-```
-
----
-
-## Desktop App
-
-Karpa is also available as a native Windows desktop application built with [Tauri](https://tauri.app/).
-
-### Development
-
-```bash
-npm run desktop:dev     # Start dev server + Tauri window
-```
-
-### Build
-
-```bash
-npm run desktop:build   # Build installer (MSI + NSIS)
-```
-
-Outputs:
-```
-src-tauri/target/release/bundle/nsis/Karpa_x64-setup.exe
-src-tauri/target/release/bundle/msi/Karpa_x64_en-US.msi
-```
-
-### Architecture
-
-The desktop app uses Next.js static export + Tauri WebView. All API calls (translate, test connection, model listing) go directly to your LLM provider via `fetch()` — no proxy, no server. The app is fully self-contained.
-
----
-
 ## Usage
 
 ### Text Translation
@@ -169,6 +79,29 @@ The desktop app uses Next.js static export + Tauri WebView. All API calls (trans
 | Shortcut     | Action           |
 | ------------ | ---------------- |
 | `Ctrl+Enter` | Translate        |
+
+---
+
+## Build from Source
+
+```bash
+git clone https://github.com/sudoeren/karpa.git
+cd karpa
+npm install
+```
+
+**Desktop app:**
+```bash
+npm run desktop:build       # Windows → .exe/.msi | macOS → .dmg | Linux → .deb/.AppImage
+npm run desktop:dev         # Dev mode with hot reload
+```
+
+**Docker:**
+```bash
+docker compose up -d
+# or
+docker run -p 7250:7250 ghcr.io/sudoeren/karpa:latest
+```
 
 ---
 
