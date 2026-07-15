@@ -52,9 +52,9 @@ Download the latest installer from [Releases](https://github.com/sudoeren/karpa/
 
 | Platform | Package |
 |----------|---------|
-| **Windows** | `Karpa_x64-setup.exe` (NSIS) / `Karpa_x64_en-US.msi` (MSI) |
-| **macOS** | `Karpa_x64.dmg` |
-| **Linux** | `Karpa_amd64.AppImage` / `Karpa_amd64.deb` |
+| **Windows** | `.exe` (NSIS installer), `.msi` |
+| **macOS** | `.dmg` (Intel + Apple Silicon) |
+| **Linux** | `.deb`, `.AppImage`, `.rpm` |
 
 ## Usage
 
@@ -92,8 +92,8 @@ npm install
 
 **Desktop app:**
 ```bash
-npm run desktop:build       # Windows → .exe/.msi | macOS → .dmg | Linux → .deb/.AppImage
-npm run desktop:dev         # Dev mode with hot reload
+npm run desktop:build      # Windows → .exe/.msi | macOS → .dmg | Linux → .deb/.AppImage
+npm run desktop:dev        # Dev mode with hot reload
 ```
 
 **Docker:**
