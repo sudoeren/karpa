@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Translate, ClockCounterClockwise, Star, Gear, WifiHigh, WifiSlash, Spinner } from "@phosphor-icons/react"
 import { cn, decodeApiKey } from "@/lib/utils"
+import { clientTestConnection } from "@/lib/client-test-connection"
 import { useLanguage } from "@/contexts/language-context"
 import {
   Tooltip,
@@ -24,13 +25,8 @@ export function FloatingNavbar() {
         const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url") || "http://localhost:1234"
         const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
         const savedApiKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
-        const response = await fetch('/api/test-connection', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: savedUrl, provider: savedProvider, apiKey: savedApiKey }),
-        })
-        const data = await response.json()
-        setIsConnected(data.success)
+        const result = await clientTestConnection({ url: savedUrl, provider: savedProvider, apiKey: savedApiKey })
+        setIsConnected(result.success)
       } catch {
         setIsConnected(false)
       }

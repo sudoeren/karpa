@@ -11,7 +11,9 @@ import {
   Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Calendar, Trash, ArrowRight, ArrowSquareOut,
   File, FileText, FileCode, Table, Subtitles, FileJs, FileHtml, FileCss, CheckCircle, ArrowsClockwise
 } from "@phosphor-icons/react"
-import { cn, splitIntoChunks, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
+import { cn, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
+import { clientTranslate } from "@/lib/client-translate"
+import type { ProviderType } from "@/lib/providers"
 import { useLanguage } from "@/contexts/language-context"
 import { motion, AnimatePresence } from "framer-motion"
 import { Logo } from "@/components/logo"
@@ -200,25 +202,18 @@ function TranslatorWorkspace() {
     const textToTranslate = mode === "text" ? sourceText : fileContent
     if (!textToTranslate.trim()) return
 
-    // Cancel any existing request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
     }
 
-    // Create new AbortController
     abortControllerRef.current = new AbortController()
 
     setLoading(true)
     setProgress(0)
+    setCurrentChunk(0)
+    setTotalChunks(0)
 
     try {
-      // Use preserveFormatting=true to keep original whitespace/indentation for files
-      const chunks = splitIntoChunks(textToTranslate, 2000, true)
-      setTotalChunks(chunks.length)
-
-      const translatedChunks: string[] = []
-
-      // Get settings from localStorage
       const savedModel = localStorage.getItem("llm-model") || localStorage.getItem("lm-studio-model")
       const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url")
       const savedTemp = localStorage.getItem("llm-temperature") || localStorage.getItem("lm-studio-temperature")
@@ -226,43 +221,26 @@ function TranslatorWorkspace() {
       const savedApiKey = sessionStorage.getItem("llm-api-key")
       const finalApiKey = savedApiKey ? decodeApiKey(savedApiKey) : undefined
 
-      for (let i = 0; i < chunks.length; i++) {
-        setCurrentChunk(i + 1)
+      const result = await clientTranslate({
+        text: textToTranslate,
+        targetLanguage,
+        sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
+        tone: tone !== "standard" ? tone : undefined,
+        model: savedModel || undefined,
+        apiUrl: savedUrl || undefined,
+        temperature: savedTemp ? parseFloat(savedTemp) : undefined,
+        provider: (savedProvider as ProviderType) || "lmstudio",
+        apiKey: finalApiKey,
+        preserveFormatting: true,
+        signal: abortControllerRef.current.signal,
+        onProgress: (current, total) => {
+          setCurrentChunk(current)
+          setTotalChunks(total)
+          setProgress(Math.round((current / total) * 100))
+        },
+      })
 
-        // Skip API call for whitespace-only chunks to save time (though API handles it too)
-        if (!chunks[i].trim()) {
-          translatedChunks.push(chunks[i]);
-          setProgress(Math.round(((i + 1) / chunks.length) * 100));
-          continue;
-        }
-
-        const response = await fetch("/api/translate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            text: chunks[i],
-            targetLanguage,
-            sourceLanguage: sourceLanguage !== "Auto Detect" ? sourceLanguage : undefined,
-            tone: tone !== "standard" ? tone : undefined,
-            model: savedModel,
-            apiUrl: savedUrl,
-            temperature: savedTemp ? parseFloat(savedTemp) : undefined,
-            provider: savedProvider,
-            apiKey: finalApiKey,
-            preserveFormatting: true,
-          }),
-          signal: abortControllerRef.current.signal,
-        })
-
-        const data = await response.json()
-        if (!response.ok) throw new Error(data.error || "Failed")
-
-        translatedChunks.push(data.translation)
-        setProgress(Math.round(((i + 1) / chunks.length) * 100))
-      }
-
-      // Join with empty string because separators are preserved in chunks
-      const fullTranslation = translatedChunks.join("")
+      const fullTranslation = result.translation
 
       if (mode === "text") {
         setTranslatedText(fullTranslation)
@@ -284,10 +262,8 @@ function TranslatorWorkspace() {
       }
       addToHistory(newEntry)
 
-      // Reset source language to Auto Detect but KEEP the selected target language
       setSourceLanguage("Auto Detect")
 
-      // Notify user
       const notificationsEnabled = localStorage.getItem("karpa-notifications") === "true"
       if (notificationsEnabled) {
         if (Notification.permission === 'granted') {

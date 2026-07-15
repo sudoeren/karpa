@@ -15,6 +15,7 @@ import {
 import { cn, safeSetItem } from "@/lib/utils"
 import { toast } from "sonner"
 import { type ProviderType, PROVIDERS } from "@/lib/providers"
+import { clientTestConnection } from "@/lib/client-test-connection"
 
 const translationLanguages = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -88,14 +89,9 @@ export function Onboarding() {
       let url = apiUrl.trim()
       if (url.endsWith('/')) url = url.slice(0, -1)
 
-      const response = await fetch('/api/test-connection', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, provider: selectedProvider, apiKey: apiKey || undefined }),
-      })
+      const result = await clientTestConnection({ url, provider: selectedProvider, apiKey: apiKey || undefined })
 
-      const data = await response.json()
-      if (data.success) {
+      if (result.success) {
         setConnectionStatus("success")
         safeSetItem("llm-provider", selectedProvider)
         safeSetItem("llm-api-url", url)
@@ -106,7 +102,7 @@ export function Onboarding() {
         toast.success(t.settings.connectionSuccess)
       } else {
         setConnectionStatus("error")
-        toast.error(data.error || t.settings.connectionFailed)
+        toast.error(result.error || t.settings.connectionFailed)
       }
     } catch {
       setConnectionStatus("error")

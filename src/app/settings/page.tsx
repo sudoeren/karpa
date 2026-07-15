@@ -43,6 +43,8 @@ import { useOnboarding } from "@/contexts/onboarding-context"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
 import { type ProviderType, PROVIDERS, KNOWN_MODELS } from "@/lib/providers"
+import { clientTestConnection } from "@/lib/client-test-connection"
+import { clientFetchModels } from "@/lib/client-models"
 import { version } from '../../../package.json'
 
 type Model = {
@@ -73,12 +75,7 @@ export default function SettingsPage() {
 
   const fetchModels = useCallback(async (url: string, provider: ProviderType, key?: string, currentSelected?: string) => {
     try {
-      const response = await fetch('/api/models', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, provider, apiKey: key }),
-      })
-      const data = await response.json()
+      const data = await clientFetchModels({ url, provider, apiKey: key })
       if (data.success) {
         setModels(data.models)
         const savedModel = localStorage.getItem("llm-model")
@@ -148,13 +145,8 @@ export default function SettingsPage() {
     const checkConnection = async () => {
       try {
         const savedKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
-        const response = await fetch('/api/test-connection', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, provider, apiKey: savedKey }),
-        })
-        const data = await response.json()
-        setConnectionStatus(data.success ? 'success' : 'error')
+        const result = await clientTestConnection({ url, provider, apiKey: savedKey })
+        setConnectionStatus(result.success ? 'success' : 'error')
       } catch {
         setConnectionStatus('error')
       }
@@ -298,23 +290,18 @@ export default function SettingsPage() {
     setConnectionStatus('idle')
     const effectiveKey = apiKey || (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
     try {
-      const response = await fetch('/api/test-connection', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: apiUrl,
-          provider: selectedProvider,
-          apiKey: effectiveKey,
-        }),
+      const result = await clientTestConnection({
+        url: apiUrl,
+        provider: selectedProvider,
+        apiKey: effectiveKey,
       })
-      const data = await response.json()
-      if (data.success) {
+      if (result.success) {
         setConnectionStatus('success')
         await fetchModels(apiUrl, selectedProvider, effectiveKey, selectedModel || undefined)
         toast.success(t.settings.connectionSuccess)
       } else {
         setConnectionStatus('error')
-        toast.error(data.error || t.settings.connectionFailed)
+        toast.error(result.error || t.settings.connectionFailed)
       }
     } catch (error) {
       setConnectionStatus('error')
