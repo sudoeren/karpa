@@ -20,6 +20,10 @@ Your data never leaves your device — no cloud, no tracking, no compromises.
 
 Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini, and OpenRouter.
 
+<p align="center">
+  <img src="karpa.gif" alt="Karpa demo" />
+</p>
+
 ---
 
 ## Features
