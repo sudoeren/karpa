@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import {
   ArrowsLeftRight, Spinner, Copy, Check, SpeakerHigh, SpeakerX, X, Star,
-  Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Calendar, Trash, ArrowRight, ArrowSquareOut
+  Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Calendar, Trash, ArrowRight, ArrowSquareOut,
+  File, FileText, FileCode, Table, Subtitles, FileJs, FileHtml, FileCss, CheckCircle, ArrowsClockwise
 } from "@phosphor-icons/react"
 import { cn, splitIntoChunks, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
 import { useLanguage } from "@/contexts/language-context"
@@ -383,7 +384,8 @@ function TranslatorWorkspace() {
 
   const handleDownload = () => {
     if (!translatedFileContent || !selectedFile) return
-    const blob = new Blob([translatedFileContent], { type: 'text/plain' })
+    const BOM = "\uFEFF"
+    const blob = new Blob([BOM + translatedFileContent], { type: 'text/plain;charset=utf-8' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     const nameParts = selectedFile.name.split('.')
@@ -421,6 +423,35 @@ function TranslatorWorkspace() {
       setSourceText(translatedText)
       setTranslatedText(sourceText)
     }
+  }
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  const getFileTypeInfo = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase() ?? ''
+    const map: Record<string, { icon: React.ComponentType<{ className?: string }>, color: string, label: string }> = {
+      md: { icon: FileText, color: "text-blue-500", label: "MD" },
+      txt: { icon: FileText, color: "text-blue-400", label: "TXT" },
+      json: { icon: FileCode, color: "text-yellow-500", label: "JSON" },
+      csv: { icon: Table, color: "text-green-500", label: "CSV" },
+      srt: { icon: Subtitles, color: "text-purple-500", label: "SRT" },
+      js: { icon: FileJs, color: "text-amber-500", label: "JS" },
+      ts: { icon: FileCode, color: "text-cyan-500", label: "TS" },
+      py: { icon: FileCode, color: "text-blue-500", label: "PY" },
+      html: { icon: FileHtml, color: "text-orange-500", label: "HTML" },
+      css: { icon: FileCss, color: "text-sky-500", label: "CSS" },
+      xml: { icon: FileCode, color: "text-amber-400", label: "XML" },
+    }
+    return map[ext] ?? { icon: File, color: "text-muted-foreground", label: ext.toUpperCase() || "FILE" }
+  }
+
+  const getLineCount = (content: string): number => {
+    if (!content) return 0
+    return content.split(/\r?\n/).length
   }
 
   return (
@@ -673,125 +704,264 @@ function TranslatorWorkspace() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="p-4 md:p-8 h-full flex flex-col"
+                  className="h-full flex flex-col overflow-hidden"
                 >
                   {!selectedFile ? (
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                      className={cn(
-                        "flex-1 border-2 border-dashed rounded-3xl p-6 md:p-12 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 md:gap-4",
-                        isDragging
-                          ? "border-primary bg-primary/5 scale-[0.99]"
-                          : "border-muted-foreground/20 hover:border-primary/50 hover:bg-muted/30"
-                      )}
-                    >
-                      <div className="size-12 md:size-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-                        <Upload className={cn(
-                          "size-6 md:size-8 transition-colors",
-                          isDragging ? "text-primary" : "text-muted-foreground"
-                        )} />
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="font-bold text-base md:text-lg">{t.translator.uploadFile}</h3>
-                        <p className="text-xs md:text-sm text-muted-foreground">{t.translator.dragDrop}</p>
-                      </div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-2 md:mt-4 px-2">{t.translator.supportedFormats}</p>
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="hidden"
-                        accept=".txt,.md,.json,.csv,.srt,.js,.ts,.py,.html,.css,.xml"
-                        onChange={handleFileUpload}
-                      />
+                    <div className="flex-1 flex items-center justify-center p-6 md:p-10">
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full max-w-lg"
+                      >
+                        <div
+                          onClick={() => fileInputRef.current?.click()}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          className={cn(
+                            "group relative cursor-pointer rounded-3xl border-2 border-dashed p-8 md:p-12 text-center transition-all duration-300",
+                            "before:absolute before:inset-0 before:rounded-3xl before:transition-opacity before:duration-500",
+                            isDragging
+                              ? "border-primary bg-primary/[0.06] scale-[0.98] before:bg-primary/5 before:opacity-100"
+                              : "border-border/60 hover:border-primary/40 hover:bg-muted/20 before:opacity-0"
+                          )}
+                        >
+                          <div className={cn(
+                            "absolute inset-0 rounded-3xl transition-all duration-500",
+                            isDragging
+                              ? "shadow-[inset_0_0_60px_-12px] shadow-primary/20"
+                              : "shadow-none"
+                          )} />
+                          <div className="relative z-10 space-y-5">
+                            <motion.div
+                              animate={isDragging ? { scale: 1.1 } : { scale: 1 }}
+                              className={cn(
+                                "mx-auto size-16 md:size-20 rounded-2xl flex items-center justify-center transition-all duration-300",
+                                isDragging
+                                  ? "bg-primary shadow-lg shadow-primary/25"
+                                  : "bg-muted group-hover:bg-primary/10"
+                              )}
+                            >
+                              <Upload className={cn(
+                                "size-7 md:size-9 transition-all duration-300",
+                                isDragging
+                                  ? "text-primary-foreground"
+                                  : "text-muted-foreground group-hover:text-primary"
+                              )} />
+                            </motion.div>
+                            <div className="space-y-2">
+                              <h3 className="text-lg md:text-xl font-bold tracking-tight">
+                                {isDragging ? t.translator.uploadFile : t.translator.uploadFile}
+                              </h3>
+                              <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto leading-relaxed">
+                                {t.translator.dragDrop}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap items-center justify-center gap-1.5">
+                              {[".txt", ".md", ".json", ".csv", ".srt", ".html", ".js", ".py"].map(fmt => (
+                                <span
+                                  key={fmt}
+                                  className="px-2 py-0.5 text-[10px] font-medium rounded-md bg-muted/60 border border-border/40 text-muted-foreground"
+                                >
+                                  {fmt}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept=".txt,.md,.json,.csv,.srt,.js,.ts,.py,.html,.css,.xml"
+                            onChange={handleFileUpload}
+                          />
+                        </div>
+
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="mt-6"
+                        >
+                          <Alert className="bg-muted/30 border-border/40 rounded-2xl">
+                            <Info className="size-4 text-muted-foreground" />
+                            <AlertTitle className="text-xs font-semibold">
+                              {t.translator.unsupportedNote}
+                            </AlertTitle>
+                            <AlertDescription className="text-xs text-muted-foreground/70">
+                              {t.translator.unsupportedWarning}
+                            </AlertDescription>
+                          </Alert>
+                        </motion.div>
+                      </motion.div>
                     </div>
                   ) : (
-                    <div className="space-y-4 md:space-y-6 flex-1 flex flex-col min-h-0">
-                      <div className="flex items-center justify-between p-3 md:p-5 bg-muted/50 rounded-2xl border gap-3">
-                        <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
-                          <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <FileArrowUp className="size-5 md:size-6 text-primary" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-bold text-sm truncate">{selectedFile.name}</p>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                              {fileContent.length} {t.translator.characters}
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-10 rounded-full hover:bg-destructive/10 hover:text-destructive shrink-0"
-                          onClick={() => {
-                            setSelectedFile(null)
-                            setFileContent("")
-                            setTranslatedFileContent("")
-                          }}
-                        >
-                          <X className="size-5" />
-                        </Button>
-                      </div>
+                    <div className="flex-1 flex flex-col min-h-0 p-4 md:p-6 overflow-y-auto custom-scrollbar">
+                      <div className="flex-1 space-y-4 md:space-y-5">
+                        {(() => {
+                          const fileType = getFileTypeInfo(selectedFile.name)
+                          const FileIcon = fileType.icon
+                          return (
+                            <motion.div
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="bg-muted/30 border border-border/50 rounded-2xl p-4 md:p-5"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className={cn(
+                                  "size-12 md:size-14 rounded-xl flex items-center justify-center shrink-0",
+                                  "bg-background border border-border/50"
+                                )}>
+                                  <FileIcon className={cn("size-6 md:size-7", fileType.color)} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <p className="font-semibold text-sm md:text-base truncate">{selectedFile.name}</p>
+                                    <span className={cn(
+                                      "shrink-0 px-1.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide border",
+                                      fileType.color.replace("text-", "bg-").replace(/500/, "500/10"),
+                                      fileType.color.replace("text-", "border-").replace(/500/, "500/20"),
+                                      fileType.color
+                                    )}>
+                                      {fileType.label}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-3 text-[11px] text-muted-foreground/70">
+                                    <span>{formatFileSize(selectedFile.size)}</span>
+                                    <span className="w-px h-3 bg-border/60" />
+                                    <span>{getLineCount(fileContent).toLocaleString()} {t.translator.lines}</span>
+                                    <span className="w-px h-3 bg-border/60" />
+                                    <span>{fileContent.length.toLocaleString()} {t.translator.characters}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    title={t.translator.chooseAnother}
+                                  >
+                                    <ArrowsClockwise className="size-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                    onClick={() => {
+                                      setSelectedFile(null)
+                                      setFileContent("")
+                                      setTranslatedFileContent("")
+                                    }}
+                                    title={t.common.delete}
+                                  >
+                                    <X className="size-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              {!loading && !translatedFileContent && (
+                                <div className="mt-4 pt-4 border-t border-border/40 flex items-center gap-2">
+                                  <div className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                  <span className="text-[11px] font-medium text-muted-foreground/70">
+                                    {t.translator.fileReady} — {t.translator.fileReadyDesc}
+                                  </span>
+                                </div>
+                              )}
+                            </motion.div>
+                          )
+                        })()}
 
-                      {loading && (
-                        <div className="p-8 bg-muted/30 border rounded-3xl space-y-6">
-                          <div className="flex items-center justify-between text-xs font-black uppercase tracking-[0.2em]">
-                            <div className="flex items-center gap-3 text-primary">
-                              <Spinner className="size-4 animate-spin" />
-                              <span>{t.translator.translating}</span>
+                        {loading && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-muted/30 border border-border/50 rounded-2xl p-5 md:p-6 space-y-5"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Spinner className="size-5 animate-spin text-primary" />
+                                <div>
+                                  <p className="text-sm font-semibold">{t.translator.translating}</p>
+                                  <p className="text-[10px] text-muted-foreground/70 font-medium uppercase tracking-wider truncate max-w-[200px]">
+                                    {selectedFile?.name}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="text-sm font-bold text-primary tabular-nums">{progress}%</span>
                             </div>
-                            <span className="text-muted-foreground">{progress}%</span>
-                          </div>
-                          <Progress value={progress} className="h-2" />
-                          {totalChunks > 1 && (
-                            <p className="text-center text-[10px] font-bold text-muted-foreground tracking-widest">
-                              {currentChunk} / {totalChunks}
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      {translatedFileContent && (
-                        <div className="p-6 bg-green-500/5 border border-green-500/20 rounded-[24px] mt-auto">
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                              <p className="text-xs font-black uppercase tracking-widest text-green-600 dark:text-green-400">
-                                {t.translator.translatedFile}
-                              </p>
-                              <p className="text-sm font-medium opacity-70">Ready for download</p>
+                            <div className="space-y-2">
+                              <Progress value={progress} className="h-2 [&>div]:transition-all [&>div]:duration-500" />
+                              {totalChunks > 1 && (
+                                <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                  <span>{t.translator.characters}</span>
+                                  <span>{currentChunk} / {totalChunks}</span>
+                                </div>
+                              )}
                             </div>
                             <Button
-                              size="lg"
-                              onClick={handleDownload}
-                              className="bg-green-600 hover:bg-green-500 rounded-xl px-8 font-bold shadow-lg shadow-green-500/20"
+                              variant="outline"
+                              size="sm"
+                              className="w-full rounded-xl h-9 text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50"
+                              onClick={handleCancelTranslation}
                             >
-                              <Download className="size-4 mr-2" />
-                              {t.common.download}
+                              {t.common.cancel}
                             </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                          </motion.div>
+                        )}
 
-                  {mode === "file" && !selectedFile && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-6 shrink-0"
-                    >
-                      <Alert className="bg-primary/5 border-primary/20 rounded-[20px]">
-                        <Info className="size-4 text-primary" />
-                        <AlertTitle className="text-xs font-black uppercase tracking-widest text-primary">
-                          {t.translator.unsupportedNote}
-                        </AlertTitle>
-                        <AlertDescription className="text-xs">
-                          {t.translator.unsupportedWarning}
-                        </AlertDescription>
-                      </Alert>
-                    </motion.div>
+                        {translatedFileContent && !loading && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="space-y-4"
+                          >
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-muted/20 border border-border/40 rounded-2xl p-4">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+                                  {t.translator.originalFile}
+                                </p>
+                                <p className="text-2xl font-bold tabular-nums">{fileContent.length.toLocaleString()}</p>
+                                <p className="text-[11px] text-muted-foreground/70">{t.translator.characters}</p>
+                              </div>
+                              <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
+                                  {t.translator.translatedResult}
+                                </p>
+                                <p className="text-2xl font-bold text-primary tabular-nums">{translatedFileContent.length.toLocaleString()}</p>
+                                <p className="text-[11px] text-primary/70">{t.translator.characters}</p>
+                              </div>
+                            </div>
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="bg-gradient-to-br from-green-500/5 to-emerald-500/5 border border-green-500/25 rounded-2xl p-5 md:p-6"
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="size-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+                                    <CheckCircle className="size-5 text-green-500" />
+                                  </div>
+                                  <div className="space-y-0.5">
+                                    <p className="font-bold text-sm">{t.translator.fileProcessed}</p>
+                                    <p className="text-xs text-muted-foreground/70 truncate max-w-[200px]">
+                                      {selectedFile?.name}
+                                    </p>
+                                  </div>
+                                </div>
+                                <Button
+                                  size="lg"
+                                  onClick={handleDownload}
+                                  className="bg-green-600 hover:bg-green-500 rounded-xl px-8 h-11 font-bold shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all active:scale-[0.97]"
+                                >
+                                  <Download className="size-4 mr-2" />
+                                  {t.translator.downloadTranslated}
+                                </Button>
+                              </div>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </motion.div>
               )}
