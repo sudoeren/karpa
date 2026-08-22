@@ -8,11 +8,11 @@ import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 
 import {
-  Sun, Moon, Monitor, Globe,
-  Trash, Download, Upload, ArrowsClockwise, Check, Spinner, Lightning,
-  Bell, SpeakerHigh, Info, User, ArrowSquareOut,
-  Key, ComputerTower, Cloud, SquaresFour, Sliders,
-  HardDrive, ShieldCheck, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X
+  Sun, Moon, Monitor,
+  Trash, Download, Upload, ArrowsClockwise, Check, Spinner,
+  Bell, SpeakerHigh, Info,
+  ComputerTower, Cloud, SquaresFour, Sliders,
+  HardDrive, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
