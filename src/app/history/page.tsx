@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   MagnifyingGlass, Trash, ArrowRight, ClockCounterClockwise, Copy,
-  ArrowSquareOut, X, Funnel, Calendar, Star, Sparkle, FileArrowUp, Download
+  ArrowSquareOut, X, Star, FileArrowUp, Download
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
