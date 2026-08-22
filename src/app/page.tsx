@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import {
   ArrowsLeftRight, Spinner, Copy, Check, SpeakerHigh, SpeakerX, X, Star,
-  Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Calendar, Trash, ArrowRight, ArrowSquareOut,
+  Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Trash, ArrowRight, ArrowSquareOut,
   File, FileText, FileCode, Table, Subtitles, FileJs, FileHtml, FileCss, CheckCircle, ArrowsClockwise
 } from "@phosphor-icons/react"
 import { cn, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
@@ -22,7 +22,6 @@ import { MarkdownViewer } from "@/components/markdown-viewer"
 import { useOnboarding } from "@/contexts/onboarding-context"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
 
 type TranslationItem = {
   id: string
@@ -77,7 +76,7 @@ const tones = [
 function TranslatorWorkspace() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const { targetLanguage: defaultTargetLang } = useOnboarding()
 
   const [mode, setMode] = useState<"text" | "file">("text")
