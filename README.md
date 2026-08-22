@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://karpa.erencakar.com">Website</a> •
   <a href="#features">Features</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#usage">Usage</a> •
@@ -16,9 +17,11 @@
 </p>
 
 Karpa is a privacy-first AI translator that runs entirely on your machine.
-Your data never leaves your device — no cloud, no tracking, no compromises.
+Your data never leaves your device. No cloud, no tracking, no compromises.
 
-Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini, and OpenRouter.
+Website: **https://karpa.erencakar.com**
+
+Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini and OpenRouter.
 
 <p align="center">
   <img src="karpa.gif" alt="Karpa demo" />
@@ -46,9 +49,9 @@ Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini, and OpenRouter.
 ### Prerequisites
 
 Pick one of the supported providers:
-- **[LM Studio](https://lmstudio.ai/)** — Download, load a model, and start the local server
-- **[Ollama](https://ollama.com/)** — Download and pull a model
-- **OpenAI / Anthropic / Google Gemini / OpenRouter** — Create an account and get an API key
+- **[LM Studio](https://lmstudio.ai/)**: Download, load a model, and start the local server
+- **[Ollama](https://ollama.com/)**: Download and pull a model
+- **OpenAI / Anthropic / Google Gemini / OpenRouter**: Create an account and get an API key
 
 ### Desktop App
 
@@ -162,4 +165,4 @@ Clear browser data (history, settings, API key) manually from Settings → Data.
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE) for details.
