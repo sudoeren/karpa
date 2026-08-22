@@ -17,7 +17,7 @@ export function KeyboardShortcuts() {
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const { setTheme, theme } = useTheme()
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
