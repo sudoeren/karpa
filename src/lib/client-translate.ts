@@ -202,7 +202,6 @@ export async function clientTranslate(params: TranslateParams): Promise<Translat
   const chunks = splitIntoChunks(text, 2000, preserveFormatting === true)
   const isLongText = chunks.length > 1
 
-  let lastError: Error | null = null
   const maxRetries = 2
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -259,8 +258,6 @@ export async function clientTranslate(params: TranslateParams): Promise<Translat
         }
       }
     } catch (fetchError) {
-      lastError = fetchError as Error
-
       if ((fetchError as Error).name === "AbortError") {
         throw new Error("Translation request timed out. Please try again with shorter text.")
       }
