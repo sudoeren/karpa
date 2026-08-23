@@ -1,17 +1,19 @@
+import { openUrl } from "@tauri-apps/plugin-opener"
+
 /**
  * Open an external URL in the system browser.
  * - Inside Tauri: uses @tauri-apps/plugin-opener (openUrl)
  * - In browser: falls back to window.open
- * Always tries opener first, so AppImage/browser detection cannot fail.
+ * Static import ensures Next.js bundles the plugin correctly for Tauri's asset protocol.
  */
 export async function openExternal(url: string): Promise<void> {
   // Try Tauri opener first (works in AppImage/.deb/.dmg/.exe/.msi)
   try {
-    const { openUrl } = await import("@tauri-apps/plugin-opener")
     await openUrl(url)
     return
-  } catch {
+  } catch (e) {
     // Not in Tauri or opener failed -> fallback to window.open
+    console.warn("[openExternal] openUrl failed, fallback to window.open", e)
   }
 
   if (typeof window !== "undefined") {
