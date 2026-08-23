@@ -9,6 +9,12 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/sudoeren/karpa/releases"><img src="https://img.shields.io/github/v/release/sudoeren/karpa?label=version&color=blue" alt="Version"></a>
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platform">
+  <a href="https://github.com/sudoeren/karpa/blob/main/LICENSE"><img src="https://img.shields.io/github/license/sudoeren/karpa" alt="License"></a>
+</p>
+
+<p align="center">
   <a href="https://karpa.erencakar.com">Website</a> •
   <a href="https://karpa.erencakar.com/docs">Docs</a> •
   <a href="#download">Download</a> •
@@ -39,7 +45,7 @@ Full documentation is available at **https://karpa.erencakar.com/docs** - guides
 
 ## Download
 
-Get Karpa for your platform from **[GitHub Releases](https://github.com/sudoeren/karpa/releases)**. Open the latest release and download the file for your OS:
+**Latest version: v1.3.3** - Get Karpa for your platform from **[GitHub Releases](https://github.com/sudoeren/karpa/releases)**. Open the latest release and download the file for your OS:
 
 | Platform | File | How to install |
 |----------|------|----------------|
