@@ -9,6 +9,7 @@ import { FloatingNavbar } from "@/components/floating-navbar";
 import { MobileNav } from "@/components/mobile-nav";
 import { AppWrapper } from "@/components/app-wrapper";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
+import { ExternalLinkHandler } from "@/components/external-link-handler";
 
 export const metadata: Metadata = {
   title: "Karpa | Yerel & Güvenli Yapay Zeka Çevirmeni",
@@ -55,6 +56,7 @@ export default function RootLayout({
           <LanguageProvider>
             <OnboardingProvider>
               <AppWrapper>
+                <ExternalLinkHandler />
                 <KeyboardShortcuts />
                 <main className="h-svh w-full bg-background transition-colors duration-300 overflow-hidden flex flex-col">
                   <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full overflow-hidden">
