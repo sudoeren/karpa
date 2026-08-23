@@ -43,20 +43,6 @@ Full documentation is available at **https://karpa.erencakar.com/docs** - guides
 
 ---
 
-## Download
-
-**Latest version: v1.3.3** - Get Karpa for your platform from **[GitHub Releases](https://github.com/sudoeren/karpa/releases)**. Open the latest release and download the file for your OS:
-
-| Platform | File | How to install |
-|----------|------|----------------|
-| **Windows** | `.exe` (NSIS) or `.msi` | Download and run the installer. Follow the setup wizard. |
-| **macOS** | `.dmg` (Intel and Apple Silicon) | Open the `.dmg`, drag Karpa to Applications, then launch it. |
-| **Linux** | `.deb`, `.AppImage`, `.rpm` | `.deb`/`.rpm`: install with your package manager (`sudo dpkg -i karpa_*.deb` or `sudo rpm -i karpa_*.rpm`). `AppImage`: `chmod +x Karpa_*.AppImage && ./Karpa_*.AppImage` |
-
-Tip: You can also find all past versions and checksums on the Releases page. No account or signup required.
-
----
-
 ## Features
 
 | Feature | Description |
@@ -81,9 +67,18 @@ Pick one of the supported providers:
 - **[Ollama](https://ollama.com/)**: Download and pull a model
 - **OpenAI / Anthropic / Google Gemini / OpenRouter**: Create an account and get an API key
 
+<a id="download"></a>
 ### Desktop App
 
-If you already installed Karpa, just launch it. If not, see **[Download](#download)** to get the installer for your OS (Windows `.exe`/`.msi`, macOS `.dmg`, Linux `.deb`/`.AppImage`/`.rpm` from [Releases](https://github.com/sudoeren/karpa/releases)).
+**Latest version: v1.3.3** - Get Karpa for your platform from **[GitHub Releases](https://github.com/sudoeren/karpa/releases)**. Open the latest release and download the file for your OS:
+
+| Platform | File | How to install |
+|----------|------|----------------|
+| **Windows** | `.exe` (NSIS) or `.msi` | Download and run the installer. Follow the setup wizard. |
+| **macOS** | `.dmg` (Intel and Apple Silicon) | Open the `.dmg`, drag Karpa to Applications, then launch it. |
+| **Linux** | `.deb`, `.AppImage`, `.rpm` | `.deb`/`.rpm`: install with your package manager (`sudo dpkg -i karpa_*.deb` or `sudo rpm -i karpa_*.rpm`). `AppImage`: `chmod +x Karpa_*.AppImage && ./Karpa_*.AppImage` |
+
+Tip: You can also find all past versions and checksums on the Releases page. No account or signup required.
 
 ## Usage
 
