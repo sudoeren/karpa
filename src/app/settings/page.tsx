@@ -766,7 +766,7 @@ export default function SettingsPage() {
                       </button>
                     </div>
 
-                  <div className="pt-6 border-t border-border">
+                  <div className="pt-6 border-t border-border space-y-4">
                     <div className="rounded-2xl border border-border/60 overflow-hidden divide-y divide-border/60">
                       <button onClick={() => openExternal("https://karpa.erencakar.com")} className="group flex items-center gap-3 w-full px-4 py-3.5 hover:bg-muted/40 transition-colors text-left">
                         <Globe className="size-4 text-muted-foreground shrink-0" />
@@ -784,19 +784,22 @@ export default function SettingsPage() {
                         </div>
                         <ArrowUpRight className="size-3.5 text-muted-foreground/30 group-hover:text-foreground transition-colors shrink-0" />
                       </button>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/60 overflow-hidden divide-y divide-border/60">
                       <button onClick={() => openExternal("https://erencakar.com")} className="group flex items-center gap-3 w-full px-4 py-3.5 hover:bg-muted/40 transition-colors text-left">
                         <User className="size-4 text-muted-foreground shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium leading-none">Eren Cakar</p>
-                          <p className="text-xs text-muted-foreground">{t.about.developer}</p>
+                          <p className="text-sm font-medium leading-none">erencakar.com</p>
+                          <p className="text-xs text-muted-foreground">{t.about.developer} - Eren Cakar</p>
                         </div>
                         <ArrowUpRight className="size-3.5 text-muted-foreground/30 group-hover:text-foreground transition-colors shrink-0" />
                       </button>
                       <button onClick={() => openExternal("https://github.com/sudoeren/karpa")} className="group flex items-center gap-3 w-full px-4 py-3.5 hover:bg-muted/40 transition-colors text-left">
                         <GitFork className="size-4 text-muted-foreground shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium leading-none">sudoeren/karpa</p>
-                          <p className="text-xs text-muted-foreground">{t.about.openSource}</p>
+                          <p className="text-sm font-medium leading-none">github.com/sudoeren/karpa</p>
+                          <p className="text-xs text-muted-foreground">GitHub Repo - {t.about.openSource}</p>
                         </div>
                         <ArrowUpRight className="size-3.5 text-muted-foreground/30 group-hover:text-foreground transition-colors shrink-0" />
                       </button>
