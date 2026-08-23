@@ -70,7 +70,7 @@ Pick one of the supported providers:
 <a id="download"></a>
 ### Desktop App
 
-**Latest version: v1.3.7** - Get Karpa for your platform from **[GitHub Releases](https://github.com/sudoeren/karpa/releases)**. Open the latest release and download the file for your OS:
+**Latest version: v1.3.8** - Get Karpa for your platform from **[GitHub Releases](https://github.com/sudoeren/karpa/releases)**. Open the latest release and download the file for your OS:
 
 | Platform | File | How to install |
 |----------|------|----------------|
