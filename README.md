@@ -138,8 +138,7 @@ karpa/
 │   │   ├── page.tsx            # Main translator
 │   │   ├── history/            # Translation history
 │   │   ├── favorites/          # Saved translations
-│   │   ├── settings/           # App settings
-│   │   └── about/              # About page
+│   │   └── settings/           # App settings (incl. About)
 │   ├── components/             # React components
 │   ├── contexts/               # React contexts
 │   ├── hooks/                  # Custom hooks
