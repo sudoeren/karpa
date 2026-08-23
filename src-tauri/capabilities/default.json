@@ -8,6 +8,6 @@
   "permissions": [
     "core:default",
     "opener:default",
-    "opener:allow-open"
+    "opener:allow-open-url"
   ]
 }
