@@ -766,47 +766,39 @@ export default function SettingsPage() {
                       </button>
                     </div>
 
-                  <div className="pt-6 border-t border-border space-y-6">
-                    <div className="flex flex-col sm:flex-row gap-6">
-                      <button onClick={() => openExternal("https://karpa.erencakar.com")} className="group flex items-center gap-3 text-left">
-                        <Globe className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
-                        <div>
-                          <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.site}</p>
-                          <span className="text-sm font-medium group-hover:text-primary transition-colors">karpa.erencakar.com</span>
+                  <div className="pt-6 border-t border-border">
+                    <div className="rounded-2xl border border-border/60 overflow-hidden divide-y divide-border/60">
+                      <button onClick={() => openExternal("https://karpa.erencakar.com")} className="group flex items-center gap-3 w-full px-4 py-3.5 hover:bg-muted/40 transition-colors text-left">
+                        <Globe className="size-4 text-muted-foreground shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium leading-none">karpa.erencakar.com</p>
+                          <p className="text-xs text-muted-foreground">{t.about.site}</p>
                         </div>
-                        <ArrowUpRight className="size-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />
+                        <ArrowUpRight className="size-3.5 text-muted-foreground/30 group-hover:text-foreground transition-colors shrink-0" />
                       </button>
-
-                      <div className="hidden sm:block w-px bg-border" />
-
-                      <button onClick={() => openExternal("https://karpa.erencakar.com/docs")} className="group flex items-center gap-3 text-left">
-                        <BookOpen className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
-                        <div>
-                          <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.docs}</p>
-                          <span className="text-sm font-medium group-hover:text-primary transition-colors">Docs</span>
+                      <button onClick={() => openExternal("https://karpa.erencakar.com/docs")} className="group flex items-center gap-3 w-full px-4 py-3.5 hover:bg-muted/40 transition-colors text-left">
+                        <BookOpen className="size-4 text-muted-foreground shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium leading-none">karpa.erencakar.com/docs</p>
+                          <p className="text-xs text-muted-foreground">{t.about.docs}</p>
                         </div>
-                        <ArrowUpRight className="size-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />
+                        <ArrowUpRight className="size-3.5 text-muted-foreground/30 group-hover:text-foreground transition-colors shrink-0" />
                       </button>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-6">
-                      <button onClick={() => openExternal("https://erencakar.com")} className="group flex items-center gap-3 text-left">
-                        <User className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
-                        <div>
-                          <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.developer}</p>
-                          <span className="text-sm font-medium group-hover:text-primary transition-colors">Eren Çakar</span>
+                      <button onClick={() => openExternal("https://erencakar.com")} className="group flex items-center gap-3 w-full px-4 py-3.5 hover:bg-muted/40 transition-colors text-left">
+                        <User className="size-4 text-muted-foreground shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium leading-none">Eren Cakar</p>
+                          <p className="text-xs text-muted-foreground">{t.about.developer}</p>
                         </div>
-                        <ArrowUpRight className="size-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />
+                        <ArrowUpRight className="size-3.5 text-muted-foreground/30 group-hover:text-foreground transition-colors shrink-0" />
                       </button>
-
-                      <div className="hidden sm:block w-px bg-border" />
-
-                      <button onClick={() => openExternal("https://github.com/sudoeren/karpa")} className="group flex items-center gap-3 text-left">
-                        <div>
-                          <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.sourceCode}</p>
-                          <span className="text-sm font-medium group-hover:text-primary transition-colors">{t.about.openSource}</span>
+                      <button onClick={() => openExternal("https://github.com/sudoeren/karpa")} className="group flex items-center gap-3 w-full px-4 py-3.5 hover:bg-muted/40 transition-colors text-left">
+                        <GitFork className="size-4 text-muted-foreground shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium leading-none">sudoeren/karpa</p>
+                          <p className="text-xs text-muted-foreground">{t.about.openSource}</p>
                         </div>
-                        <GitFork className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+                        <ArrowUpRight className="size-3.5 text-muted-foreground/30 group-hover:text-foreground transition-colors shrink-0" />
                       </button>
                     </div>
                   </div>
