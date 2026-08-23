@@ -12,7 +12,7 @@ import {
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner,
   Bell, SpeakerHigh, Info,
   ComputerTower, Cloud, SquaresFour, Sliders,
-  HardDrive, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X
+  HardDrive, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X, Globe, BookOpen
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -759,30 +759,55 @@ export default function SettingsPage() {
                           {t.about.description}
                         </p>
                       </div>
-                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border/50">
+                      <button onClick={() => openExternal(`https://github.com/sudoeren/karpa/releases/tag/v${version}`)} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border/50 hover:bg-muted/80 transition-colors">
                         <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Version</span>
                         <span className="text-xs font-mono font-bold text-foreground">v{version}</span>
-                      </div>
+                        <ArrowUpRight className="size-3 text-muted-foreground/40" />
+                      </button>
                     </div>
 
-                  <div className="pt-6 border-t border-border flex flex-col sm:flex-row gap-6">
-                    <button onClick={() => openExternal("https://erencakar.com")} className="group flex items-center gap-3 text-left">
-                      <div>
-                        <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.developer}</p>
-                        <span className="text-sm font-medium group-hover:text-primary transition-colors">Eren Çakar</span>
-                      </div>
-                      <ArrowUpRight className="size-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />
-                    </button>
+                  <div className="pt-6 border-t border-border space-y-6">
+                    <div className="flex flex-col sm:flex-row gap-6">
+                      <button onClick={() => openExternal("https://karpa.erencakar.com")} className="group flex items-center gap-3 text-left">
+                        <Globe className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+                        <div>
+                          <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.site}</p>
+                          <span className="text-sm font-medium group-hover:text-primary transition-colors">karpa.erencakar.com</span>
+                        </div>
+                        <ArrowUpRight className="size-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />
+                      </button>
 
-                    <div className="hidden sm:block w-px bg-border" />
+                      <div className="hidden sm:block w-px bg-border" />
 
-                    <button onClick={() => openExternal("https://github.com/sudoeren/karpa")} className="group flex items-center gap-3 text-left">
-                      <div>
-                        <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.sourceCode}</p>
-                        <span className="text-sm font-medium group-hover:text-primary transition-colors">{t.about.openSource}</span>
-                      </div>
-                      <GitFork className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
-                    </button>
+                      <button onClick={() => openExternal("https://karpa.erencakar.com/docs")} className="group flex items-center gap-3 text-left">
+                        <BookOpen className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+                        <div>
+                          <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.docs}</p>
+                          <span className="text-sm font-medium group-hover:text-primary transition-colors">Docs</span>
+                        </div>
+                        <ArrowUpRight className="size-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-6">
+                      <button onClick={() => openExternal("https://erencakar.com")} className="group flex items-center gap-3 text-left">
+                        <div>
+                          <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.developer}</p>
+                          <span className="text-sm font-medium group-hover:text-primary transition-colors">Eren Çakar</span>
+                        </div>
+                        <ArrowUpRight className="size-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />
+                      </button>
+
+                      <div className="hidden sm:block w-px bg-border" />
+
+                      <button onClick={() => openExternal("https://github.com/sudoeren/karpa")} className="group flex items-center gap-3 text-left">
+                        <div>
+                          <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.sourceCode}</p>
+                          <span className="text-sm font-medium group-hover:text-primary transition-colors">{t.about.openSource}</span>
+                        </div>
+                        <GitFork className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+                      </button>
+                    </div>
                   </div>
 
 
