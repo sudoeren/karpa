@@ -10,6 +10,8 @@
 
 <p align="center">
   <a href="https://karpa.erencakar.com">Website</a> •
+  <a href="https://karpa.erencakar.com/docs">Docs</a> •
+  <a href="#download">Download</a> •
   <a href="#features">Features</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#usage">Usage</a> •
@@ -19,13 +21,33 @@
 Karpa is a privacy-first AI translator that runs entirely on your machine.
 Your data never leaves your device. No cloud, no tracking, no compromises.
 
-Website: **https://karpa.erencakar.com**
-
-Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini and OpenRouter.
-
 <p align="center">
   <img src="karpa.gif" alt="Karpa demo" />
 </p>
+
+<p align="center">
+  Supports LM Studio, Ollama, OpenAI, Anthropic, Google Gemini and OpenRouter.
+</p>
+
+---
+
+## Documentation
+
+Full documentation is available at **https://karpa.erencakar.com/docs** - guides, provider setup (LM Studio, Ollama, OpenAI, Anthropic, Gemini, OpenRouter), and troubleshooting.
+
+---
+
+## Download
+
+Get Karpa for your platform from **[GitHub Releases](https://github.com/sudoeren/karpa/releases)**. Open the latest release and download the file for your OS:
+
+| Platform | File | How to install |
+|----------|------|----------------|
+| **Windows** | `.exe` (NSIS) or `.msi` | Download and run the installer. Follow the setup wizard. |
+| **macOS** | `.dmg` (Intel and Apple Silicon) | Open the `.dmg`, drag Karpa to Applications, then launch it. |
+| **Linux** | `.deb`, `.AppImage`, `.rpm` | `.deb`/`.rpm`: install with your package manager (`sudo dpkg -i karpa_*.deb` or `sudo rpm -i karpa_*.rpm`). `AppImage`: `chmod +x Karpa_*.AppImage && ./Karpa_*.AppImage` |
+
+Tip: You can also find all past versions and checksums on the Releases page. No account or signup required.
 
 ---
 
@@ -55,13 +77,7 @@ Pick one of the supported providers:
 
 ### Desktop App
 
-Download the latest installer from [Releases](https://github.com/sudoeren/karpa/releases):
-
-| Platform | Package |
-|----------|---------|
-| **Windows** | `.exe` (NSIS installer), `.msi` |
-| **macOS** | `.dmg` (Intel + Apple Silicon) |
-| **Linux** | `.deb`, `.AppImage`, `.rpm` |
+If you already installed Karpa, just launch it. If not, see **[Download](#download)** to get the installer for your OS (Windows `.exe`/`.msi`, macOS `.dmg`, Linux `.deb`/`.AppImage`/`.rpm` from [Releases](https://github.com/sudoeren/karpa/releases)).
 
 ## Usage
 

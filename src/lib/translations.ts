@@ -37,7 +37,7 @@ export const translations = {
       history: "History",
       favorites: "Favorites",
       settings: "Settings",
-      about: "About Developer",
+      about: "About",
     },
     
     // Onboarding
@@ -252,9 +252,11 @@ export const translations = {
     
     // About
     about: {
-      title: "About Developer",
+      title: "About",
       developer: "Developer",
       website: "Website",
+      docs: "Docs",
+      site: "Website",
       github: "GitHub",
       version: "Version",
       privacyFirst: "Privacy First AI",
@@ -327,7 +329,7 @@ export const translations = {
       history: "Geçmiş",
       favorites: "Favoriler",
       settings: "Ayarlar",
-      about: "Geliştirici Hakkında",
+      about: "Hakkında",
     },
     
     // Onboarding
@@ -545,6 +547,8 @@ export const translations = {
       title: "Hakkında",
       developer: "Geliştirici",
       website: "Web Sitesi",
+      docs: "Dokümanlar",
+      site: "Site",
       github: "GitHub",
       version: "Sürüm",
       privacyFirst: "Gizlilik Öncelikli YZ",
@@ -613,7 +617,7 @@ export const translations = {
       history: "Verlauf",
       favorites: "Favoriten",
       settings: "Einstellungen",
-      about: "Über den Entwickler",
+      about: "Über",
     },
     onboarding: {
       welcome: "Willkommen bei Karpa",
@@ -807,9 +811,11 @@ export const translations = {
       privacyNoticeDesc: "Alle Daten werden lokal in Ihrem Browser (localStorage) gespeichert. Export erstellt eine Kopie, und Löschen entfernt sie dauerhaft.",
     },
     about: {
-      title: "Über Karpa",
+      title: "Über",
       developer: "Entwickler",
       website: "Webseite",
+      docs: "Docs",
+      site: "Webseite",
       github: "GitHub",
       version: "Version",
       privacyFirst: "Datenschutz-KI",
@@ -876,7 +882,7 @@ export const translations = {
       history: "Historique",
       favorites: "Favoris",
       settings: "Paramètres",
-      about: "À propos du développeur",
+      about: "À propos",
     },
     onboarding: {
       welcome: "Bienvenue sur Karpa",
@@ -1073,6 +1079,8 @@ export const translations = {
       title: "À propos",
       developer: "Développeur",
       website: "Site web",
+      docs: "Docs",
+      site: "Site web",
       github: "GitHub",
       version: "Version",
       privacyFirst: "IA axée sur la vie privée",
@@ -1139,7 +1147,7 @@ export const translations = {
       history: "Historial",
       favorites: "Favoritos",
       settings: "Ajustes",
-      about: "Sobre el desarrollador",
+      about: "Acerca de",
     },
     onboarding: {
       welcome: "Bienvenido a Karpa",
@@ -1336,6 +1344,8 @@ export const translations = {
       title: "Acerca de",
       developer: "Desarrollador",
       website: "Sitio web",
+      docs: "Docs",
+      site: "Sitio web",
       github: "GitHub",
       version: "Versión",
       privacyFirst: "IA centrada en la privacidad",

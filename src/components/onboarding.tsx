@@ -448,7 +448,7 @@ function LanguagesStep({
           <div className="flex items-center gap-2 mb-3 shrink-0">
             <span className="text-sm font-medium">{t.onboarding.nativeLanguage}</span>
             {nativeLang && (
-              <span className="text-[11px] text-muted-foreground">— {nativeLang}</span>
+              <span className="text-[11px] text-muted-foreground">- {nativeLang}</span>
             )}
           </div>
           <div className="overflow-y-auto hide-scrollbar flex-1 min-h-0">
@@ -479,7 +479,7 @@ function LanguagesStep({
           <div className="flex items-center gap-2 mb-3 shrink-0">
             <span className="text-sm font-medium">{t.onboarding.targetLanguage}</span>
             {targetLang && (
-              <span className="text-[11px] text-muted-foreground">— {targetLang}</span>
+              <span className="text-[11px] text-muted-foreground">- {targetLang}</span>
             )}
           </div>
           <div className="overflow-y-auto hide-scrollbar flex-1 min-h-0">

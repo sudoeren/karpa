@@ -41,7 +41,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { cn, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
 import { useOnboarding } from "@/contexts/onboarding-context"
 import { Logo } from "@/components/logo"
-import Link from "next/link"
+import { openExternal } from "@/lib/open-external"
 import { type ProviderType, PROVIDERS, KNOWN_MODELS } from "@/lib/providers"
 import { clientTestConnection } from "@/lib/client-test-connection"
 import { clientFetchModels } from "@/lib/client-models"
@@ -766,23 +766,23 @@ export default function SettingsPage() {
                     </div>
 
                   <div className="pt-6 border-t border-border flex flex-col sm:flex-row gap-6">
-                    <Link href="https://erencakar.com" target="_blank" className="group flex items-center gap-3">
+                    <button onClick={() => openExternal("https://erencakar.com")} className="group flex items-center gap-3 text-left">
                       <div>
                         <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.developer}</p>
                         <span className="text-sm font-medium group-hover:text-primary transition-colors">Eren Çakar</span>
                       </div>
                       <ArrowUpRight className="size-3.5 text-muted-foreground/20 group-hover:text-primary transition-colors" />
-                    </Link>
+                    </button>
 
                     <div className="hidden sm:block w-px bg-border" />
 
-                    <Link href="https://github.com/sudoeren/karpa" target="_blank" className="group flex items-center gap-3">
+                    <button onClick={() => openExternal("https://github.com/sudoeren/karpa")} className="group flex items-center gap-3 text-left">
                       <div>
                         <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.sourceCode}</p>
                         <span className="text-sm font-medium group-hover:text-primary transition-colors">{t.about.openSource}</span>
                       </div>
                       <GitFork className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
-                    </Link>
+                    </button>
                   </div>
 
 

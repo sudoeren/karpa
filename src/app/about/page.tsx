@@ -2,11 +2,11 @@
 
 import { useLanguage } from "@/contexts/language-context"
 import { motion } from "framer-motion"
-import { GitFork, Globe, Heart, Code, ArrowUpRight } from "@phosphor-icons/react"
-import Link from "next/link"
+import { GitFork, Globe, Heart, Code, ArrowUpRight, BookOpen } from "@phosphor-icons/react"
 import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import { version } from '../../../package.json'
+import { openExternal } from "@/lib/open-external"
 
 export default function AboutPage() {
   const { t } = useLanguage()
@@ -67,19 +67,15 @@ export default function AboutPage() {
               </div>
 
               <div className="flex flex-wrap gap-2 md:gap-3">
-                <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs group-hover:border-foreground/20 transition-colors" asChild>
-                  <Link href="https://erencakar.com" target="_blank">
-                    <Globe className="size-3.5" />
-                    {t.about.website}
-                    <ArrowUpRight className="size-3 opacity-50" />
-                  </Link>
+                <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs group-hover:border-foreground/20 transition-colors" onClick={() => openExternal("https://erencakar.com")}>
+                  <Globe className="size-3.5" />
+                  {t.about.website}
+                  <ArrowUpRight className="size-3 opacity-50" />
                 </Button>
-                <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs group-hover:border-foreground/20 transition-colors" asChild>
-                  <Link href="https://github.com/sudoeren" target="_blank">
-                    <GitFork className="size-3.5" />
-                    {t.about.github}
-                    <ArrowUpRight className="size-3 opacity-50" />
-                  </Link>
+                <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs group-hover:border-foreground/20 transition-colors" onClick={() => openExternal("https://github.com/sudoeren")}>
+                  <GitFork className="size-3.5" />
+                  {t.about.github}
+                  <ArrowUpRight className="size-3 opacity-50" />
                 </Button>
               </div>
             </div>
@@ -96,13 +92,23 @@ export default function AboutPage() {
                 <h3 className="text-lg md:text-xl font-medium text-foreground">{t.about.publicRepo}</h3>
               </div>
 
-              <div>
-                <Button className="w-full rounded-full gap-2 h-10 group-hover:bg-primary/90 transition-colors" asChild>
-                  <Link href="https://github.com/sudoeren/karpa" target="_blank">
-                    <GitFork className="size-4" />
-                    {t.about.openSource}
-                    <ArrowUpRight className="size-3.5 opacity-50" />
-                  </Link>
+              <div className="space-y-2.5">
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs flex-1 min-w-[90px] group-hover:border-foreground/20 transition-colors" onClick={() => openExternal("https://karpa.erencakar.com")}>
+                    <Globe className="size-3.5" />
+                    {t.about.site}
+                    <ArrowUpRight className="size-3 opacity-50" />
+                  </Button>
+                  <Button variant="outline" size="sm" className="rounded-full gap-2 h-9 text-xs flex-1 min-w-[90px] group-hover:border-foreground/20 transition-colors" onClick={() => openExternal("https://karpa.erencakar.com/docs")}>
+                    <BookOpen className="size-3.5" />
+                    {t.about.docs}
+                    <ArrowUpRight className="size-3 opacity-50" />
+                  </Button>
+                </div>
+                <Button className="w-full rounded-full gap-2 h-10 group-hover:bg-primary/90 transition-colors" onClick={() => openExternal("https://github.com/sudoeren/karpa")}>
+                  <GitFork className="size-4" />
+                  {t.about.openSource}
+                  <ArrowUpRight className="size-3.5 opacity-50" />
                 </Button>
               </div>
             </div>

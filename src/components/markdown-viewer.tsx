@@ -3,6 +3,7 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { cn } from '@/lib/utils'
+import { openExternal } from '@/lib/open-external'
 
 interface MarkdownViewerProps {
   content: string
@@ -96,11 +97,17 @@ export function MarkdownViewer({ content, className }: MarkdownViewerProps) {
             <td className="border border-border px-2 py-1">{children}</td>
           ),
           a: ({ children, href }) => (
-            <a 
-              href={href} 
-              target="_blank" 
+            <a
+              href={href}
+              target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
+              onClick={(e) => {
+                if (href && /^https?:\/\//.test(href)) {
+                  e.preventDefault()
+                  openExternal(href)
+                }
+              }}
             >
               {children}
             </a>

@@ -838,7 +838,7 @@ function TranslatorWorkspace() {
                                 <div className="mt-4 pt-4 border-t border-border/40 flex items-center gap-2">
                                   <div className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
                                   <span className="text-[11px] font-medium text-muted-foreground/70">
-                                    {t.translator.fileReady} — {t.translator.fileReadyDesc}
+                                    {t.translator.fileReady} - {t.translator.fileReadyDesc}
                                   </span>
                                 </div>
                               )}
