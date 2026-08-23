@@ -12,7 +12,7 @@ import {
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner,
   Bell, SpeakerHigh, Info,
   ComputerTower, Cloud, SquaresFour, Sliders,
-  HardDrive, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X, Globe, BookOpen
+  HardDrive, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X, Globe, BookOpen, User
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -791,6 +791,7 @@ export default function SettingsPage() {
 
                     <div className="flex flex-col sm:flex-row gap-6">
                       <button onClick={() => openExternal("https://erencakar.com")} className="group flex items-center gap-3 text-left">
+                        <User className="size-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
                         <div>
                           <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">{t.about.developer}</p>
                           <span className="text-sm font-medium group-hover:text-primary transition-colors">Eren Çakar</span>
