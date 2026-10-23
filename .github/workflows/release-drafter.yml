@@ -13,6 +13,10 @@ jobs:
   update-release-draft:
     name: Update Release Draft
     runs-on: ubuntu-latest
+    permissions:
+      # Creating/updating the draft release needs write access.
+      contents: write
+      pull-requests: read
     steps:
       - name: Update draft release
         uses: release-drafter/release-drafter@v7
