@@ -9,7 +9,7 @@ import { toast } from "sonner"
 import {
   ArrowsLeftRight, Spinner, Copy, Check, SpeakerHigh, SpeakerX, X, Star,
   Translate, Sparkle, MagicWand, FileArrowUp, Upload, Download, Info, ClockCounterClockwise, Trash, ArrowRight, ArrowSquareOut,
-  File, FileText, FileCode, Table, Subtitles, FileJs, FileHtml, FileCss, CheckCircle, ArrowsClockwise
+  File as FileIcon, FileText, FileCode, Table, Subtitles, FileJs, FileHtml, FileCss, CheckCircle, ArrowsClockwise
 } from "@phosphor-icons/react"
 import { cn, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
 import { clientTranslate } from "@/lib/client-translate"
@@ -110,6 +110,7 @@ function TranslatorWorkspace() {
     const modeParam = searchParams.get("mode")
     const fileName = searchParams.get("fileName")
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time load of client-only state after hydration
     if (text) setSourceText(decodeURIComponent(text))
     if (translation) setTranslatedText(decodeURIComponent(translation))
     if (src) setSourceLanguage(src)
@@ -182,20 +183,6 @@ function TranslatorWorkspace() {
       toast.info(t.favorites.alreadyExists)
     }
   }
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        if (!loading && (sourceText.trim() || selectedFile)) {
-          handleTranslate()
-        }
-      }
-      if (e.key === 'Escape') setIsHistoryOpen(false)
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sourceText, selectedFile, loading])
 
   const handleTranslate = async () => {
     const textToTranslate = mode === "text" ? sourceText : fileContent
@@ -309,6 +296,20 @@ function TranslatorWorkspace() {
     }
   }
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        if (!loading && (sourceText.trim() || selectedFile)) {
+          handleTranslate()
+        }
+      }
+      if (e.key === 'Escape') setIsHistoryOpen(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceText, selectedFile, loading])
+
   const handleCancelTranslation = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
@@ -421,7 +422,7 @@ function TranslatorWorkspace() {
       css: { icon: FileCss, color: "text-sky-500", label: "CSS" },
       xml: { icon: FileCode, color: "text-amber-400", label: "XML" },
     }
-    return map[ext] ?? { icon: File, color: "text-muted-foreground", label: ext.toUpperCase() || "FILE" }
+    return map[ext] ?? { icon: FileIcon, color: "text-muted-foreground", label: ext.toUpperCase() || "FILE" }
   }
 
   const getLineCount = (content: string): number => {
