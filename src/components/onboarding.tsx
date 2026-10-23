@@ -10,11 +10,13 @@ import { Input } from "@/components/ui/input"
 import { Logo } from "@/components/logo"
 import {
   CaretRight, Check, Network, Key, Eye, EyeSlash, Link,
-  ArrowsClockwise, Lightning, WarningCircle, ComputerTower, Terminal, Cloud
+  ArrowsClockwise, Lightning, WarningCircle, ComputerTower, Terminal, Cloud,
+  type Icon
 } from "@phosphor-icons/react"
 import { cn, safeSetItem } from "@/lib/utils"
 import { toast } from "sonner"
 import { type ProviderType, PROVIDERS } from "@/lib/providers"
+import type { Language } from "@/lib/translations"
 import { clientTestConnection } from "@/lib/client-test-connection"
 
 const translationLanguages = [
@@ -47,7 +49,7 @@ const translationLanguages = [
   { code: "bn", name: "Bengali", flag: "🇧🇩" },
 ]
 
-const interfaceLanguages = [
+const interfaceLanguages: { code: Language; name: string; flag: string; native: string }[] = [
   { code: "en", name: "English", flag: "🇺🇸", native: "English" },
   { code: "tr", name: "Turkish", flag: "🇹🇷", native: "Türkçe" },
   { code: "de", name: "German", flag: "🇩🇪", native: "Deutsch" },
@@ -55,7 +57,7 @@ const interfaceLanguages = [
   { code: "es", name: "Spanish", flag: "🇪🇸", native: "Español" },
 ]
 
-const providerList: { key: ProviderType; icon: any; label: string }[] = [
+const providerList: { key: ProviderType; icon: Icon; label: string }[] = [
   { key: 'lmstudio', icon: Terminal, label: 'LM Studio' },
   { key: 'ollama', icon: ComputerTower, label: 'Ollama' },
   { key: 'openai', icon: Cloud, label: 'OpenAI' },
@@ -230,7 +232,9 @@ export function Onboarding() {
   )
 }
 
-function WelcomeStep({ t }: { t: any }) {
+type LanguageState = ReturnType<typeof useLanguage>
+
+function WelcomeStep({ t }: { t: LanguageState["t"] }) {
   return (
     <div className="text-center py-12">
       <div className="flex justify-center mb-6">
@@ -246,7 +250,7 @@ function WelcomeStep({ t }: { t: any }) {
   )
 }
 
-function InterfaceStep({ t, language, setLanguage }: { t: any; language: string; setLanguage: any }) {
+function InterfaceStep({ t, language, setLanguage }: { t: LanguageState["t"]; language: string; setLanguage: LanguageState["setLanguage"] }) {
   return (
     <div>
       <h2 className="text-2xl font-semibold tracking-tight mb-1.5">
@@ -282,7 +286,7 @@ function EngineStep({
   t, selectedProvider, onProviderSelect, apiUrl, setApiUrl,
   apiKey, setApiKey, showApiKey, setShowApiKey, testConnection, connectionStatus
 }: {
-  t: any; selectedProvider: ProviderType; onProviderSelect: (p: ProviderType) => void
+  t: LanguageState["t"]; selectedProvider: ProviderType; onProviderSelect: (p: ProviderType) => void
   apiUrl: string; setApiUrl: (u: string) => void; apiKey: string; setApiKey: (k: string) => void
   showApiKey: boolean; setShowApiKey: (s: boolean) => void
   testConnection: () => void; connectionStatus: string
@@ -431,7 +435,7 @@ function EngineStep({
 function LanguagesStep({
   t, nativeLang, setNativeLang, targetLang, setTargetLang
 }: {
-  t: any; nativeLang: string; setNativeLang: (l: string) => void
+  t: LanguageState["t"]; nativeLang: string; setNativeLang: (l: string) => void
   targetLang: string; setTargetLang: (l: string) => void
 }) {
   return (

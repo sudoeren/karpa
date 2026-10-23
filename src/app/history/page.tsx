@@ -54,6 +54,7 @@ export default function HistoryPage() {
     const saved = localStorage.getItem("translation-history")
     if (saved) {
       const historyData = safeJSONParse(saved, [])
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time load of client-only state after hydration
       setHistory(historyData)
       
       const hash = window.location.hash.replace('#', '')
@@ -99,6 +100,7 @@ export default function HistoryPage() {
       newFavorites = favorites.filter(f => f.translatedText !== item.translatedText)
       toast.info(t.favorites.removed)
     } else {
+      // eslint-disable-next-line react-hooks/purity -- runs in a click handler, not during render
       newFavorites = [{ ...item, timestamp: Date.now() }, ...favorites]
       toast.success(t.favorites.added)
     }

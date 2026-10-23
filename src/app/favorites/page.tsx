@@ -46,6 +46,7 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("translation-favorites")
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time load of client-only state after hydration
     if (saved) setFavorites(safeJSONParse(saved, []))
   }, [])
 

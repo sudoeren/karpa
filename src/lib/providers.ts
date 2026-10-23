@@ -276,8 +276,21 @@ export function getGeminiUrl(baseUrl: string, model: string, _apiKey: string): s
   return `${url}/v1beta/models/${model}:generateContent`
 }
 
+// Response shapes we read from; every field is optional because the payload
+// comes from an external server.
+interface TranslationResponse {
+  content?: { text?: string }[]
+  candidates?: { content?: { parts?: { text?: string }[] } }[]
+  choices?: { message?: { content?: string } }[]
+}
+
+interface ModelsResponse {
+  models?: { name?: string; model?: string }[]
+  data?: { id: string; object?: string }[]
+}
+
 // Extract translation text from provider response
-export function extractTranslation(provider: ProviderType, data: any): string | null {
+export function extractTranslation(provider: ProviderType, data: TranslationResponse | null | undefined): string | null {
   switch (provider) {
     case 'anthropic':
       return data?.content?.[0]?.text?.trim() || null
@@ -307,16 +320,16 @@ export function getModelsUrl(provider: ProviderType, baseUrl: string): string | 
 }
 
 // Parse models response for a provider
-export function parseModelsResponse(provider: ProviderType, data: any): { id: string; object: string }[] {
+export function parseModelsResponse(provider: ProviderType, data: ModelsResponse | null | undefined): { id: string; object: string }[] {
   switch (provider) {
     case 'ollama':
-      return (data?.models || []).map((m: any) => ({
-        id: m.name || m.model,
+      return (data?.models || []).map((m) => ({
+        id: m.name || m.model || '',
         object: 'model',
       }))
     default:
       // OpenAI-compatible format
-      return (data?.data || []).map((m: any) => ({
+      return (data?.data || []).map((m) => ({
         id: m.id,
         object: m.object || 'model',
       }))
