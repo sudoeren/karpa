@@ -12,6 +12,7 @@ import {
   Spinner
 } from "@phosphor-icons/react"
 import { cn, decodeApiKey } from "@/lib/utils"
+import type { ProviderType } from "@/lib/providers"
 import { clientTestConnection } from "@/lib/client-test-connection"
 import { useLanguage } from "@/contexts/language-context"
 import { Logo } from "@/components/logo"
@@ -47,7 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const checkConnection = async () => {
       try {
         const savedUrl = localStorage.getItem("llm-api-url") || localStorage.getItem("lm-studio-url") || "http://localhost:1234"
-        const savedProvider = localStorage.getItem("llm-provider") || "lmstudio"
+        const savedProvider = (localStorage.getItem("llm-provider") || "lmstudio") as ProviderType
         const savedApiKey = (() => { const k = sessionStorage.getItem("llm-api-key"); return k ? decodeApiKey(k) : undefined })()
         const result = await clientTestConnection({ url: savedUrl, provider: savedProvider, apiKey: savedApiKey })
         setIsConnected(result.success)

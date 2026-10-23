@@ -12,7 +12,8 @@ import {
   Trash, Download, Upload, ArrowsClockwise, Check, Spinner,
   Bell, SpeakerHigh, Info,
   ComputerTower, Cloud, SquaresFour, Sliders,
-  HardDrive, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X, Globe, BookOpen, User
+  HardDrive, ArrowUpRight, GitFork, MagnifyingGlass, CaretDown, X, Globe, BookOpen, User,
+  type Icon as PhosphorIcon
 } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import {
@@ -36,6 +37,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useLanguage } from "@/contexts/language-context"
+import type { Language } from "@/lib/translations"
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn, decodeApiKey, safeJSONParse, safeSetItem } from "@/lib/utils"
@@ -111,6 +113,7 @@ export default function SettingsPage() {
         safeSetItem("llm-api-url", oldUrl)
         if (oldModel) safeSetItem("llm-model", oldModel)
         if (oldTemp) safeSetItem("llm-temperature", oldTemp)
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time load of client-only state after hydration
         setSelectedProvider("lmstudio")
         setApiUrl(oldUrl)
         if (oldModel) setSelectedModel(oldModel)
@@ -153,7 +156,7 @@ export default function SettingsPage() {
     }
 
     checkConnection()
-  }, [selectedProvider, apiUrl]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedProvider, apiUrl])
 
   const handleProviderChange = (provider: ProviderType) => {
     setSelectedProvider(provider)
@@ -459,7 +462,7 @@ export default function SettingsPage() {
                       ].map((l) => (
                         <button
                           key={l.id}
-                          onClick={() => setLanguage(l.id as any)}
+                          onClick={() => setLanguage(l.id as Language)}
                           className={cn(
                             "flex items-center gap-3 p-3.5 rounded-xl border transition-colors",
                             language === l.id
@@ -882,7 +885,7 @@ function ModelPickerDialog({ models, selected, onSelect, manualPlaceholder }: {
         ))}
         {filtered.length === 0 && (
           <div className="px-4 py-10 text-sm text-muted-foreground/50 text-center">
-            No models match "<span className="font-mono">{query}</span>"
+            No models match &ldquo;<span className="font-mono">{query}</span>&rdquo;
           </div>
         )}
       </div>
@@ -895,7 +898,7 @@ function ModelPickerDialog({ models, selected, onSelect, manualPlaceholder }: {
   )
 }
 
-function ToggleTile({ icon: Icon, title, desc, checked, onChange, disabled = false }: { icon: any, title: string, desc: string, checked: boolean, onChange: any, disabled?: boolean }) {
+function ToggleTile({ icon: Icon, title, desc, checked, onChange, disabled = false }: { icon: PhosphorIcon, title: string, desc: string, checked: boolean, onChange: (checked: boolean) => void, disabled?: boolean }) {
   return (
     <div className={cn(
       "flex items-center justify-between p-4 rounded-xl border border-border transition-colors",
@@ -913,7 +916,7 @@ function ToggleTile({ icon: Icon, title, desc, checked, onChange, disabled = fal
   )
 }
 
-function DataButton({ icon: Icon, title, desc, onClick, className }: { icon: any, title: string, desc?: string, onClick: any, className?: string }) {
+function DataButton({ icon: Icon, title, desc, onClick, className }: { icon: PhosphorIcon, title: string, desc?: string, onClick: () => void, className?: string }) {
   return (
     <button
       onClick={onClick}
