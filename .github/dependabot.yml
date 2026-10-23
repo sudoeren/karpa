@@ -26,6 +26,13 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "react-dom"
         update-types: ["version-update:semver-major"]
+      # Must stay on the same minor as the tauri-plugin-opener crate in
+      # src-tauri/Cargo.toml, or `tauri build` refuses to run.
+      - dependency-name: "@tauri-apps/plugin-opener"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # typescript-eslint does not support TypeScript 7 yet.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
