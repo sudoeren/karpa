@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@tauri-apps/cli": "^2.12.3",
+    "@tauri-apps/cli": "^2.12.4",
     "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
